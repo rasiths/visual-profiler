@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{a94d7ced-e853-4774-9f73-24b4938d6fe6}</UniqueIdentifier>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Headers">
+      <UniqueIdentifier>{797b9261-7a57-4d0d-aae1-b2fd418da2b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files\Source Files">
+      <UniqueIdentifier>{af824a2a-ad76-492b-be9b-48bcbf5b5255}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files\Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Generated Files\Generated_I">
+      <UniqueIdentifier>{4398b8e8-f4bc-4e81-8535-9c05dd3c2945}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Generated Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Generated Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VisualProfilerBackend_i.c">
+      <Filter>Generated Files\Generated_I</Filter>
+    </ClCompile>
+    <ClCompile Include="VisualProfilerBackend.cpp">
+      <Filter>Generated Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SamplingProfiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TracingProfiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CorProfilerCallbackBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dllmain.h">
+      <Filter>Generated Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Generated Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Generated Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="VisualProfilerBackend_i.h">
+      <Filter>Generated Files\Generated_I</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Generated Files\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplingProfiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TracingProfiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CorProfilerCallbackBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="VisualProfilerBackend.rc">
+      <Filter>Generated Files\Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="VisualProfilerBackend.rgs">
+      <Filter>Generated Files\Resource Files</Filter>
+    </None>
+    <None Include="VisualProfilerBackend.def">
+      <Filter>Generated Files\Source Files</Filter>
+    </None>
+    <None Include="ReadMe.txt">
+      <Filter>Generated Files</Filter>
+    </None>
+    <None Include="SamplingProfiler.rgs">
+      <Filter>Generated Files\Resource Files</Filter>
+    </None>
+    <None Include="TracingProfiler.rgs">
+      <Filter>Generated Files\Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="VisualProfilerBackend.idl">
+      <Filter>Generated Files\Source Files</Filter>
+    </Midl>
+  </ItemGroup>
+</Project>
