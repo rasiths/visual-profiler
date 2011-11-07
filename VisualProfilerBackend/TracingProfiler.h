@@ -53,11 +53,15 @@ END_COM_MAP()
 	{
 	}
 
+
+
+
 public:
 
 	virtual HRESULT STDMETHODCALLTYPE Initialize( /* [in] */ IUnknown *pICorProfilerInfoUnk) ;
 	static UINT_PTR _stdcall FunctionMapper(FunctionID functionId, BOOL *pbHookFunction);
-	static UINT_PTR _stdcall FunctionMapper2(FunctionID functionId, BOOL *pbHookFunction);
+	static UINT_PTR _stdcall FunctionMapper2(FunctionID functionId, void * clientData, BOOL *pbHookFunction);
+    HRESULT GetMethodAndDefininingAssemblyForFunctionID(FunctionID functionID, mdAssembly * assembly, mdMethodDef* method);
 
 };
 

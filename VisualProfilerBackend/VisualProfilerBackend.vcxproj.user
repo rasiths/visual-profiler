@@ -8,5 +8,6 @@
 COR_PROFILER={19840906-C001-0000-000C-000000000002}
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <ShowAllFiles>false</ShowAllFiles>
   </PropertyGroup>
 </Project>

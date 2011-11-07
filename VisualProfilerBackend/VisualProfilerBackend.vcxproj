@@ -113,6 +113,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AssemblyMetadata.cpp" />
     <ClCompile Include="CorProfilerCallbackBase.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
@@ -122,6 +123,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="MethodMetadata.cpp" />
     <ClCompile Include="SamplingProfiler.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -139,8 +141,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssemblyMetadata.h" />
     <ClInclude Include="CorProfilerCallbackBase.h" />
     <ClInclude Include="dllmain.h" />
+    <ClInclude Include="MethodMetadata.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SamplingProfiler.h" />
     <ClInclude Include="stdafx.h" />
