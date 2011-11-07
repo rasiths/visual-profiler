@@ -49,6 +49,12 @@
     <ClCompile Include="CorProfilerCallbackBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AssemblyMetadata.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MethodMetadata.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dllmain.h">
@@ -73,6 +79,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CorProfilerCallbackBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AssemblyMetadata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodMetadata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

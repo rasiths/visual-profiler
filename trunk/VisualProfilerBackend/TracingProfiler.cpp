@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #include "TracingProfiler.h"
 #include <iostream>
-#define NAME_BUFFER_SIZE 1024
+
 
 CTracingProfiler * tracingProfiler;
 
@@ -67,17 +67,16 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::Initialize( /* [in] */ IUnknown *pIC
 	return S_OK;
 }
 
-void AssemblyMetadata(mdTypeDef classTypeDef, IMetaDataAssemblyImport* pIMetaDataAssemblyImport ){
+void AssemblyMetadataFCE(mdTypeDef classTypeDef, IMetaDataAssemblyImport* pIMetaDataAssemblyImport ){
 	mdAssembly  assemblyToken = 0;
 	HRESULT hr = pIMetaDataAssemblyImport->GetAssemblyFromScope(&assemblyToken);
 	
 	WCHAR assemblyName[NAME_BUFFER_SIZE];
-	ASSEMBLYMETADATA assemblyMetadata;
 	hr = pIMetaDataAssemblyImport->GetAssemblyProps(assemblyToken,0,0,0, assemblyName,NAME_BUFFER_SIZE, 0, 0,0);
 	
 
 	IMetaDataImport2* pIMetaDataImport = 0;
-	hr =pIMetaDataAssemblyImport->QueryInterface(IID_IMetaDataImport2,(void **)&pIMetaDataImport);
+	hr = pIMetaDataAssemblyImport->QueryInterface(IID_IMetaDataImport2,(void **)&pIMetaDataImport);
 	std::wcout<<L"assembly:: "<<assemblyName<<std::endl;
 	
 	 BYTE *  pVal;
@@ -128,11 +127,19 @@ void AssemblyMetadata(mdTypeDef classTypeDef, IMetaDataAssemblyImport* pIMetaDat
 	
 }
 
-UINT_PTR FunctionMapper(FunctionID functionId, void * clientData, BOOL *pbHookFunction){
+HRESULT CTracingProfiler::GetMethodAndDefininingAssemblyForFunctionID(FunctionID functionID, mdAssembly * assembly, mdMethodDef* method){
+	HRESULT hr = _pICorProfilerInfo3->GetTokenAndMetaDataFromFunction(id,IID_IMetaDataImport2,(LPUNKNOWN *) &pIMetaDataImport, &funcToken);
 
-	//mdMethodDef method
-	//mdAssembly methodsAssembly = GetDefininingAssembly(
+	return S_OK;
+}
 
+UINT_PTR FunctionMapper2(FunctionID functionId, void * clientData, BOOL *pbHookFunction){
+	
+	mdMethodDef method;
+	mdAssembly methodsAssembly; 
+	HRESULT hr = tracingProfiler->GetMethodAndDefininingAssemblyForFunctionID(functionId, &methodsAssembly, & method);
+	
+	return S_OK;
 }
 
 UINT_PTR CTracingProfiler::FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
@@ -146,6 +153,7 @@ UINT_PTR CTracingProfiler::FunctionMapper(FunctionID functionID, BOOL *pbHookFun
 	WCHAR szClass[NAME_BUFFER_SIZE];
 	hr = tracingProfiler->_pICorProfilerInfo3->GetTokenAndMetaDataFromFunction(id,IID_IMetaDataImport2,(LPUNKNOWN *) &pIMetaDataImport, &funcToken);
 
+	
 	IMetaDataAssemblyImport* pIMetaDataAssemblyImport = 0;
 	hr = tracingProfiler->_pICorProfilerInfo3->GetTokenAndMetaDataFromFunction(id,IID_IMetaDataAssemblyImport,(LPUNKNOWN *) &pIMetaDataAssemblyImport, 0);
 	
@@ -159,7 +167,7 @@ UINT_PTR CTracingProfiler::FunctionMapper(FunctionID functionID, BOOL *pbHookFun
 		hr = pIMetaDataImport->GetMethodProps(funcToken, &classTypeDef, szFunction, NAME_BUFFER_SIZE, &cchFunction, 0, 0, 0, 0, 0);
 		if (SUCCEEDED(hr))
 		{
-			AssemblyMetadata(classTypeDef, pIMetaDataAssemblyImport );
+			AssemblyMetadataFCE(classTypeDef, pIMetaDataAssemblyImport );
 			// get the function name
 			hr = pIMetaDataImport->GetTypeDefProps(classTypeDef, szClass, NAME_BUFFER_SIZE, &cchClass, 0, 0);
 			if (SUCCEEDED(hr))
