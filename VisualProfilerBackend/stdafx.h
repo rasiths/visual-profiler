@@ -25,5 +25,11 @@
 #include <atlbase.h>
 #include <atlcom.h>
 #include <atlctl.h>
+#include <string>
+
+
+using namespace std;
 
 void CheckError(HRESULT hr);
+
+void HandleError(wstring message);

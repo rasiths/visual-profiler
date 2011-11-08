@@ -26,6 +26,12 @@
     <Filter Include="Generated Files\Generated_I">
       <UniqueIdentifier>{4398b8e8-f4bc-4e81-8535-9c05dd3c2945}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Metadata">
+      <UniqueIdentifier>{87c0e19d-41a2-4328-a63b-cbdf5be4638f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Metadata">
+      <UniqueIdentifier>{4a098e5a-6120-4a20-8092-8e72442437bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -50,19 +56,16 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AssemblyMetadata.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="MethodMetadata.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TypeMetadata.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="ModuleMetadata.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
-    <ClCompile Include="MetadataBase.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="ClassMetadata.cpp">
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -91,19 +94,19 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AssemblyMetadata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MethodMetadata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TypeMetadata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ModuleMetadata.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Metadata</Filter>
     </ClInclude>
     <ClInclude Include="MetadataBase.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="MethodMetadata.h">
+      <Filter>Header Files\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleMetadata.h">
+      <Filter>Header Files\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="ClassMetadata.h">
+      <Filter>Header Files\Metadata</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

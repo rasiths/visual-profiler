@@ -4,14 +4,16 @@
 #include "TracingProfiler.h"
 #include <iostream>
 #include "MethodMetadata.h"
+
 #define NAME_BUFFER_SIZE 1024
 
 CTracingProfiler * tracingProfiler;
-
+int calls = 0;
 void __stdcall FunctionEnterGlobal(FunctionIDOrClientID functionIDOrClientID){
 	if(functionIDOrClientID.functionID == 0)
 		return;
-
+	calls++;
+	cout << calls << endl;
 	shared_ptr<MethodMetadata> pMethodMetadata =  MethodMetadata::GetMethodMetadataBy(functionIDOrClientID.functionID);  
 	std::wcout << L"Entering method " << pMethodMetadata->ToString() << std::endl;
 	
@@ -58,7 +60,7 @@ void _declspec(naked) FunctionTailcall3Naked(FunctionIDOrClientID functionIDOrCl
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::Initialize( /* [in] */ IUnknown *pICorProfilerInfoUnk) {
 	CorProfilerCallbackBase::Initialize(pICorProfilerInfoUnk);
-	DWORD mask = COR_PRF_MONITOR_ENTERLEAVE;      
+	DWORD mask = COR_PRF_MONITOR_ENTERLEAVE ;      
 	_pICorProfilerInfo3->SetEventMask(mask);
 
 	FunctionEnter3* enterFunction = &FunctionEnter3Naked;
@@ -149,19 +151,15 @@ UINT_PTR CTracingProfiler::FunctionMapper(FunctionID functionId, void * clientDa
 	HRESULT hr;
 	CorProfilerCallbackBase * profilerBase = (CorProfilerCallbackBase *) clientData;
 	ICorProfilerInfo3 * profilerInfo = profilerBase->_pICorProfilerInfo3;
-
-	ClassID classId;
-	ModuleID moduleId;
-	mdToken methodToken;   
-	hr = profilerInfo->GetFunctionInfo(functionId, &classId, &moduleId, &methodToken);
 	
-	shared_ptr<MethodMetadata> pMethodMetadata(new MethodMetadata(functionId, *profilerInfo)); 
+	shared_ptr<MethodMetadata> pMethodMetadata = MethodMetadata::AddMetadata(functionId, *profilerInfo);
     wstring methodName = pMethodMetadata->ToString();
 	std::wcout << L"Mapping method " << methodName << std::endl;
-//	bool contains = pMethodMetadata->Contains(functionId);
+	bool contains = pMethodMetadata->Contains(functionId);
 	
-    MethodMetadata::AddMethodMetadata(functionId, pMethodMetadata);
-//    pMethodMetadata->Contains(functionId);
+    
+    
+	contains = pMethodMetadata->Contains(functionId);
 	
 	
 	*pbHookFunction = true;

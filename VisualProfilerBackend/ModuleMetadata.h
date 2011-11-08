@@ -4,18 +4,18 @@
 #include <corprof.h>
 #include <string>
 #include <map>
+#include "MetadataBase.h"
 
 using namespace std;
 
-class ModuleMetadata
+class ModuleMetadata : public MetadataBase<ModuleID, ModuleMetadata>
 {
 public:
 	ModuleID ModuleId;
-	mdModule ModuleMdToken;
 	wstring FileName;
 	LPCBYTE BaseLoadAddress;  
 
-	ModuleMetadata(ModuleID moduleId, ICorProfilerInfo3 & profilerInfo);
+	ModuleMetadata(ModuleID moduleId, ICorProfilerInfo3 & profilerInfo, IMetaDataImport2* pMetadataImport);
 	~ModuleMetadata(void);
 
 private:

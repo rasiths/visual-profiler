@@ -6,7 +6,7 @@
 #include <string>
 #include <map>
 #include "AssemblyMetadata.h"
-#include "TypeMetadata.h"
+#include "ClassMetadata.h"
 #include "MetadataBase.h"
 
 using namespace std;
@@ -17,17 +17,18 @@ public:
 	mdMethodDef MethodMdToken;
 	wstring Name;
 	vector<wstring> Parameters;
+	shared_ptr<ClassMetadata> pContainingTypeMetadata;
 		
-	MethodMetadata(FunctionID functionId, ICorProfilerInfo3 & profilerInfo);
+	MethodMetadata(FunctionID functionId, ICorProfilerInfo3 & profilerInfo, IMetaDataImport2* pMetadataImport);
 	~MethodMetadata(void);
 	AssemblyMetadata & GetDefiningAssembly();
 	wstring ToString();
 
 private:
-	shared_ptr<TypeMetadata> _pContainingTypeMetadata;
+	
 	IMetaDataImport2* _pMetaDataImport ;
 		
-	mdTypeDef GetContainingTypeMdTokenAndSetMethodProps(ICorProfilerInfo3 & profilerInfo);
-	void SetParameters();
+	void InitializeFields(ICorProfilerInfo3 & profilerInfo);
+	void PopulateParameters();
 };
 

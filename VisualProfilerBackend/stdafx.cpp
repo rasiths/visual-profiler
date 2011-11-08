@@ -11,3 +11,10 @@ void CheckError(HRESULT hr){
 
 	throw hr;
 }
+
+void HandleError(wstring message){
+	Beep(3333,1000);
+	__asm{
+		int 3
+	}
+}
