@@ -15,6 +15,6 @@ public:
 	bool IsMarkedForProfiling;
 
 	AssemblyMetadata(IMetaDataAssemblyImport* metadataAssemblyImport);
-	
+	~AssemblyMetadata(void);
 };
 

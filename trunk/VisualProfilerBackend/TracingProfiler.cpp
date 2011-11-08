@@ -3,31 +3,36 @@
 #include "stdafx.h"
 #include "TracingProfiler.h"
 #include <iostream>
-
+#include "MethodMetadata.h"
+#define NAME_BUFFER_SIZE 1024
 
 CTracingProfiler * tracingProfiler;
 
 void __stdcall FunctionEnterGlobal(FunctionIDOrClientID functionIDOrClientID){
-	BOOL zkurvenaPromena;
-	CTracingProfiler::FunctionMapper(functionIDOrClientID.functionID, &zkurvenaPromena);
+	if(functionIDOrClientID.functionID == 0)
+		return;
+
+	shared_ptr<MethodMetadata> pMethodMetadata =  MethodMetadata::GetMethodMetadataBy(functionIDOrClientID.functionID);  
+	std::wcout << L"Entering method " << pMethodMetadata->ToString() << std::endl;
+	
 }
 
 
 
-void _declspec(naked)  FunctionEnter3Naked(FunctionIDOrClientID functionIDOrClientID)
+void  _declspec(naked)  FunctionEnter3Naked(FunctionIDOrClientID functionIDOrClientID)
 {
 
 	__asm
 	{
 		push    ebp                 // Create a frame
-			mov     ebp,esp
-			pushad                      // Save registers
-			mov     eax,[ebp+0x08]      // functionIDOrClientID
+		mov     ebp,esp
+		pushad                      // Save registers
+		mov     eax,[ebp+0x08]      // functionIDOrClientID
 		push    eax;
 		call    FunctionEnterGlobal
-			popad                       // Restore registers
-			pop     ebp                 // Restore EBP
-			ret     4					// Return to caller and ESP = ESP+4 to clean the argument
+		popad                       // Restore registers
+		pop     ebp                 // Restore EBP
+		ret     4					// Return to caller and ESP = ESP+4 to clean the argument
 	}
 }
 
@@ -36,8 +41,8 @@ void _declspec(naked) FunctionLeave3Naked(FunctionIDOrClientID functionIDOrClien
 
 	__asm
 	{
-		int 3
-			ret
+		//int 3
+			ret 4
 	}
 }
 
@@ -46,8 +51,8 @@ void _declspec(naked) FunctionTailcall3Naked(FunctionIDOrClientID functionIDOrCl
 
 	__asm
 	{
-		int 3
-			ret    
+		//int 3
+			ret    4
 	}
 }
 
@@ -59,8 +64,9 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::Initialize( /* [in] */ IUnknown *pIC
 	FunctionEnter3* enterFunction = &FunctionEnter3Naked;
 	FunctionLeave3* leaveFunction = &FunctionLeave3Naked;
 	FunctionTailcall3* tailcallFuntion = &FunctionTailcall3Naked;
-	_pICorProfilerInfo3->SetEnterLeaveFunctionHooks3(enterFunction, NULL , NULL);
-	_pICorProfilerInfo3->SetFunctionIDMapper(&FunctionMapper);
+	_pICorProfilerInfo3->SetFunctionIDMapper2(&FunctionMapper, this);
+	_pICorProfilerInfo3->SetEnterLeaveFunctionHooks3(enterFunction, leaveFunction , tailcallFuntion);
+	
 
 	tracingProfiler = this;
 	Beep(1000, 500);
@@ -128,34 +134,50 @@ void AssemblyMetadataFCE(mdTypeDef classTypeDef, IMetaDataAssemblyImport* pIMeta
 }
 
 HRESULT CTracingProfiler::GetMethodAndDefininingAssemblyForFunctionID(FunctionID functionID, mdAssembly * assembly, mdMethodDef* method){
-	HRESULT hr = _pICorProfilerInfo3->GetTokenAndMetaDataFromFunction(id,IID_IMetaDataImport2,(LPUNKNOWN *) &pIMetaDataImport, &funcToken);
+//	HRESULT hr = _pICorProfilerInfo3->GetTokenAndMetaDataFromFunction(id,IID_IMetaDataImport2,(LPUNKNOWN *) &pIMetaDataImport, &funcToken);
 
 	return S_OK;
 }
 
 UINT_PTR FunctionMapper2(FunctionID functionId, void * clientData, BOOL *pbHookFunction){
 	
-	mdMethodDef method;
-	mdAssembly methodsAssembly; 
-	HRESULT hr = tracingProfiler->GetMethodAndDefininingAssemblyForFunctionID(functionId, &methodsAssembly, & method);
-	
 	return S_OK;
 }
 
-UINT_PTR CTracingProfiler::FunctionMapper(FunctionID functionID, BOOL *pbHookFunction)
+UINT_PTR CTracingProfiler::FunctionMapper(FunctionID functionId, void * clientData, BOOL *pbHookFunction)
 {
+	HRESULT hr;
+	CorProfilerCallbackBase * profilerBase = (CorProfilerCallbackBase *) clientData;
+	ICorProfilerInfo3 * profilerInfo = profilerBase->_pICorProfilerInfo3;
+
+	ClassID classId;
+	ModuleID moduleId;
+	mdToken methodToken;   
+	hr = profilerInfo->GetFunctionInfo(functionId, &classId, &moduleId, &methodToken);
 	
-	FunctionID id = functionID;
+	shared_ptr<MethodMetadata> pMethodMetadata(new MethodMetadata(functionId, *profilerInfo)); 
+    wstring methodName = pMethodMetadata->ToString();
+	std::wcout << L"Mapping method " << methodName << std::endl;
+//	bool contains = pMethodMetadata->Contains(functionId);
+	
+    MethodMetadata::AddMethodMetadata(functionId, pMethodMetadata);
+//    pMethodMetadata->Contains(functionId);
+	
+	
+	*pbHookFunction = true;
+	return functionId;
+#pragma region	hide me
+	
 	IMetaDataImport2* pIMetaDataImport = 0;
-	HRESULT hr = S_OK;
+
 	mdToken funcToken = 0;
 	WCHAR szFunction[NAME_BUFFER_SIZE];
 	WCHAR szClass[NAME_BUFFER_SIZE];
-	hr = tracingProfiler->_pICorProfilerInfo3->GetTokenAndMetaDataFromFunction(id,IID_IMetaDataImport2,(LPUNKNOWN *) &pIMetaDataImport, &funcToken);
+	hr = tracingProfiler->_pICorProfilerInfo3->GetTokenAndMetaDataFromFunction(functionId,IID_IMetaDataImport2,(LPUNKNOWN *) &pIMetaDataImport, &funcToken);
 
-	
+
 	IMetaDataAssemblyImport* pIMetaDataAssemblyImport = 0;
-	hr = tracingProfiler->_pICorProfilerInfo3->GetTokenAndMetaDataFromFunction(id,IID_IMetaDataAssemblyImport,(LPUNKNOWN *) &pIMetaDataAssemblyImport, 0);
+	hr = tracingProfiler->_pICorProfilerInfo3->GetTokenAndMetaDataFromFunction(functionId,IID_IMetaDataAssemblyImport,(LPUNKNOWN *) &pIMetaDataAssemblyImport, 0);
 	
 	if(SUCCEEDED(hr))
 	{
@@ -186,5 +208,6 @@ UINT_PTR CTracingProfiler::FunctionMapper(FunctionID functionID, BOOL *pbHookFun
 	}
 
 			return S_OK;
+#pragma endregion
 }
 

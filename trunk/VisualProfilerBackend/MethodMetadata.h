@@ -7,27 +7,27 @@
 #include <map>
 #include "AssemblyMetadata.h"
 #include "TypeMetadata.h"
+#include "MetadataBase.h"
 
 using namespace std;
-class MethodMetadata
+class MethodMetadata : public MetadataBase<FunctionID, MethodMetadata>
 {
 public:
 	FunctionID FunctionId;
 	mdMethodDef MethodMdToken;
 	wstring Name;
 	vector<wstring> Parameters;
-	
-	
+		
 	MethodMetadata(FunctionID functionId, ICorProfilerInfo3 & profilerInfo);
 	~MethodMetadata(void);
-
 	AssemblyMetadata & GetDefiningAssembly();
-
-	//static MethodMetadata & GetMethodMetadataByFunctionId(FunctionID functionID);
+	wstring ToString();
 
 private:
-	TypeMetadata * _pContainingTypeMetadata;
-	//std::map<FunctionID, MethodMetadata&> _functionIDToMethodMetadataMap;
-
+	shared_ptr<TypeMetadata> _pContainingTypeMetadata;
+	IMetaDataImport2* _pMetaDataImport ;
+		
+	mdTypeDef GetContainingTypeMdTokenAndSetMethodProps(ICorProfilerInfo3 & profilerInfo);
+	void SetParameters();
 };
 

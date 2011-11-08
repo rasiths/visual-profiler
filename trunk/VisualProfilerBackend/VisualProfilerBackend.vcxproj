@@ -114,6 +114,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyMetadata.cpp" />
+    <ClCompile Include="MetadataBase.cpp" />
     <ClCompile Include="CorProfilerCallbackBase.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
@@ -124,12 +125,14 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="MethodMetadata.cpp" />
+    <ClCompile Include="ModuleMetadata.cpp" />
     <ClCompile Include="SamplingProfiler.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TracingProfiler.cpp" />
+    <ClCompile Include="TypeMetadata.cpp" />
     <ClCompile Include="VisualProfilerBackend.cpp" />
     <ClCompile Include="VisualProfilerBackend_i.c">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
@@ -142,14 +145,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssemblyMetadata.h" />
+    <ClInclude Include="MetadataBase.h" />
     <ClInclude Include="CorProfilerCallbackBase.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="MethodMetadata.h" />
+    <ClInclude Include="ModuleMetadata.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SamplingProfiler.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TracingProfiler.h" />
+    <ClInclude Include="TypeMetadata.h" />
     <ClInclude Include="VisualProfilerBackend_i.h" />
   </ItemGroup>
   <ItemGroup>
