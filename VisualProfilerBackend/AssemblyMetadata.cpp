@@ -2,7 +2,7 @@
 #include "AssemblyMetadata.h"
 
 
-AssemblyMetadata::AssemblyMetadata(void)
+AssemblyMetadata::AssemblyMetadata(IMetaDataAssemblyImport* metadataAssemblyImport)
 {
 }
 
