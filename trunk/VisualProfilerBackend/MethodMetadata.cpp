@@ -10,7 +10,7 @@ MethodMetadata::MethodMetadata(FunctionID functionId, ICorProfilerInfo3 * pProfi
 void MethodMetadata::InitializeFields(ICorProfilerInfo3 * pProfilerInfo){
 	HRESULT hr;
 
-	hr = pProfilerInfo->GetTokenAndMetaDataFromFunction(this->FunctionId,IID_IMetaDataImport2,(LPUNKNOWN *) &_pMetaDataImport, &this->MethodMdToken);
+	hr = pProfilerInfo->GetTokenAndMetaDataFromFunction(this->FunctionId,IID_IMetaDataImport2,(LPUNKNOWN *) &this->_pMetaDataImport, &this->MethodMdToken);
 	CheckError(hr);
 	
 	WCHAR methodName[NAME_BUFFER_SIZE];
