@@ -26,6 +26,11 @@ public:
 		shared_ptr<TMetadata> pMetadata = _cacheMap[id];
 		return pMetadata;
 	}
+
+	static int CacheSize(){
+		int cacheSize = _cacheMap.size();
+		return cacheSize;
+	}
 	
 protected:
 	static map<TId, shared_ptr<TMetadata>> _cacheMap;

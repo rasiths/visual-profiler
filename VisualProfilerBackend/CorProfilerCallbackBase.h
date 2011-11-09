@@ -12,9 +12,7 @@ class CorProfilerCallbackBase :
 {
 //protected:
 public:
-	CComQIPtr<ICorProfilerInfo> _pICorProfilerInfo;
-	CComQIPtr<ICorProfilerInfo2> _pICorProfilerInfo2;
-	CComQIPtr<ICorProfilerInfo3> _pICorProfilerInfo3;
+	CComQIPtr<ICorProfilerInfo3> pProfilerInfo;
 public:
 
 	//------------------------------------------------------------------ICorProfilerCallback3------------------------------------------------------------------

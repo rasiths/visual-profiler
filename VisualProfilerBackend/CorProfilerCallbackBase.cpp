@@ -54,15 +54,7 @@ HRESULT STDMETHODCALLTYPE CorProfilerCallbackBase::Initialize(
 { 
 	HRESULT hr;
 
-	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo, (void **)  (LPVOID*)&_pICorProfilerInfo);
-	if (FAILED(hr))
-		return E_FAIL;
-
-	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo2, (void **)  (LPVOID*)&_pICorProfilerInfo2);
-	if (FAILED(hr))
-		return E_FAIL;
-
-	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo3, (void **)  (LPVOID*)&_pICorProfilerInfo3);
+	hr = pICorProfilerInfoUnk->QueryInterface(IID_ICorProfilerInfo3, (void **)  (LPVOID*)&pProfilerInfo);
 	if (FAILED(hr))
 		return E_FAIL;
 
