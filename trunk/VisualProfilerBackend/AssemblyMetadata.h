@@ -2,19 +2,22 @@
 #include "stdafx.h"
 #include <cor.h>
 #include <corprof.h>
-#include <map>
+#include <string>
+#include "MetadataBase.h"
+#define VISUAL_PROFILER_TARGET_ATTR L"SandBox.ProfileMeAttribute"
 
-
-class AssemblyMetadata
+class AssemblyMetadata : public MetadataBase<AssemblyID, AssemblyMetadata>
 {
-private:
-	IMetaDataAssemblyImport* metadataAssemblyImport;
-public:
-	mdAssembly metadataToken;
-	WCHAR name;
-	bool IsMarkedForProfiling;
 
-	AssemblyMetadata(IMetaDataAssemblyImport* metadataAssemblyImport);
-	~AssemblyMetadata(void);
+public:
+	AssemblyID AssemblyId;
+	mdAssembly AssemblyMdToken;
+	wstring Name;
+	AppDomainID AppDomainId;
+	ModuleID MetadataModuleId;
+	bool IsProfilingEnabled;
+
+	AssemblyMetadata(AssemblyID assemblyId, ICorProfilerInfo3 * pProfilerInfo, IMetaDataImport2 * pMetadataImport);
+	
 };
 

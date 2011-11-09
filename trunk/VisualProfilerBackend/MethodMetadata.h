@@ -18,17 +18,17 @@ public:
 	wstring Name;
 	vector<wstring> Parameters;
 	shared_ptr<ClassMetadata> pContainingTypeMetadata;
-		
-	MethodMetadata(FunctionID functionId, ICorProfilerInfo3 & profilerInfo, IMetaDataImport2* pMetadataImport);
-	~MethodMetadata(void);
-	AssemblyMetadata & GetDefiningAssembly();
+
+	MethodMetadata(FunctionID functionId, ICorProfilerInfo3 * pProfilerInfo);
+	shared_ptr<AssemblyMetadata> GetDefiningAssembly();
 	wstring ToString();
 
 private:
 	
 	IMetaDataImport2* _pMetaDataImport ;
 		
-	void InitializeFields(ICorProfilerInfo3 & profilerInfo);
+	void InitializeFields(ICorProfilerInfo3 * pProfilerInfo);
+	void InitializeContainingClass(ICorProfilerInfo3 * pProfilerInfo, mdTypeDef classMdToken);
 	void PopulateParameters();
 };
 

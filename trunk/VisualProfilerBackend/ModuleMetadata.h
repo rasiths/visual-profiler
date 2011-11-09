@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include "MetadataBase.h"
+#include "AssemblyMetadata.h"
 
 using namespace std;
 
@@ -12,13 +13,11 @@ class ModuleMetadata : public MetadataBase<ModuleID, ModuleMetadata>
 {
 public:
 	ModuleID ModuleId;
+	mdToken ModuleMdToken;
 	wstring FileName;
 	LPCBYTE BaseLoadAddress;  
 
-	ModuleMetadata(ModuleID moduleId, ICorProfilerInfo3 & profilerInfo, IMetaDataImport2* pMetadataImport);
-	~ModuleMetadata(void);
-
-private:
-	AssemblyID assemblyId;
+	ModuleMetadata(ModuleID moduleId, mdToken moduleMdToken, ICorProfilerInfo3 * pProfilerInfo, IMetaDataImport2* pMetadataImport);
+	shared_ptr<AssemblyMetadata> pAssemblyMetadata;
 };
 

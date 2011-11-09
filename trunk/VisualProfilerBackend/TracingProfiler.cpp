@@ -4,6 +4,7 @@
 #include "TracingProfiler.h"
 #include <iostream>
 #include "MethodMetadata.h"
+#include "AssemblyMetadata.h"
 
 #define NAME_BUFFER_SIZE 1024
 
@@ -12,18 +13,15 @@ int calls = 0;
 void __stdcall FunctionEnterGlobal(FunctionIDOrClientID functionIDOrClientID){
 	if(functionIDOrClientID.functionID == 0)
 		return;
-	calls++;
-	cout << calls << endl;
-	shared_ptr<MethodMetadata> pMethodMetadata =  MethodMetadata::GetMethodMetadataBy(functionIDOrClientID.functionID);  
+	/*calls++;
+	cout << calls << endl;*/
+	shared_ptr<MethodMetadata> pMethodMetadata =  MethodMetadata::GetById(functionIDOrClientID.functionID);  
 	std::wcout << L"Entering method " << pMethodMetadata->ToString() << std::endl;
 	
 }
 
-
-
 void  _declspec(naked)  FunctionEnter3Naked(FunctionIDOrClientID functionIDOrClientID)
 {
-
 	__asm
 	{
 		push    ebp                 // Create a frame
@@ -150,19 +148,22 @@ UINT_PTR CTracingProfiler::FunctionMapper(FunctionID functionId, void * clientDa
 {
 	HRESULT hr;
 	CorProfilerCallbackBase * profilerBase = (CorProfilerCallbackBase *) clientData;
-	ICorProfilerInfo3 * profilerInfo = profilerBase->_pICorProfilerInfo3;
+	ICorProfilerInfo3 * pProfilerInfo = profilerBase->_pICorProfilerInfo3;
+
+	shared_ptr<MethodMetadata> pMethodMetadata;
+	if(MethodMetadata::ContainsCache(functionId)){
+		pMethodMetadata = MethodMetadata::GetById(functionId);
+	}else{
+		pMethodMetadata = shared_ptr<MethodMetadata>(new MethodMetadata(functionId, pProfilerInfo));
+		MethodMetadata::AddMetadata(functionId, pMethodMetadata);
+	}
+		
+	//wstring methodName = pMethodMetadata->ToString();
+//	std::wcout << L"Mapping method:: " << methodName << endl;
 	
-	shared_ptr<MethodMetadata> pMethodMetadata = MethodMetadata::AddMetadata(functionId, *profilerInfo);
-    wstring methodName = pMethodMetadata->ToString();
-	std::wcout << L"Mapping method " << methodName << std::endl;
-	bool contains = pMethodMetadata->Contains(functionId);
+		   
 	
-    
-    
-	contains = pMethodMetadata->Contains(functionId);
-	
-	
-	*pbHookFunction = true;
+	*pbHookFunction = pMethodMetadata->GetDefiningAssembly()->IsProfilingEnabled;
 	return functionId;
 #pragma region	hide me
 	
