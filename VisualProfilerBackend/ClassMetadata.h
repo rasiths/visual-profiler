@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "MetadataBase.h"
+#include "ModuleMetadata.h"
 
 using namespace std;
 
@@ -13,14 +14,10 @@ public:
 	ClassID ClassId;
 	wstring Name;
 	mdTypeDef ClassMdToken;
-	vector<shared_ptr<ClassMetadata>> TypeArgs;
+	bool IsGeneric;
 
-	ClassMetadata(ClassID classId, ICorProfilerInfo3 & profilerInfo, IMetaDataImport2* pMetadataImport);
-	ClassMetadata(mdTypeDef classMdToken);
+	ClassMetadata(ClassID classId, mdTypeDef classMdToken, ModuleID moduleId, mdToken moduleMdToken, ICorProfilerInfo3 * pProfilerInfo, IMetaDataImport2* pMetadataImport,bool isGeneric);
 	wstring ToString();
-
-private:
-	bool _typeArgsListIncomplete;
-	void PopulateTypeArgs(ClassID typeArgsArray[], ULONG32 typeArgsCount, ICorProfilerInfo3 & profilerInfo);
+	shared_ptr<ModuleMetadata> pParentModuleMetadata;
 };
 

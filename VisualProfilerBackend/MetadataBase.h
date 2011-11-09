@@ -10,27 +10,23 @@ class MetadataBase
 {
 public:
 
-	static shared_ptr<TMetadata> GetMethodMetadataBy(TId id){
-		shared_ptr<TMetadata> pMetadata = _cacheMap[id];
-		return pMetadata;
-	}
-
-	static shared_ptr<TMetadata> AddMetadata(TId id, ICorProfilerInfo3 & profilerInfo, IMetaDataImport2* pMetadataImport = NULL){
-		shared_ptr<TMetadata> pMetadata;
-		if(!Contains(id)){
-			pMetadata = shared_ptr<TMetadata>(new TMetadata(id, profilerInfo, pMetadataImport));
+	static void AddMetadata(TId id, shared_ptr<TMetadata> pMetadata){
+		//Beep(200,200);
+		if(!ContainsCache(id)){
 			_cacheMap[id] = pMetadata;
-		}else{
-			pMetadata = _cacheMap[id];
 		}
-		return pMetadata;
 	}
 
-	static bool Contains(TId id){
+	static bool ContainsCache(TId id){
 		bool contains = _cacheMap[id] != NULL;
 		return contains;
 	}
 
+	static shared_ptr<TMetadata> GetById(TId id){
+		shared_ptr<TMetadata> pMetadata = _cacheMap[id];
+		return pMetadata;
+	}
+	
 protected:
 	static map<TId, shared_ptr<TMetadata>> _cacheMap;
 };
