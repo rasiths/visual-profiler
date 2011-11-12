@@ -12,6 +12,14 @@ void CheckError(HRESULT hr){
 	throw hr;
 }
 
+void CheckError(bool succeeded){
+	if(succeeded){
+		return;
+	}
+
+	throw "CheckError encountered false";
+}
+
 void HandleError(wstring message){
 	Beep(3333,1000);
 	__asm{
