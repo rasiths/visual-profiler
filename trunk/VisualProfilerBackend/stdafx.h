@@ -32,4 +32,7 @@ using namespace std;
 
 void CheckError(HRESULT hr);
 
+void CheckError(bool succeeded);
+
 void HandleError(wstring message);
+

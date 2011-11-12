@@ -67,6 +67,12 @@
     <ClCompile Include="ClassMetadata.cpp">
       <Filter>Source Files\Metadata</Filter>
     </ClCompile>
+    <ClCompile Include="ThreadStack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dllmain.h">
@@ -107,6 +113,15 @@
     </ClInclude>
     <ClInclude Include="ClassMetadata.h">
       <Filter>Header Files\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="CriticalSection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadStack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadTimer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

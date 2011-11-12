@@ -10,9 +10,10 @@
 #include "ClassMetadata.h"
 #include "ModuleMetadata.h"
 #include "AssemblyMetadata.h"
-
+#include "ThreadStack.h"
 #include <set>
 #include <map>
+#include <stack>
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -32,7 +33,7 @@ class ATL_NO_VTABLE CTracingProfiler :
 {
 public:
 	CTracingProfiler()
-	{
+	{	
 	}
 
 DECLARE_REGISTRY_RESOURCEID(IDR_TRACINGPROFILER)
@@ -52,41 +53,117 @@ END_COM_MAP()
 
 	HRESULT FinalConstruct()
 	{
+		cout << "------------------------------" << endl;
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
-		int methodsCache = MethodMetadata::CacheSize();
-		int classesCache = ClassMetadata::CacheSize();
-		int modulesCache = ModuleMetadata::CacheSize();
-		int assembliesCache = AssemblyMetadata::CacheSize();
-		cout<< "methodsCache = " << methodsCache << endl;
-		cout<< "classesCache = " << classesCache << endl;
-		cout<< "modulesCache = " << modulesCache << endl;
-		cout<< "assembliesCache = " << assembliesCache << endl << endl;
+		map<ThreadID, shared_ptr<ThreadStack>> * pThreadStacksMap = ThreadStack::GetThreadStacskMap();
+		long megaSum = 0;
+		int indentation = 0;
+		for(map<ThreadID, shared_ptr<ThreadStack>>::iterator it = pThreadStacksMap->begin(); it != pThreadStacksMap->end(); it++ ){
+			ThreadID threadId = it->first;
+			shared_ptr<ThreadStack> pThreadStack = it->second;
+			cout << "Thread id = " << threadId << endl;
+			int indentation = 0;
+		/*	vector<shared_ptr<ThreadStackElement>> * pEnterStack = &pThreadStack->FunctionEnterStack;
+			vector<shared_ptr<ThreadStackElement>> * pLeaveStack = &pThreadStack->FunctionLeaveStack;
+		*/	vector<int> * pEnterStack = &pThreadStack->FunctionEnterStack;
+			vector<int> * pLeaveStack = &pThreadStack->FunctionLeaveStack;
+			
+			int size = pEnterStack->size();
+			int size2 = pLeaveStack->size();
+			megaSum += size;
+			megaSum += size2;
+			cout << size << ", " << size2 << endl;
+		/*	continue;
+			for(int i = 0; i < size; i++){
+				ThreadStackElement * enterElem =(* pEnterStack)[i].get();
+				shared_ptr<MethodMetadata> pMethodMetadata = MethodMetadata::GetById(enterElem->FunctionId);
+				wcout << pMethodMetadata->ToString() << endl;
 
-		for (map<ThreadID, set<DWORD>>::iterator it=ThreadIdsMap.begin() ; it != ThreadIdsMap.end(); it++ ){
+			}
+
+			cout << endl;
+
+			for(int i = 0; i < size; i++){
+				
+				ThreadStackElement * leaveElem =(* pLeaveStack)[size-1-i].get();
+				shared_ptr<MethodMetadata> pMethodMetadata = MethodMetadata::GetById(leaveElem->FunctionId);
+				wcout << pMethodMetadata->ToString() << endl;
+			}*/
+
+			//for(vector<shared_ptr<ThreadStackElement>>::iterator it2 = pEnterStack->begin(); it2 != pEnterStack->end(); it2++ ){
+			//	PrintIndent(indentation++);
+			//	ULONGLONG * pTimeStamp = &(*it2)->TimeStamp;
+			//	FunctionID functionId = (*it2)->FunctionId;
+			//	shared_ptr<MethodMetadata> pMethodMetadata = MethodMetadata::GetById(functionId);
+			//	wcout << *pTimeStamp << ": " << pMethodMetadata->ToString() << endl;
+			//}
+			cout << endl;
+			cout << endl;
+
+		}
+
+		cout << "mega sum " << megaSum << endl;
+		cout << "size of FUnctionId " << sizeof(FunctionID) << endl;
+		cout << "size of ULONGLONG " << sizeof(ULONGLONG) << endl;
+		cout << "size of shared_ptr " << sizeof(shared_ptr<ThreadStackElement>) << endl;
+
+
+		
+
+		int a;
+		cin >> a;
+	}
+
+	void PrintIndent(int indentCount){
+		for(int i = 0; i < indentCount; i++){cout << "  ";}
+	}
+
+public:
+
+    virtual HRESULT STDMETHODCALLTYPE Initialize(IUnknown *pICorProfilerInfoUnk) ;
+	static UINT_PTR STDMETHODCALLTYPE FunctionMapper(FunctionID functionId,void * clientData,  BOOL *pbHookFunction);
+//	virtual HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) ;
+	virtual HRESULT STDMETHODCALLTYPE ThreadCreated(ThreadID threadId) ;
+	virtual HRESULT STDMETHODCALLTYPE ThreadDestroyed(ThreadID threadId) ;
+    virtual HRESULT STDMETHODCALLTYPE RuntimeThreadSuspended(ThreadID threadId) ;
+	virtual HRESULT STDMETHODCALLTYPE RuntimeThreadResumed(ThreadID threadId) ;
+
+
+private:
+	static void __stdcall FunctionEnterHook(FunctionIDOrClientID functionIDOrClientID);
+	static void __stdcall FunctionLeaveHook(FunctionIDOrClientID functionIDOrClientID);
+	
+};
+
+OBJECT_ENTRY_AUTO(__uuidof(TracingProfiler), CTracingProfiler)
+
+
+//
+//	void CacheStats(){
+//		int methodsCache =		MethodMetadata::CacheSize();
+//		int classesCache =		ClassMetadata::CacheSize();
+//		int modulesCache =		ModuleMetadata::CacheSize();	
+//		int assembliesCache =	AssemblyMetadata::CacheSize();
+//		cout<< "methodsCache = " << methodsCache << endl;
+//		cout<< "classesCache = " << classesCache << endl;
+//		cout<< "modulesCache = " << modulesCache << endl;
+//		cout<< "assembliesCache = " << assembliesCache << endl << endl;
+//
+//		cout<< "methodsCache2 = " <<		MethodMetadata::Count<< endl;
+//		cout<< "classesCache2 = " <<		ClassMetadata::Count<< endl;
+//		cout<< "modulesCache2 = " <<		ModuleMetadata::Count<< endl;
+//		cout<< "assembliesCache2 = " <<	AssemblyMetadata::Count << endl;
+//
+/*	for (map<ThreadID, set<DWORD>>::iterator it=ThreadIdsMap.begin() ; it != ThreadIdsMap.end(); it++ ){
 			cout << "managed threadId = " << (*it).first << endl;
 			set<DWORD> * setOsIds = &(*it).second;
 			for (set<DWORD>::iterator it = setOsIds->begin() ; it != setOsIds->end(); it++ ){
 				cout << "\tos threadId = " << *it << endl;
 			}
 			cout << endl;
-		}
-
-		int a;
-		cin >> a;
-	}
-
-public:
-
-    virtual HRESULT STDMETHODCALLTYPE Initialize( /* [in] */ IUnknown *pICorProfilerInfoUnk) ;
-	static UINT_PTR STDMETHODCALLTYPE FunctionMapper(FunctionID functionId,void * clientData,  BOOL *pbHookFunction);
-
-	static void InspectThreadIds();
-	static map<ThreadID, set<DWORD>> ThreadIdsMap;
-	
-};
-
-OBJECT_ENTRY_AUTO(__uuidof(TracingProfiler), CTracingProfiler)
+		}*/
+//}
