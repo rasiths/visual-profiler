@@ -3,7 +3,7 @@
 #include "stdafx.h"
 #include "TracingProfiler.h"
 #include <iostream>
-#include "ThreadStack.h"
+#include "ThreadCallTree.h"
 
 CTracingProfiler * tracingProfiler;
 map<ThreadID, HANDLE> threadMap;
@@ -12,13 +12,19 @@ ULARGE_INTEGER startTime;
 void __stdcall CTracingProfiler::FunctionEnterHook(FunctionIDOrClientID functionIDOrClientID){
 	ThreadID threadId;
 	tracingProfiler->pProfilerInfo->GetCurrentThreadID(&threadId);
-	ThreadStack::PushFunctionEnter(functionIDOrClientID.functionID, threadId);
+
+	ThreadCallTree * pThreadCallTree = ThreadCallTree::GetThreadCallTree(threadId);
+
+	pThreadCallTree->FunctionEnter(functionIDOrClientID.functionID);
 }
 
 void __stdcall CTracingProfiler::FunctionLeaveHook(FunctionIDOrClientID functionIDOrClientID){
 	ThreadID threadId;
 	tracingProfiler->pProfilerInfo->GetCurrentThreadID(&threadId);
-	ThreadStack::PushFunctionLeave(functionIDOrClientID.functionID, threadId);
+
+	ThreadCallTree * pThreadCallTree = ThreadCallTree::GetThreadCallTree(threadId);
+
+	pThreadCallTree->FunctionLeave(functionIDOrClientID.functionID);
 }
 
 void  _declspec(naked) FunctionEnter3Naked(FunctionIDOrClientID functionIDOrClientID)
@@ -60,7 +66,7 @@ void _declspec(naked) FunctionTailcall3Naked(FunctionIDOrClientID functionIDOrCl
 	__asm
 	{
 		int 3
-		ret    4
+			ret    4
 	}
 }
 
@@ -82,7 +88,6 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::Initialize( IUnknown *pICorProfilerI
 
 UINT_PTR STDMETHODCALLTYPE CTracingProfiler::FunctionMapper(FunctionID functionId, void * clientData, BOOL *pbHookFunction)
 {	 
-
 	CTracingProfiler * profilerBase = (CTracingProfiler *) clientData;
 
 	shared_ptr<MethodMetadata> pMethodMetadata;
@@ -103,24 +108,24 @@ UINT_PTR STDMETHODCALLTYPE CTracingProfiler::FunctionMapper(FunctionID functionI
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadCreated(ThreadID threadId){
-	shared_ptr<ThreadStack> pThreadStack = ThreadStack::AddThread(threadId);
-	pThreadStack->Timer.Start();
+	ThreadCallTree * pThreadCallTree = ThreadCallTree::AddThread(threadId);
+	pThreadCallTree->Timer.Start();
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadDestroyed(ThreadID threadId){
-	
+
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::RuntimeThreadSuspended(ThreadID threadId){
-	shared_ptr<ThreadStack> pThreadStack = ThreadStack::GetThreadStack(threadId);
-	pThreadStack->Timer.Stop();
+	ThreadCallTree * pThreadCallTree = ThreadCallTree::AddThread(threadId);
+	pThreadCallTree->Timer.Stop();
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::RuntimeThreadResumed(ThreadID threadId){
-shared_ptr<ThreadStack> pThreadStack = ThreadStack::GetThreadStack(threadId);
-	pThreadStack->Timer.Start();
+	ThreadCallTree * pThreadCallTree = ThreadCallTree::AddThread(threadId);
+	pThreadCallTree->Timer.Start();
 	return S_OK;
 }
