@@ -67,9 +67,6 @@
     <ClCompile Include="ClassMetadata.cpp">
       <Filter>Source Files\Metadata</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadStack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ThreadTimer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -117,10 +114,10 @@
     <ClInclude Include="CriticalSection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadStack.h">
+    <ClInclude Include="ThreadTimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadTimer.h">
+    <ClInclude Include="ThreadCallTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

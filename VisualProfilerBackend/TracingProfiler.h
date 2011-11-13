@@ -10,7 +10,7 @@
 #include "ClassMetadata.h"
 #include "ModuleMetadata.h"
 #include "AssemblyMetadata.h"
-#include "ThreadStack.h"
+#include "ThreadCallTree.h"
 #include <set>
 #include <map>
 #include <stack>
@@ -59,69 +59,16 @@ END_COM_MAP()
 
 	void FinalRelease()
 	{
-		map<ThreadID, shared_ptr<ThreadStack>> * pThreadStacksMap = ThreadStack::GetThreadStacskMap();
-		long megaSum = 0;
-		int indentation = 0;
-		for(map<ThreadID, shared_ptr<ThreadStack>>::iterator it = pThreadStacksMap->begin(); it != pThreadStacksMap->end(); it++ ){
-			ThreadID threadId = it->first;
-			shared_ptr<ThreadStack> pThreadStack = it->second;
-			cout << "Thread id = " << threadId << endl;
-			int indentation = 0;
-		/*	vector<shared_ptr<ThreadStackElement>> * pEnterStack = &pThreadStack->FunctionEnterStack;
-			vector<shared_ptr<ThreadStackElement>> * pLeaveStack = &pThreadStack->FunctionLeaveStack;
-		*/	vector<int> * pEnterStack = &pThreadStack->FunctionEnterStack;
-			vector<int> * pLeaveStack = &pThreadStack->FunctionLeaveStack;
-			
-			int size = pEnterStack->size();
-			int size2 = pLeaveStack->size();
-			megaSum += size;
-			megaSum += size2;
-			cout << size << ", " << size2 << endl;
-		/*	continue;
-			for(int i = 0; i < size; i++){
-				ThreadStackElement * enterElem =(* pEnterStack)[i].get();
-				shared_ptr<MethodMetadata> pMethodMetadata = MethodMetadata::GetById(enterElem->FunctionId);
-				wcout << pMethodMetadata->ToString() << endl;
-
-			}
-
-			cout << endl;
-
-			for(int i = 0; i < size; i++){
-				
-				ThreadStackElement * leaveElem =(* pLeaveStack)[size-1-i].get();
-				shared_ptr<MethodMetadata> pMethodMetadata = MethodMetadata::GetById(leaveElem->FunctionId);
-				wcout << pMethodMetadata->ToString() << endl;
-			}*/
-
-			//for(vector<shared_ptr<ThreadStackElement>>::iterator it2 = pEnterStack->begin(); it2 != pEnterStack->end(); it2++ ){
-			//	PrintIndent(indentation++);
-			//	ULONGLONG * pTimeStamp = &(*it2)->TimeStamp;
-			//	FunctionID functionId = (*it2)->FunctionId;
-			//	shared_ptr<MethodMetadata> pMethodMetadata = MethodMetadata::GetById(functionId);
-			//	wcout << *pTimeStamp << ": " << pMethodMetadata->ToString() << endl;
-			//}
-			cout << endl;
-			cout << endl;
-
+		map<ThreadID, shared_ptr<ThreadCallTree>> * pThreadCallTreeMap = ThreadCallTree::GetThreadCallTreeMap();
+		for(map<ThreadID, shared_ptr<ThreadCallTree>>::iterator it = pThreadCallTreeMap->begin(); it != pThreadCallTreeMap->end(); it++ ){
+			ThreadCallTree * pThreadCallTree = it->second.get();
+			wcout << pThreadCallTree->ToString()<< endl<< endl;
 		}
-
-		cout << "mega sum " << megaSum << endl;
-		cout << "size of FUnctionId " << sizeof(FunctionID) << endl;
-		cout << "size of ULONGLONG " << sizeof(ULONGLONG) << endl;
-		cout << "size of shared_ptr " << sizeof(shared_ptr<ThreadStackElement>) << endl;
-
-
-		
-
 		int a;
 		cin >> a;
 	}
 
-	void PrintIndent(int indentCount){
-		for(int i = 0; i < indentCount; i++){cout << "  ";}
-	}
-
+	
 public:
 
     virtual HRESULT STDMETHODCALLTYPE Initialize(IUnknown *pICorProfilerInfoUnk) ;
