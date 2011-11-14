@@ -6,25 +6,15 @@
 #include "ThreadCallTree.h"
 
 CTracingProfiler * tracingProfiler;
-map<ThreadID, HANDLE> threadMap;
-ULARGE_INTEGER startTime;
+
+__declspec(thread)  ThreadCallTree * CTracingProfiler::_pThreadCallTree = 0;
 
 void __stdcall CTracingProfiler::FunctionEnterHook(FunctionIDOrClientID functionIDOrClientID){
-	ThreadID threadId;
-	tracingProfiler->pProfilerInfo->GetCurrentThreadID(&threadId);
-
-	ThreadCallTree * pThreadCallTree = ThreadCallTree::GetThreadCallTree(threadId);
-
-	pThreadCallTree->FunctionEnter(functionIDOrClientID.functionID);
+	_pThreadCallTree->FunctionEnter(functionIDOrClientID.functionID);
 }
 
 void __stdcall CTracingProfiler::FunctionLeaveHook(FunctionIDOrClientID functionIDOrClientID){
-	ThreadID threadId;
-	tracingProfiler->pProfilerInfo->GetCurrentThreadID(&threadId);
-
-	ThreadCallTree * pThreadCallTree = ThreadCallTree::GetThreadCallTree(threadId);
-
-	pThreadCallTree->FunctionLeave(functionIDOrClientID.functionID);
+	_pThreadCallTree->FunctionLeave(functionIDOrClientID.functionID);
 }
 
 void  _declspec(naked) FunctionEnter3Naked(FunctionIDOrClientID functionIDOrClientID)
@@ -103,29 +93,51 @@ UINT_PTR STDMETHODCALLTYPE CTracingProfiler::FunctionMapper(FunctionID functionI
 	*/   
 
 	*pbHookFunction = pMethodMetadata->GetDefiningAssembly()->IsProfilingEnabled;
+	//*pbHookFunction = true;
 	UINT_PTR internalCLRFunctionKey = functionId;
 	return internalCLRFunctionKey;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadCreated(ThreadID threadId){
-	ThreadCallTree * pThreadCallTree = ThreadCallTree::AddThread(threadId);
-	pThreadCallTree->Timer.Start();
+	_pThreadCallTree = ThreadCallTree::AddThread(threadId);
+	_pThreadCallTree->GetTimer()->Start();
+	HANDLE osThreadHandle = GetCurrentThread();
+	_pThreadCallTree->SetOSThreadHandle(osThreadHandle);
+	
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadDestroyed(ThreadID threadId){
-
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::RuntimeThreadSuspended(ThreadID threadId){
-	ThreadCallTree * pThreadCallTree = ThreadCallTree::AddThread(threadId);
-	pThreadCallTree->Timer.Stop();
+	_pThreadCallTree->GetTimer()->Stop();
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::RuntimeThreadResumed(ThreadID threadId){
-	ThreadCallTree * pThreadCallTree = ThreadCallTree::AddThread(threadId);
-	pThreadCallTree->Timer.Start();
+	_pThreadCallTree->GetTimer()->Start();
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId){
+	bool needOSThreadInitialization = _pThreadCallTree == NULL || _pThreadCallTree->GetThreadId() != managedThreadId;
+	if(needOSThreadInitialization){
+		_pThreadCallTree =  ThreadCallTree::GetThreadCallTree(managedThreadId);
+	}
+
+	HANDLE osThreadHandle = GetCurrentThread();
+	_pThreadCallTree->SetOSThreadHandle(osThreadHandle);
+
+	//update thread kernel and user mode time stamps when a new os thread is assigned to the managed thread 
+	ThreadCallTreeElem * pCallTreeElem = _pThreadCallTree->GetRealRootCallTreeElem();
+	if(pCallTreeElem != NULL){
+		while(!pCallTreeElem->IsRootElem()){
+			FILETIME dummy;
+			GetThreadTimes(_pThreadCallTree->GetOSThreadHandle(),&dummy, &dummy, &pCallTreeElem->LastEnterKernelModeTimeStamp, &pCallTreeElem->LastEnterUserModeTimeStamp);
+		}
+	}
+	
 	return S_OK;
 }
