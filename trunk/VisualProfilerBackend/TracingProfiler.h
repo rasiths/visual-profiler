@@ -23,6 +23,7 @@ using namespace ATL;
 using namespace std;
 
 
+
 // CTracingProfiler
 
 class ATL_NO_VTABLE CTracingProfiler :
@@ -62,7 +63,7 @@ END_COM_MAP()
 		map<ThreadID, shared_ptr<ThreadCallTree>> * pThreadCallTreeMap = ThreadCallTree::GetThreadCallTreeMap();
 		for(map<ThreadID, shared_ptr<ThreadCallTree>>::iterator it = pThreadCallTreeMap->begin(); it != pThreadCallTreeMap->end(); it++ ){
 			ThreadCallTree * pThreadCallTree = it->second.get();
-			wcout << pThreadCallTree->ToString()<< endl<< endl;
+			wcout << pThreadCallTree->ToString() << endl<< endl;
 		}
 		int a;
 		cin >> a;
@@ -73,7 +74,7 @@ public:
 
     virtual HRESULT STDMETHODCALLTYPE Initialize(IUnknown *pICorProfilerInfoUnk) ;
 	static UINT_PTR STDMETHODCALLTYPE FunctionMapper(FunctionID functionId,void * clientData,  BOOL *pbHookFunction);
-//	virtual HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) ;
+	virtual HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) ;
 	virtual HRESULT STDMETHODCALLTYPE ThreadCreated(ThreadID threadId) ;
 	virtual HRESULT STDMETHODCALLTYPE ThreadDestroyed(ThreadID threadId) ;
     virtual HRESULT STDMETHODCALLTYPE RuntimeThreadSuspended(ThreadID threadId) ;
@@ -83,6 +84,7 @@ public:
 private:
 	static void __stdcall FunctionEnterHook(FunctionIDOrClientID functionIDOrClientID);
 	static void __stdcall FunctionLeaveHook(FunctionIDOrClientID functionIDOrClientID);
+	static __declspec(thread)  ThreadCallTree * _pThreadCallTree;
 	
 };
 
