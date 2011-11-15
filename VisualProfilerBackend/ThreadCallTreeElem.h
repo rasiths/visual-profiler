@@ -4,8 +4,8 @@
 #include <corprof.h>
 #include <string>
 #include <sstream>
-#include <iostream>
 #include "MethodMetadata.h"
+
 
 class ThreadCallTreeElem{
 public:
@@ -23,7 +23,7 @@ public:
 	ThreadCallTreeElem(FunctionID functionId = 0, ThreadCallTreeElem * pParent = NULL);
 	bool IsRootElem();
 	ThreadCallTreeElem * GetChildTreeElem(FunctionID functionId);
-	wstring ToString(wstring indentation = L"", wstring indentationString = L"   ");
+	void ToString(wstringstream & wsout, wstring indentation = L"", wstring indentationString = L"   ");
 	map<FunctionID,shared_ptr<ThreadCallTreeElem>> * GetChildrenMap();
 
 private:

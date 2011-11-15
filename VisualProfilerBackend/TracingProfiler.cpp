@@ -7,14 +7,20 @@
 
 CTracingProfiler * tracingProfiler;
 
+wstring GetFunctionName(FunctionID functionId){
+	MethodMetadata * methodMd = MethodMetadata::GetById(functionId).get();
+	return methodMd->ToString();
+}
+
 __declspec(thread)  ThreadCallTree * CTracingProfiler::_pThreadCallTree = 0;
+__declspec(thread)  UINT CTracingProfiler::_exceptionSearchCount = 0;
 
 void __stdcall CTracingProfiler::FunctionEnterHook(FunctionIDOrClientID functionIDOrClientID){
 	_pThreadCallTree->FunctionEnter(functionIDOrClientID.functionID);
 }
 
 void __stdcall CTracingProfiler::FunctionLeaveHook(FunctionIDOrClientID functionIDOrClientID){
-	_pThreadCallTree->FunctionLeave(functionIDOrClientID.functionID);
+	_pThreadCallTree->FunctionLeave();
 }
 
 void  _declspec(naked) FunctionEnter3Naked(FunctionIDOrClientID functionIDOrClientID)
@@ -22,9 +28,9 @@ void  _declspec(naked) FunctionEnter3Naked(FunctionIDOrClientID functionIDOrClie
 	__asm
 	{
 		push    ebp                 // Create a frame
-			mov     ebp,esp
-			pushad                      // Save registers
-			mov     eax,[ebp+0x08]      // pass functionIDOrClientID parameter to a function
+		mov     ebp,esp
+		pushad                      // Save registers
+		mov     eax,[ebp+0x08]      // pass functionIDOrClientID parameter to a function
 		push    eax;
 		call    CTracingProfiler::FunctionEnterHook // call a function
 			popad                       // Restore registers
@@ -62,7 +68,7 @@ void _declspec(naked) FunctionTailcall3Naked(FunctionIDOrClientID functionIDOrCl
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::Initialize( IUnknown *pICorProfilerInfoUnk) {
 	CorProfilerCallbackBase::Initialize(pICorProfilerInfoUnk);
-	DWORD mask = COR_PRF_MONITOR_ENTERLEAVE |  COR_PRF_MONITOR_THREADS  | COR_PRF_DISABLE_INLINING;      
+	DWORD mask = COR_PRF_MONITOR_ENTERLEAVE |  COR_PRF_MONITOR_THREADS | COR_PRF_MONITOR_EXCEPTIONS | COR_PRF_DISABLE_INLINING;      
 	this->pProfilerInfo->SetEventMask(mask);
 
 	FunctionEnter3* enterFunction = &FunctionEnter3Naked;
@@ -93,7 +99,7 @@ UINT_PTR STDMETHODCALLTYPE CTracingProfiler::FunctionMapper(FunctionID functionI
 	*/   
 
 	*pbHookFunction = pMethodMetadata->GetDefiningAssembly()->IsProfilingEnabled;
-	//*pbHookFunction = true;
+	// *pbHookFunction = true;
 	UINT_PTR internalCLRFunctionKey = functionId;
 	return internalCLRFunctionKey;
 }
@@ -103,11 +109,16 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadCreated(ThreadID threadId){
 	_pThreadCallTree->GetTimer()->Start();
 	HANDLE osThreadHandle = GetCurrentThread();
 	_pThreadCallTree->SetOSThreadHandle(osThreadHandle);
-	
+
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadDestroyed(ThreadID threadId){
+	ThreadCallTreeElem * activeElem = _pThreadCallTree->GetActiveCallTreeElem();
+	while(!activeElem->IsRootElem()){
+		_pThreadCallTree->FunctionLeave();
+		activeElem = _pThreadCallTree->GetActiveCallTreeElem();
+	}
 	return S_OK;
 }
 
@@ -125,19 +136,35 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadAssignedToOSThread(ThreadID ma
 	bool needOSThreadInitialization = _pThreadCallTree == NULL || _pThreadCallTree->GetThreadId() != managedThreadId;
 	if(needOSThreadInitialization){
 		_pThreadCallTree =  ThreadCallTree::GetThreadCallTree(managedThreadId);
-	}
+		HANDLE osThreadHandle = GetCurrentThread();
+		_pThreadCallTree->SetOSThreadHandle(osThreadHandle);
 
-	HANDLE osThreadHandle = GetCurrentThread();
-	_pThreadCallTree->SetOSThreadHandle(osThreadHandle);
-
-	//update thread kernel and user mode time stamps when a new os thread is assigned to the managed thread 
-	ThreadCallTreeElem * pCallTreeElem = _pThreadCallTree->GetRealRootCallTreeElem();
-	if(pCallTreeElem != NULL){
-		while(!pCallTreeElem->IsRootElem()){
-			FILETIME dummy;
-			GetThreadTimes(_pThreadCallTree->GetOSThreadHandle(),&dummy, &dummy, &pCallTreeElem->LastEnterKernelModeTimeStamp, &pCallTreeElem->LastEnterUserModeTimeStamp);
+		//update thread kernel and user mode time stamps when a new os thread is assigned to the managed thread 
+		ThreadCallTreeElem * pCallTreeElem = _pThreadCallTree->GetActiveCallTreeElem();
+		if(pCallTreeElem != NULL){
+			while(!pCallTreeElem->IsRootElem()){
+				FILETIME dummy;
+				GetThreadTimes(_pThreadCallTree->GetOSThreadHandle(),&dummy, &dummy, &pCallTreeElem->LastEnterKernelModeTimeStamp, &pCallTreeElem->LastEnterUserModeTimeStamp);
+				pCallTreeElem = pCallTreeElem->pParent;
+			}
 		}
 	}
-	
+
 	return S_OK;
 }
+
+HRESULT STDMETHODCALLTYPE CTracingProfiler::ExceptionSearchFunctionEnter(FunctionID functionId){
+	_exceptionSearchCount ++;
+	MethodMetadata *  met = MethodMetadata::GetById(functionId).get();
+	wcout << met->ToString() << endl;
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE CTracingProfiler::ExceptionSearchCatcherFound(FunctionID functionId){
+	for(int i = 0; i < _exceptionSearchCount - 1; i++){
+		_pThreadCallTree->FunctionLeave();
+	}
+	_exceptionSearchCount = 0;
+	return S_OK;
+}
+

@@ -7,7 +7,6 @@
 #include "ThreadCallTreeElem.h"
 #include <string>
 #include <sstream>
-#include <iostream>
 #include "Utils.h"
 
 using namespace std;
@@ -26,14 +25,15 @@ private:
 public:
 	ThreadCallTree(ThreadID threadId);
 	void FunctionEnter(FunctionID functionId);
-	void FunctionLeave(FunctionID functionId);
+	void FunctionLeave();
 
-	ThreadCallTreeElem * GetRealRootCallTreeElem();
+	
+	ThreadCallTreeElem * GetActiveCallTreeElem();
 	ThreadTimer * GetTimer();
 	ThreadID GetThreadId();
 	void SetOSThreadHandle(HANDLE osThreadHandle);
 	HANDLE GetOSThreadHandle();
-	wstring ToString();
+	void ToString(wstringstream & wsout);
 	static ThreadCallTree * AddThread(ThreadID threadId);
 	static ThreadCallTree * GetThreadCallTree(ThreadID threadId);
 	static map<ThreadID, shared_ptr<ThreadCallTree>> * GetThreadCallTreeMap();
