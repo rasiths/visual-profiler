@@ -21,7 +21,7 @@ void ThreadCallTree::FunctionEnter(FunctionID functionId){
 	_pActiveCallTreeElem = nextActiveElem;
 }
 
-void ThreadCallTree::FunctionLeave(FunctionID functionId){
+void ThreadCallTree::FunctionLeave(){
 	ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
 	ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->pParent;
 
@@ -43,16 +43,8 @@ void ThreadCallTree::UpdateUserAndKernelMode(ThreadCallTreeElem * prevActiveElem
 	SubtractFILETIMESAndAddToResult( &nextActiveElem->LastEnterUserModeTimeStamp,   &prevActiveElem->LastEnterUserModeTimeStamp,   &prevActiveElem->UserModeDurationHns);
 }
 
-ThreadCallTreeElem * ThreadCallTree::GetRealRootCallTreeElem(){
-	bool noManagedCallTree = _rootCallTreeElem.GetChildrenMap()->size() == 0;
-	if(noManagedCallTree)
-		return NULL;
-
-	bool unexpectedSize = _rootCallTreeElem.GetChildrenMap()->size() != 1;
-	if(unexpectedSize)
-		CheckError(false);
-	ThreadCallTreeElem * pRealRootCallTreeElem  =_rootCallTreeElem.GetChildrenMap()->begin()->second.get();
-	return pRealRootCallTreeElem;
+ThreadCallTreeElem * ThreadCallTree::GetActiveCallTreeElem(){
+	return _pActiveCallTreeElem;
 }
 
 ThreadTimer * ThreadCallTree::GetTimer(){
@@ -71,15 +63,9 @@ HANDLE ThreadCallTree::GetOSThreadHandle(){
 	return _OSThreadHandle;
 }
 
-wstring ThreadCallTree::ToString(){
-	wstringstream wsout;
-	wsout << "Thread Id = " << _threadId;
-	ThreadCallTreeElem * pRealRootCallTreeElem = GetRealRootCallTreeElem();
-	if(pRealRootCallTreeElem != NULL){
-		wsout << endl <<  pRealRootCallTreeElem->ToString();
-	}
-
-	return wsout.str();
+void ThreadCallTree::ToString(wstringstream & wsout){
+	wsout << "Thread Id = " << _threadId << ", Number of stack divisions = " << _rootCallTreeElem.GetChildrenMap()->size() <<  endl ;
+	_rootCallTreeElem.ToString(wsout);
 }
 
 ThreadCallTree * ThreadCallTree::AddThread(ThreadID threadId){

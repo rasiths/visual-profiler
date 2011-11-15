@@ -9,7 +9,9 @@ void CheckError(HRESULT hr){
 		return;
 	}
 
-	throw hr;
+	__asm{
+		int 3
+	}
 }
 
 void CheckError(bool succeeded){
@@ -17,7 +19,9 @@ void CheckError(bool succeeded){
 		return;
 	}
 
-	throw "CheckError encountered false";
+	__asm{
+		int 3
+	}
 }
 
 void HandleError(wstring message){
