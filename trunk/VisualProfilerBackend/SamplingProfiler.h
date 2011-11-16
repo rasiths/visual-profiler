@@ -3,7 +3,14 @@
 #pragma once
 #include "resource.h"       // main symbols
 #include "CorProfilerCallbackBase.h"
+#include <iostream>
+#include <vector>
+#include <windows.h>
+#include <process.h> 
 
+#include <set>
+#include "CriticalSection.h"
+#include "MethodMetadata.h"
 
 #include "VisualProfilerBackend_i.h"
 
@@ -50,7 +57,17 @@ public:
 	}
 
 	void FinalRelease()
-	{
+	{  
+		_continueSampling = false;
+		for(vector<FunctionID>::iterator it2 = _functionIds.begin(); it2 != _functionIds.end(); it2++){
+					FunctionID functionId = *it2;
+					if(functionId == 0)
+						continue;
+					shared_ptr<MethodMetadata> pMethodMetadata = MethodMetadata::GetById(functionId);
+					wcout << "\t" << pMethodMetadata->ToString() << endl;
+				}
+		int a;
+		cin >> a;
 	}
 
 
@@ -58,8 +75,12 @@ public:
 public:
 
 	virtual HRESULT STDMETHODCALLTYPE Initialize( /* [in] */ IUnknown *pICorProfilerInfoUnk) ;
+	virtual HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) ;
+	virtual HRESULT STDMETHODCALLTYPE ThreadCreated(ThreadID threadId) ;
+	virtual HRESULT STDMETHODCALLTYPE ThreadDestroyed(ThreadID threadId) ;
 
-
+	static bool _continueSampling;
+	static vector<FunctionID> _functionIds;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(SamplingProfiler), CSamplingProfiler)
