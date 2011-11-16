@@ -149,6 +149,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssemblyMetadata.h" />
+    <ClInclude Include="CallTreeBase.h" />
+    <ClInclude Include="CallTreeElemBase.h" />
     <ClInclude Include="ClassMetadata.h" />
     <ClInclude Include="MetadataBase.h" />
     <ClInclude Include="CorProfilerCallbackBase.h" />

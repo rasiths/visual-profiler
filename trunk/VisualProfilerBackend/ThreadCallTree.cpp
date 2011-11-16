@@ -1,12 +1,9 @@
 #include "StdAfx.h"
 #include "ThreadCallTree.h"
 
-
-map<ThreadID, shared_ptr<ThreadCallTree>> ThreadCallTree::_threadCallTreeMap;
-CriticalSection ThreadCallTree::_criticalSection;
 __declspec(thread) HANDLE ThreadCallTree::_OSThreadHandle;
 
-ThreadCallTree::ThreadCallTree(ThreadID threadId):_threadId(threadId){
+ThreadCallTree::ThreadCallTree(ThreadID threadId):CallTreeBase<ThreadCallTree, ThreadCallTreeElem>(threadId){
 	_pActiveCallTreeElem = & _rootCallTreeElem;	
 }
 
@@ -51,10 +48,6 @@ ThreadTimer * ThreadCallTree::GetTimer(){
 	return &_timer;
 }
 
-ThreadID ThreadCallTree::GetThreadId(){
-	return _threadId;
-}
-
 void ThreadCallTree::SetOSThreadHandle(HANDLE osThreadHandle){
 	_OSThreadHandle = osThreadHandle;
 }
@@ -63,26 +56,4 @@ HANDLE ThreadCallTree::GetOSThreadHandle(){
 	return _OSThreadHandle;
 }
 
-void ThreadCallTree::ToString(wstringstream & wsout){
-	wsout << "Thread Id = " << _threadId << ", Number of stack divisions = " << _rootCallTreeElem.GetChildrenMap()->size() <<  endl ;
-	_rootCallTreeElem.ToString(wsout);
-}
 
-ThreadCallTree * ThreadCallTree::AddThread(ThreadID threadId){
-	shared_ptr<ThreadCallTree> pThreadCallTree(new ThreadCallTree(threadId));
-	_criticalSection.Enter();
-	_threadCallTreeMap[threadId] = pThreadCallTree;
-	_criticalSection.Leave();
-	return pThreadCallTree.get();
-}
-
-ThreadCallTree * ThreadCallTree::GetThreadCallTree(ThreadID threadId){
-	_criticalSection.Enter();
-	shared_ptr<ThreadCallTree> pThreadCallTree = _threadCallTreeMap[threadId];
-	_criticalSection.Leave();
-	return pThreadCallTree.get();
-}
-
-map<ThreadID, shared_ptr<ThreadCallTree>> * ThreadCallTree::GetThreadCallTreeMap(){
-	return &_threadCallTreeMap;
-}

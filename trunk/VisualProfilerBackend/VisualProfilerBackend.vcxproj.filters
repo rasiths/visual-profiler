@@ -38,6 +38,12 @@
     <Filter Include="Source Files\TracingProfiler">
       <UniqueIdentifier>{8b641a15-f2c0-49d2-bd7e-20f77125892f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SamplingProfiler">
+      <UniqueIdentifier>{f3c0db22-4e60-4199-84e5-eae821ad9a38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SamplingProfiler">
+      <UniqueIdentifier>{b6f87f97-6206-44f4-a7d6-fa28d4d93799}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -51,9 +57,6 @@
     </ClCompile>
     <ClCompile Include="VisualProfilerBackend.cpp">
       <Filter>Generated Files\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SamplingProfiler.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CorProfilerCallbackBase.cpp">
       <Filter>Source Files</Filter>
@@ -73,9 +76,6 @@
     <ClCompile Include="Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StackWalker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ThreadCallTree.cpp">
       <Filter>Source Files\TracingProfiler</Filter>
     </ClCompile>
@@ -87,6 +87,12 @@
     </ClCompile>
     <ClCompile Include="TracingProfiler.cpp">
       <Filter>Source Files\TracingProfiler</Filter>
+    </ClCompile>
+    <ClCompile Include="SamplingProfiler.cpp">
+      <Filter>Source Files\SamplingProfiler</Filter>
+    </ClCompile>
+    <ClCompile Include="StackWalker.cpp">
+      <Filter>Source Files\SamplingProfiler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -104,9 +110,6 @@
     </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Generated Files\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="SamplingProfiler.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CorProfilerCallbackBase.h">
       <Filter>Header Files</Filter>
@@ -132,9 +135,6 @@
     <ClInclude Include="Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StackWalker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TracingProfiler.h">
       <Filter>Header Files\TracingProfiler</Filter>
     </ClInclude>
@@ -146,6 +146,18 @@
     </ClInclude>
     <ClInclude Include="ThreadTimer.h">
       <Filter>Header Files\TracingProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="CallTreeElemBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplingProfiler.h">
+      <Filter>Header Files\SamplingProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="StackWalker.h">
+      <Filter>Header Files\SamplingProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="CallTreeBase.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

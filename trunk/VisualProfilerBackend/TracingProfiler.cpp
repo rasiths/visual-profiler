@@ -7,11 +7,6 @@
 
 CTracingProfiler * tracingProfiler;
 
-wstring GetFunctionName(FunctionID functionId){
-	MethodMetadata * methodMd = MethodMetadata::GetById(functionId).get();
-	return methodMd->ToString();
-}
-
 __declspec(thread)  ThreadCallTree * CTracingProfiler::_pThreadCallTree = 0;
 __declspec(thread)  UINT CTracingProfiler::_exceptionSearchCount = 0;
 
@@ -33,9 +28,9 @@ void  _declspec(naked) FunctionEnter3Naked(FunctionIDOrClientID functionIDOrClie
 		mov     eax,[ebp+0x08]      // pass functionIDOrClientID parameter to a function
 		push    eax;
 		call    CTracingProfiler::FunctionEnterHook // call a function
-			popad                       // Restore registers
-			pop     ebp                 // Restore EBP
-			ret     4					// Return to caller and ESP = ESP+4 to clean the argument
+		popad                       // Restore registers
+		pop     ebp                 // Restore EBP
+		ret     4					// Return to caller and ESP = ESP+4 to clean the argument
 	}
 }
 
@@ -45,24 +40,23 @@ void _declspec(naked) FunctionLeave3Naked(FunctionIDOrClientID functionIDOrClien
 	__asm
 	{
 		push    ebp                 // Create a frame
-			mov     ebp,esp
-			pushad                      // Save registers
-			mov     eax,[ebp+0x08]      // pass functionIDOrClientID parameter to a function
+		mov     ebp,esp
+		pushad                      // Save registers
+		mov     eax,[ebp+0x08]      // pass functionIDOrClientID parameter to a function
 		push    eax;
 		call    CTracingProfiler::FunctionLeaveHook // call a function
-			popad                       // Restore registers
-			pop     ebp                 // Restore EBP
-			ret     4					// Return to caller and ESP = ESP+4 to clean the argument
+		popad                       // Restore registers
+		pop     ebp                 // Restore EBP
+		ret     4					// Return to caller and ESP = ESP+4 to clean the argument
 	}
 }
 
 void _declspec(naked) FunctionTailcall3Naked(FunctionIDOrClientID functionIDOrClientID)
 {
-
 	__asm
 	{
-		int 3
-			ret    4
+		int 3 //jump to debugger
+		ret    4
 	}
 }
 
@@ -94,12 +88,8 @@ UINT_PTR STDMETHODCALLTYPE CTracingProfiler::FunctionMapper(FunctionID functionI
 		MethodMetadata::AddMetadata(functionId, pMethodMetadata);
 	}
 
-	/*	wstring methodName = pMethodMetadata->ToString();
-	std::wcout << L"Mapping method:: " << methodName << endl;
-	*/   
-
 	*pbHookFunction = pMethodMetadata->GetDefiningAssembly()->IsProfilingEnabled;
-	// *pbHookFunction = true;
+	// *pbHookFunction = true; //uncomment to track all CLR functions
 	UINT_PTR internalCLRFunctionKey = functionId;
 	return internalCLRFunctionKey;
 }
@@ -135,7 +125,7 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::RuntimeThreadResumed(ThreadID thread
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId){
 	bool needOSThreadInitialization = _pThreadCallTree == NULL || _pThreadCallTree->GetThreadId() != managedThreadId;
 	if(needOSThreadInitialization){
-		_pThreadCallTree =  ThreadCallTree::GetThreadCallTree(managedThreadId);
+		_pThreadCallTree =  ThreadCallTree::GetCallTree(managedThreadId);
 		HANDLE osThreadHandle = GetCurrentThread();
 		_pThreadCallTree->SetOSThreadHandle(osThreadHandle);
 
@@ -155,13 +145,11 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadAssignedToOSThread(ThreadID ma
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ExceptionSearchFunctionEnter(FunctionID functionId){
 	_exceptionSearchCount ++;
-	MethodMetadata *  met = MethodMetadata::GetById(functionId).get();
-	wcout << met->ToString() << endl;
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ExceptionSearchCatcherFound(FunctionID functionId){
-	for(int i = 0; i < _exceptionSearchCount - 1; i++){
+	for(UINT i = 0; i < _exceptionSearchCount - 1; i++){
 		_pThreadCallTree->FunctionLeave();
 	}
 	_exceptionSearchCount = 0;

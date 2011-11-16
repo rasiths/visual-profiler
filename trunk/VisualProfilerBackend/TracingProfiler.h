@@ -1,30 +1,16 @@
-// TracingProfiler.h : Declaration of the CTracingProfiler
-
 #pragma once
 #include "resource.h"       // main symbols
 #include <iostream>
 #include "CorProfilerCallbackBase.h"
-
 #include "VisualProfilerBackend_i.h"
-#include "MethodMetadata.h"
-#include "ClassMetadata.h"
-#include "ModuleMetadata.h"
-#include "AssemblyMetadata.h"
 #include "ThreadCallTree.h"
-#include <set>
-#include <map>
-#include <stack>
-#include <fstream>
+
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
 #endif
 
 using namespace ATL;
 using namespace std;
-
-
-
-// CTracingProfiler
 
 class ATL_NO_VTABLE CTracingProfiler :
 	public CComObjectRootEx<CComMultiThreadModel>,
@@ -48,65 +34,50 @@ public:
 		COM_INTERFACE_ENTRY(ICorProfilerCallback3)
 	END_COM_MAP()
 
-
-
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
-	HRESULT FinalConstruct()
-	{
-		cout << "------------------------------" << endl;
-		return S_OK;
-	}
+	HRESULT FinalConstruct(){ return S_OK; }
 
 	void FinalRelease()
 	{
-		map<ThreadID, shared_ptr<ThreadCallTree>> * pThreadCallTreeMap = ThreadCallTree::GetThreadCallTreeMap();
+		cout << endl <<"----- Profiler output -----" << endl;
+		map<ThreadID, shared_ptr<ThreadCallTree>> * pThreadCallTreeMap = ThreadCallTree::GetCallTreeMap();
 		wstringstream wsout;	
 		for(map<ThreadID, shared_ptr<ThreadCallTree>>::iterator it = pThreadCallTreeMap->begin(); it != pThreadCallTreeMap->end(); it++ ){
 			ThreadCallTree * pThreadCallTree = it->second.get();
 			pThreadCallTree->ToString(wsout);
 			wsout << endl<< endl;
-				
 		}
-
 		wcout << wsout.rdbuf();
-		
-		/*wofstream fileStream; 
-		fileStream.open ("d:\\test.txt", fstream::out);
-		fileStream << wsout.rdbuf();
-		fileStream.close();*/
+
 		int a;
 		cin >> a;
 	}
 
-
 public:
-
 	virtual HRESULT STDMETHODCALLTYPE Initialize(IUnknown *pICorProfilerInfoUnk) ;
-	static UINT_PTR STDMETHODCALLTYPE FunctionMapper(FunctionID functionId,void * clientData,  BOOL *pbHookFunction);
 	virtual HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) ;
 	virtual HRESULT STDMETHODCALLTYPE ThreadCreated(ThreadID threadId) ;
 	virtual HRESULT STDMETHODCALLTYPE ThreadDestroyed(ThreadID threadId) ;
 	virtual HRESULT STDMETHODCALLTYPE RuntimeThreadSuspended(ThreadID threadId) ;
 	virtual HRESULT STDMETHODCALLTYPE RuntimeThreadResumed(ThreadID threadId) ;
 	virtual HRESULT STDMETHODCALLTYPE ExceptionSearchFunctionEnter(FunctionID functionId);
-	
 	virtual HRESULT STDMETHODCALLTYPE ExceptionSearchCatcherFound(FunctionID functionId);
 
+	static UINT_PTR STDMETHODCALLTYPE FunctionMapper(FunctionID functionId,void * clientData,  BOOL *pbHookFunction);
 
 private:
 	static void __stdcall FunctionEnterHook(FunctionIDOrClientID functionIDOrClientID);
 	static void __stdcall FunctionLeaveHook(FunctionIDOrClientID functionIDOrClientID);
-
+	
 	//thread local storage static variables
 	static __declspec(thread)  ThreadCallTree * _pThreadCallTree;
 	static __declspec(thread)  UINT _exceptionSearchCount;
-	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(TracingProfiler), CTracingProfiler)
 
-
+#pragma region debug things
 	//
 	//	void CacheStats(){
 	//		int methodsCache =		MethodMetadata::CacheSize();
@@ -132,3 +103,4 @@ OBJECT_ENTRY_AUTO(__uuidof(TracingProfiler), CTracingProfiler)
 	cout << endl;
 	}*/
 	//}
+#pragma endregion

@@ -1,17 +1,11 @@
 #pragma once
-#include <map>
-#include <cor.h>
-#include <corprof.h>
-#include <string>
-#include <sstream>
 #include "MethodMetadata.h"
+#include "CallTreeElemBase.h"
 
 
-class ThreadCallTreeElem{
+class ThreadCallTreeElem: public CallTreeElemBase<ThreadCallTreeElem> { 
 public:
-	ThreadCallTreeElem * pParent;
-	FunctionID FunctionId;
-    UINT EnterCount;
+	UINT EnterCount;
 	UINT LeaveCount;
 	ULONGLONG WallClockDurationHns; //100 nanoseconds
 	ULONGLONG LastEnterTimeStampHns; //100 nanoseconds
@@ -19,13 +13,7 @@ public:
 	ULONGLONG KernelModeDurationHns; //100 nanoseconds
 	FILETIME LastEnterUserModeTimeStamp;
 	FILETIME LastEnterKernelModeTimeStamp;
-	
-	ThreadCallTreeElem(FunctionID functionId = 0, ThreadCallTreeElem * pParent = NULL);
-	bool IsRootElem();
-	ThreadCallTreeElem * GetChildTreeElem(FunctionID functionId);
-	void ToString(wstringstream & wsout, wstring indentation = L"", wstring indentationString = L"   ");
-	map<FunctionID,shared_ptr<ThreadCallTreeElem>> * GetChildrenMap();
 
-private:
-	map<FunctionID,shared_ptr<ThreadCallTreeElem>> _pChildrenMap;
+	ThreadCallTreeElem(FunctionID functionId = 0, ThreadCallTreeElem * pParent = NULL);
+	void ToString(wstringstream & wsout, wstring indentation = L"", wstring indentationString = L"   ");
 };

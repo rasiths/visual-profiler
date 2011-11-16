@@ -5,16 +5,13 @@
 #include "CriticalSection.h"
 #include <vector>
 #include <map>
+#include "CallTreeElemBase.h"
 
-class StatisticalCallTreeElem{
+class StatisticalCallTreeElem : public CallTreeElemBase<StatisticalCallTreeElem>{
 public:
-	FunctionID FunctionId;
-	StatisticalCallTreeElem * Parent;
 	UINT TopOfStackCount;
 	UINT BelowTopOfStackCount;
-
-	private:
-	map<FunctionID,shared_ptr<StatisticalCallTreeElem>> _pChildrenMap;
+		
 };
 
 class StatisticalCallTree{
