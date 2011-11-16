@@ -16,7 +16,7 @@ public:
 	}
 
 	void Leave(){
-			LeaveCriticalSection(&m_CriticalSection);
+		LeaveCriticalSection(&m_CriticalSection);
 	}
 
 private:

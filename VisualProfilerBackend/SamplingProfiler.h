@@ -7,13 +7,12 @@
 #include <vector>
 #include <windows.h>
 #include <process.h> 
-
 #include <set>
 #include "CriticalSection.h"
 #include "MethodMetadata.h"
-
+#include "StackWalker.h"
 #include "VisualProfilerBackend_i.h"
-
+#include "StackWalker.h"
 
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -58,29 +57,29 @@ public:
 
 	void FinalRelease()
 	{  
-		_continueSampling = false;
-		for(vector<FunctionID>::iterator it2 = _functionIds.begin(); it2 != _functionIds.end(); it2++){
-					FunctionID functionId = *it2;
-					if(functionId == 0)
-						continue;
-					shared_ptr<MethodMetadata> pMethodMetadata = MethodMetadata::GetById(functionId);
-					wcout << "\t" << pMethodMetadata->ToString() << endl;
-				}
+		cout << endl <<"----- Profiler output -----" << endl;
+		map<ThreadID, shared_ptr<StatisticalCallTree>> * pStatCallTreeMap = StatisticalCallTree::GetCallTreeMap();
+		wstringstream wsout;	
+		for(map<ThreadID, shared_ptr<StatisticalCallTree>>::iterator it = pStatCallTreeMap->begin(); it != pStatCallTreeMap->end(); it++ ){
+			StatisticalCallTree * pStatCallTree = it->second.get();
+			pStatCallTree->ToString(wsout);
+			wsout << endl<< endl;
+		}
+		wcout << wsout.rdbuf();
+
 		int a;
 		cin >> a;
 	}
 
-
-
 public:
-
-	virtual HRESULT STDMETHODCALLTYPE Initialize( /* [in] */ IUnknown *pICorProfilerInfoUnk) ;
+	virtual HRESULT STDMETHODCALLTYPE Initialize(IUnknown *pICorProfilerInfoUnk) ;
 	virtual HRESULT STDMETHODCALLTYPE ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId) ;
 	virtual HRESULT STDMETHODCALLTYPE ThreadCreated(ThreadID threadId) ;
 	virtual HRESULT STDMETHODCALLTYPE ThreadDestroyed(ThreadID threadId) ;
+	virtual HRESULT STDMETHODCALLTYPE Shutdown();
 
-	static bool _continueSampling;
-	static vector<FunctionID> _functionIds;
+private:
+	shared_ptr<StackWalker> _stackWalker;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(SamplingProfiler), CSamplingProfiler)
