@@ -6,17 +6,55 @@
 #include <vector>
 #include <map>
 #include "CallTreeElemBase.h"
+#include "CallTreeBase.h"
 
 class StatisticalCallTreeElem : public CallTreeElemBase<StatisticalCallTreeElem>{
 public:
-	UINT TopOfStackCount;
-	UINT BelowTopOfStackCount;
-		
+	UINT TopStackOccurrenceCount;
+
+	StatisticalCallTreeElem(FunctionID functionId = 0, StatisticalCallTreeElem * pParent = NULL)
+		:CallTreeElemBase<StatisticalCallTreeElem>(functionId, pParent),TopStackOccurrenceCount(0){}
+
+	void ToString(wstringstream & wsout, wstring indentation = L"", wstring indentationString = L"   "){
+		if(!IsRootElem()){
+			MethodMetadata * pMethodMd = MethodMetadata::GetById(this->FunctionId).get();
+			wsout << indentation << pMethodMd->ToString() << L",TopCount=" << TopStackOccurrenceCount ;
+		}
+
+		int stackDivisionCount = 0;
+		for(map<FunctionID,shared_ptr<StatisticalCallTreeElem>>::iterator it = _pChildrenMap.begin(); it != _pChildrenMap.end(); it ++){
+			if(IsRootElem()){
+				wsout << endl << indentation << "-------------- Stack division "<< stackDivisionCount++ <<"--------------";
+			}
+			wsout << endl ;
+			it->second->ToString(wsout,indentation + indentationString);
+		}
+	}
 };
 
-class StatisticalCallTree{
+class StatisticalCallTree : public CallTreeBase<StatisticalCallTree, StatisticalCallTreeElem> {
+public:
+	StatisticalCallTree(ThreadID threadId):CallTreeBase<StatisticalCallTree, StatisticalCallTreeElem>(threadId){}
 
+	void ProcessSamples(vector<FunctionID> * functionIdsSnapshot, ICorProfilerInfo3 * pProfilerInfo){
 
+		StatisticalCallTreeElem * treeElem = &_rootCallTreeElem;
+		for(vector<FunctionID>::reverse_iterator it = functionIdsSnapshot->rbegin(); it < functionIdsSnapshot->rend(); it++){
+			FunctionID functionId = *it;
+			if(functionId == 0)
+				continue;
+			shared_ptr<MethodMetadata> pMethodMetadata = MethodMetadata::GetById(functionId);
+			if(pMethodMetadata == NULL){
+				pMethodMetadata = shared_ptr<MethodMetadata>(new MethodMetadata(functionId, pProfilerInfo));
+				MethodMetadata::AddMetadata(functionId, pMethodMetadata);
+			}
+			if(pMethodMetadata->GetDefiningAssembly()->IsProfilingEnabled){
+				treeElem = treeElem->GetChildTreeElem(functionId);
+			}
+		}
+		StatisticalCallTreeElem * stackTopTreeElem = treeElem;
+		stackTopTreeElem->TopStackOccurrenceCount++;
+	}
 };
 
 class StackWalker
@@ -28,8 +66,11 @@ public:
 
 	void RegisterThread(ThreadID threadId){
 		_criticalSection.Enter();
-		_registeredThreadIds.insert(threadId);
+		{
+			_registeredThreadIds.insert(threadId);
+		}
 		_criticalSection.Leave();
+		StatisticalCallTree::AddThread(threadId);
 	}
 
 	void DeregisterThread(ThreadID threadId){
@@ -40,7 +81,7 @@ public:
 private:
 	static DWORD WINAPI Sample(void * data){
 		StackWalker * pThis = (StackWalker *) data;
-		vector<FunctionID> functionIds;
+		vector<FunctionID> functionIdsSnapshot;
 		HRESULT hr = 0;
 
 		while(pThis->_continueSampling){
@@ -48,10 +89,11 @@ private:
 			{
 				for(set<ThreadID>::iterator it = pThis->_registeredThreadIds.begin(); it != pThis->_registeredThreadIds.end(); it++){
 					ThreadID threadId = *it;
-					functionIds.clear();
-					hr = pThis->_pProfilerInfo->DoStackSnapshot(threadId,&MakeFrameWalk,0, &functionIds,0,0);
+					functionIdsSnapshot.clear();
+					hr = pThis->_pProfilerInfo->DoStackSnapshot(threadId,&MakeFrameWalk,0, &functionIdsSnapshot,0,0);
 					if(SUCCEEDED(hr)){
-						pThis->ProcessSamples(&functionIds, threadId);
+						StatisticalCallTree * pCallTree = StatisticalCallTree::GetCallTree(threadId);
+						pCallTree->ProcessSamples(&functionIdsSnapshot, pThis->_pProfilerInfo);
 					}
 				}
 			}
@@ -61,16 +103,15 @@ private:
 			if(!pThis->_continueSampling) break;
 			Sleep(pThis->_samplingPeriodMs);
 		}
+
+		DWORD success = 1;
+		return success;
 	}
 
 	static HRESULT __stdcall  MakeFrameWalk(FunctionID functionId, UINT_PTR ip, COR_PRF_FRAME_INFO frameInfo, ULONG32 contextSize, BYTE context[], void *clientData){
 		vector<FunctionID>  * functionIds = (vector<FunctionID>  *) clientData;
 		functionIds->push_back(functionId);
 		return S_OK;
-	}
-
-	void ProcessSamples(vector<FunctionID> * functionIds, ThreadID threadId){
-
 	}
 
 public:
@@ -86,7 +127,6 @@ public:
 		WaitForSingleObject(_samplingThreadHandle, INFINITE);
 	}
 
-
 private:
 	bool _continueSampling;
 	CriticalSection _criticalSection;
@@ -95,6 +135,6 @@ private:
 	set<ThreadID> _registeredThreadIds;
 	DWORD _samplingThreadId;
 	HANDLE _samplingThreadHandle;
-	//map<ThreadID, shared_ptr<ThreadCallTree>> _threadCallTreeMap;
+
 };
 
