@@ -32,6 +32,12 @@
     <Filter Include="Source Files\Metadata">
       <UniqueIdentifier>{4a098e5a-6120-4a20-8092-8e72442437bf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\TracingProfiler">
+      <UniqueIdentifier>{3d7fcef4-287f-469b-9ff6-8334cc6e4c3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TracingProfiler">
+      <UniqueIdentifier>{8b641a15-f2c0-49d2-bd7e-20f77125892f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -49,9 +55,6 @@
     <ClCompile Include="SamplingProfiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TracingProfiler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="CorProfilerCallbackBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -67,17 +70,23 @@
     <ClCompile Include="ClassMetadata.cpp">
       <Filter>Source Files\Metadata</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadCallTreeElem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadCallTree.cpp">
+    <ClCompile Include="StackWalker.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadCallTree.cpp">
+      <Filter>Source Files\TracingProfiler</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadCallTreeElem.cpp">
+      <Filter>Source Files\TracingProfiler</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadTimer.cpp">
+      <Filter>Source Files\TracingProfiler</Filter>
+    </ClCompile>
+    <ClCompile Include="TracingProfiler.cpp">
+      <Filter>Source Files\TracingProfiler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -97,9 +106,6 @@
       <Filter>Generated Files\Headers</Filter>
     </ClInclude>
     <ClInclude Include="SamplingProfiler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TracingProfiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CorProfilerCallbackBase.h">
@@ -123,17 +129,23 @@
     <ClInclude Include="CriticalSection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadTimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadCallTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadCallTreeElem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Utils.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StackWalker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TracingProfiler.h">
+      <Filter>Header Files\TracingProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadCallTree.h">
+      <Filter>Header Files\TracingProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadCallTreeElem.h">
+      <Filter>Header Files\TracingProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadTimer.h">
+      <Filter>Header Files\TracingProfiler</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
