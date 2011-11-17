@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "ThreadTimer.h"
+#include "Utils.h"
 
 ThreadTimer::ThreadTimer(){
 	Reset();
@@ -18,6 +19,12 @@ void ThreadTimer::GetElapsedTimeIn100NanoSeconds(ULONGLONG * elapsedTime){
 	}
 }
 
+ULONGLONG ThreadTimer::GetElapsedTimeIn100NanoSeconds(){
+	ULONGLONG elapsedTime;
+	GetElapsedTimeIn100NanoSeconds(&elapsedTime);
+	return elapsedTime;
+}
+
 void ThreadTimer::Stop(){
 	SubtractCurrentFromStartAndAddElapsedTime(&_elapsedTime);
 	_isStopped = true;
@@ -31,14 +38,5 @@ void ThreadTimer::Reset(){
 void ThreadTimer::SubtractCurrentFromStartAndAddElapsedTime(ULONGLONG * result ){
 	FILETIME currentTime;
 	GetSystemTimeAsFileTime(&currentTime);
-	
-	ULARGE_INTEGER temp1;
-	temp1.HighPart = currentTime.dwHighDateTime;
-	temp1.LowPart =  currentTime.dwLowDateTime;
-	
-	ULARGE_INTEGER temp2;
-	temp2.HighPart = _startTime.dwHighDateTime;
-	temp2.LowPart =  _startTime.dwLowDateTime;
-	
-	*result = temp1.QuadPart - temp2.QuadPart + _elapsedTime;
+	SubtractFILETIMESAndAddToResult(&currentTime, &_startTime, result);
 }

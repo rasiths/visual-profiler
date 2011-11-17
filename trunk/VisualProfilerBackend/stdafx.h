@@ -31,8 +31,7 @@
 using namespace std;
 
 void CheckError(HRESULT hr);
-
 void CheckError(bool succeeded);
-
+void CheckError2(BOOL succeeded);
 void HandleError(wstring message);
 

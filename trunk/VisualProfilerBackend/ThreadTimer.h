@@ -6,6 +6,7 @@ public:
 	ThreadTimer();
 	void Start();
 	void GetElapsedTimeIn100NanoSeconds(ULONGLONG * elapsedTime);
+	ULONGLONG GetElapsedTimeIn100NanoSeconds();
 	void Stop();
 	void Reset();
 
