@@ -18,12 +18,22 @@ protected :
 
 	TTreeElem _rootCallTreeElem;
 	ThreadID _threadId;
+	ThreadTimer _timer;
 public:
 
 	CallTreeBase(ThreadID threadId):_threadId(threadId){};
 
 	ThreadID GetThreadId(){
 		return _threadId;
+	}
+
+	ThreadTimer * GetTimer(){
+		return &_timer;
+	}
+
+	virtual void ToString(wstringstream & wsout){
+		wsout << "Thread Id = " << _threadId << ", Number of stack divisions = " << _rootCallTreeElem.GetChildrenMap()->size() <<  endl ;
+		_rootCallTreeElem.ToString(wsout);
 	}
 
 	static TCallTree * AddThread(ThreadID threadId){
@@ -44,11 +54,6 @@ public:
 		}
 		_criticalSection.Leave();
 		return pCallTree.get();
-	}
-
-	virtual void ToString(wstringstream & wsout){
-		wsout << "Thread Id = " << _threadId << ", Number of stack divisions = " << _rootCallTreeElem.GetChildrenMap()->size() <<  endl ;
-		_rootCallTreeElem.ToString(wsout);
 	}
 
 	static map<ThreadID, shared_ptr<TCallTree>> * GetCallTreeMap(){

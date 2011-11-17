@@ -13,6 +13,7 @@
 #include "StackWalker.h"
 #include "VisualProfilerBackend_i.h"
 #include "StackWalker.h"
+#include <fstream>
 
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -65,7 +66,11 @@ public:
 			pStatCallTree->ToString(wsout);
 			wsout << endl<< endl;
 		}
-		wcout << wsout.rdbuf();
+	//	wcout << wsout.rdbuf();
+		wofstream file;
+		file.open("d:\\sampling.txt",fstream::out);
+		file << wsout.rdbuf();
+		file.close();
 
 		int a;
 		cin >> a;

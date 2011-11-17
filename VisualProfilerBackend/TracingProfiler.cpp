@@ -144,7 +144,7 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadAssignedToOSThread(ThreadID ma
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ExceptionSearchFunctionEnter(FunctionID functionId){
-	_exceptionSearchCount ++;
+	_exceptionSearchCount++;
 	return S_OK;
 }
 

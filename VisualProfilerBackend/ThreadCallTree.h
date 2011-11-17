@@ -10,14 +10,12 @@ class ThreadCallTree : public CallTreeBase<ThreadCallTree, ThreadCallTreeElem>
 private:
 	__declspec(thread) static HANDLE _OSThreadHandle;
 	ThreadCallTreeElem * _pActiveCallTreeElem;
-	ThreadTimer _timer;
 
 public:
 	ThreadCallTree(ThreadID threadId);
 	void FunctionEnter(FunctionID functionId);
 	void FunctionLeave();
 	ThreadCallTreeElem * GetActiveCallTreeElem();
-	ThreadTimer * GetTimer();
 	void SetOSThreadHandle(HANDLE osThreadHandle);
 	HANDLE GetOSThreadHandle();
 

@@ -44,10 +44,6 @@ ThreadCallTreeElem * ThreadCallTree::GetActiveCallTreeElem(){
 	return _pActiveCallTreeElem;
 }
 
-ThreadTimer * ThreadCallTree::GetTimer(){
-	return &_timer;
-}
-
 void ThreadCallTree::SetOSThreadHandle(HANDLE osThreadHandle){
 	_OSThreadHandle = osThreadHandle;
 }
