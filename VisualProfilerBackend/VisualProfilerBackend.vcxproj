@@ -127,6 +127,8 @@
     <ClCompile Include="MethodMetadata.cpp" />
     <ClCompile Include="ModuleMetadata.cpp" />
     <ClCompile Include="StackWalker.cpp" />
+    <ClCompile Include="StatisticalCallTree.cpp" />
+    <ClCompile Include="StatisticalCallTreeElem.cpp" />
     <ClCompile Include="ThreadCallTree.cpp" />
     <ClCompile Include="ThreadCallTreeElem.cpp" />
     <ClCompile Include="ThreadTimer.cpp" />
@@ -159,6 +161,8 @@
     <ClInclude Include="ModuleMetadata.h" />
     <ClInclude Include="CriticalSection.h" />
     <ClInclude Include="StackWalker.h" />
+    <ClInclude Include="StatisticalCallTree.h" />
+    <ClInclude Include="StatisticalCallTreeElem.h" />
     <ClInclude Include="ThreadCallTreeElem.h" />
     <ClInclude Include="ThreadTimer.h" />
     <ClInclude Include="Resource.h" />

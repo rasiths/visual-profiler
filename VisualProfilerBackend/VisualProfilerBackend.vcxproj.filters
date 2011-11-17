@@ -94,6 +94,12 @@
     <ClCompile Include="ThreadTimer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StatisticalCallTree.cpp">
+      <Filter>Source Files\SamplingProfiler</Filter>
+    </ClCompile>
+    <ClCompile Include="StatisticalCallTreeElem.cpp">
+      <Filter>Source Files\SamplingProfiler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dllmain.h">
@@ -158,6 +164,12 @@
     </ClInclude>
     <ClInclude Include="ThreadTimer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StatisticalCallTreeElem.h">
+      <Filter>Header Files\SamplingProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="StatisticalCallTree.h">
+      <Filter>Header Files\SamplingProfiler</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
