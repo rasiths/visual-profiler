@@ -35,5 +35,13 @@ wstring ClassMetadata::ToString(){
 	return wholeName;
 }
 
+void ClassMetadata::Serialize(SerializationBuffer * buffer){
+	buffer->SerializeMessageTypes(SerializationBuffer::ClassMedatada);
+	buffer->SerializeMetadataId(ClassId);
+	buffer->SerializeMdToken(ClassMdToken);
+	buffer->SerializeWString(Name);
+	buffer->SerializeBool(IsGeneric);
+	buffer->SerializeMetadataId(pParentModuleMetadata->ModuleId);
+}
 
-
+   

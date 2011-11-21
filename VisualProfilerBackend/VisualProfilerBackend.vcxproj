@@ -124,6 +124,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="MetadataSerializer.cpp" />
     <ClCompile Include="MethodMetadata.cpp" />
     <ClCompile Include="ModuleMetadata.cpp" />
     <ClCompile Include="StackWalker.cpp" />
@@ -154,12 +155,15 @@
     <ClInclude Include="CallTreeBase.h" />
     <ClInclude Include="CallTreeElemBase.h" />
     <ClInclude Include="ClassMetadata.h" />
+    <ClInclude Include="MessageTypes.h" />
     <ClInclude Include="MetadataBase.h" />
     <ClInclude Include="CorProfilerCallbackBase.h" />
     <ClInclude Include="dllmain.h" />
+    <ClInclude Include="MetadataSerializer.h" />
     <ClInclude Include="MethodMetadata.h" />
     <ClInclude Include="ModuleMetadata.h" />
     <ClInclude Include="CriticalSection.h" />
+    <ClInclude Include="SerializationBuffer.h" />
     <ClInclude Include="StackWalker.h" />
     <ClInclude Include="StatisticalCallTree.h" />
     <ClInclude Include="StatisticalCallTreeElem.h" />

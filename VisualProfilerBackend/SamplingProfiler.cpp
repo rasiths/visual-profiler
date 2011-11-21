@@ -8,7 +8,7 @@ HRESULT STDMETHODCALLTYPE CSamplingProfiler::Initialize(IUnknown *pICorProfilerI
 	DWORD mask =  COR_PRF_MONITOR_THREADS |  COR_PRF_ENABLE_STACK_SNAPSHOT ;
 	pProfilerInfo->SetEventMask(mask);
 	Beep(2000, 200);
-	_stackWalker = shared_ptr<StackWalker>(new StackWalker(pProfilerInfo, 2));
+	_stackWalker = shared_ptr<StackWalker>(new StackWalker(pProfilerInfo, 0));
 	_stackWalker->StartSampling();
 	return S_OK;
 }

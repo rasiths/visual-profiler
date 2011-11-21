@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "StatisticalCallTree.h"
+#include <iostream>
 
 StatisticalCallTree::StatisticalCallTree(ThreadID threadId):
 CallTreeBase<StatisticalCallTree, StatisticalCallTreeElem>(threadId),
@@ -8,6 +9,10 @@ CallTreeBase<StatisticalCallTree, StatisticalCallTreeElem>(threadId),
 		CreationUserModeTimeStamp.dwLowDateTime=0;
 		CreationKernelModeTimeStamp.dwHighDateTime=0;
 		CreationKernelModeTimeStamp.dwLowDateTime=0;
+}
+
+void printFT(FILETIME * ft){
+	cout << ft->dwHighDateTime << ft->dwLowDateTime << endl;
 }
 
 void StatisticalCallTree::ProcessSamples(vector<FunctionID> * functionIdsSnapshot, ICorProfilerInfo3 * pProfilerInfo){
@@ -23,15 +28,45 @@ void StatisticalCallTree::ProcessSamples(vector<FunctionID> * functionIdsSnapsho
 			pMethodMetadata = shared_ptr<MethodMetadata>(new MethodMetadata(functionId, pProfilerInfo));
 			MethodMetadata::AddMetadata(functionId, pMethodMetadata);
 		}
+		
 
+	
 		if(pMethodMetadata->GetDefiningAssembly()->IsProfilingEnabled){
 			isProfilingEnabledOnElem = true;
 			treeElem = treeElem->GetChildTreeElem(functionId);
+		
+			
 		}else{
 			isProfilingEnabledOnElem = false;
 		}
 	}
 
+#pragma region waitJoinSleep
+/*
+		FILETIME dummy, userNow, kernelNow;
+			GetThreadTimes(OsThreadHandle,&dummy,&dummy,&userNow,&kernelNow);
+			bool kernelChanged =false, userchanged = false;
+	
+			if(user.dwHighDateTime != userNow.dwHighDateTime && user.dwLowDateTime != userNow.dwLowDateTime){
+				user = userNow;
+				userchanged = true;
+		}
+			
+			if(kernel.dwHighDateTime != kernelNow.dwHighDateTime && kernel.dwLowDateTime != kernelNow.dwLowDateTime){
+				kernel = kernelNow;
+				kernelChanged = true;
+		}
+
+			ULONG64 ticks;
+			QueryThreadCycleTime(OsThreadHandle, &ticks);
+			cout << "threadID=" << _threadId << ", ticks=" << ticks << endl;
+			printFT(&userNow);
+			printFT(&kernelNow);
+			cout << "--------------" <<endl;
+	if(!(userchanged || kernelChanged))
+		return;
+	}*/
+#pragma endregion
 	bool wasProfilingEnabledOnStackTopFrame = isProfilingEnabledOnElem;
 	if(wasProfilingEnabledOnStackTopFrame){
 		treeElem->StackTopOccurrenceCount++;
@@ -39,6 +74,8 @@ void StatisticalCallTree::ProcessSamples(vector<FunctionID> * functionIdsSnapsho
 		treeElem->LastProfiledFrameInStackCount++;
 	}
 }
+
+
 
 void StatisticalCallTree::SetOsThreadInfo(DWORD osThreadId){
 	HANDLE osThreadHandle = OpenThread(THREAD_QUERY_INFORMATION,false,osThreadId);
@@ -63,6 +100,7 @@ void StatisticalCallTree::UpdateUserAndKernelModeDurations(){
 	CheckError2(success);
 	SubtractFILETIMESAndAddToResult(&currentUserModeTimeStamp, &CreationUserModeTimeStamp, &UserModeDurationHns);
 	SubtractFILETIMESAndAddToResult(&currentKernelModeTimeStamp, &CreationKernelModeTimeStamp, &KernelModeDurationHns);
+
 }
 
 void StatisticalCallTree::ToString(wstringstream & wsout){

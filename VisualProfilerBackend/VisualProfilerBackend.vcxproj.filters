@@ -100,6 +100,9 @@
     <ClCompile Include="StatisticalCallTreeElem.cpp">
       <Filter>Source Files\SamplingProfiler</Filter>
     </ClCompile>
+    <ClCompile Include="MetadataSerializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dllmain.h">
@@ -170,6 +173,15 @@
     </ClInclude>
     <ClInclude Include="StatisticalCallTree.h">
       <Filter>Header Files\SamplingProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="MetadataSerializer.h">
+      <Filter>Header Files\Metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="SerializationBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageTypes.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

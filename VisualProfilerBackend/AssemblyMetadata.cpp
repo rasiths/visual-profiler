@@ -39,4 +39,12 @@ AssemblyMetadata::AssemblyMetadata(AssemblyID assemblyId,ICorProfilerInfo3 * pPr
     
 }
 
+void AssemblyMetadata::Serialize(SerializationBuffer * buffer){
+	buffer->SerializeMessageTypes(SerializationBuffer::AssemblyMetadata);
+	buffer->SerializeMetadataId(AssemblyId);
+	buffer->SerializeMdToken(AssemblyMdToken);
+	buffer->SerializeWString(Name);
+	buffer->SerializeBool(IsProfilingEnabled);
+}
+
 

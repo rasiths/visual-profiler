@@ -19,4 +19,11 @@ public:
 	void SetOsThreadInfo(DWORD osThreadId);
 	void UpdateUserAndKernelModeDurations();
 	virtual void ToString(wstringstream & wsout);
+
+private:
+	#pragma region waitJoinSleep
+	//FILETIME user;
+	//FILETIME kernel;
+	#pragma endregion
+
 };

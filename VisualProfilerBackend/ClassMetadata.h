@@ -12,12 +12,13 @@ class ClassMetadata : public MetadataBase<ClassID, ClassMetadata>
 {
 public:
 	ClassID ClassId;
-	wstring Name;
 	mdTypeDef ClassMdToken;
+	wstring Name;
 	bool IsGeneric;
+	shared_ptr<ModuleMetadata> pParentModuleMetadata;
 
 	ClassMetadata(ClassID classId, mdTypeDef classMdToken, ModuleID moduleId, mdToken moduleMdToken, ICorProfilerInfo3 * pProfilerInfo, IMetaDataImport2* pMetadataImport,bool isGeneric);
 	wstring ToString();
-	shared_ptr<ModuleMetadata> pParentModuleMetadata;
+	void Serialize(SerializationBuffer * buffer);
 };
 

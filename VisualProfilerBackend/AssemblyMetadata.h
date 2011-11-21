@@ -16,8 +16,9 @@ public:
 	AppDomainID AppDomainId;
 	ModuleID MetadataModuleId;
 	bool IsProfilingEnabled;
-
+	
 	AssemblyMetadata(AssemblyID assemblyId, ICorProfilerInfo3 * pProfilerInfo, IMetaDataImport2 * pMetadataImport);
+	virtual void Serialize(SerializationBuffer * buffer);
 	
 };
 

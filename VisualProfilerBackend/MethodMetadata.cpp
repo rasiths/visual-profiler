@@ -12,15 +12,15 @@ void MethodMetadata::InitializeFields(ICorProfilerInfo3 * pProfilerInfo){
 
 	hr = pProfilerInfo->GetTokenAndMetaDataFromFunction(this->FunctionId,IID_IMetaDataImport2,(LPUNKNOWN *) &this->_pMetaDataImport, &this->MethodMdToken);
 	CheckError(hr);
-	
+
 	WCHAR methodName[NAME_BUFFER_SIZE];
 	mdTypeDef classMdToken;
 	hr = _pMetaDataImport->GetMethodProps(this->MethodMdToken,&classMdToken, methodName, NAME_BUFFER_SIZE, 0, 0, 0, 0, 0, 0);
 	CheckError(hr);
-	
+
 	this->Name.append(methodName);
 	InitializeContainingClass(pProfilerInfo, classMdToken);
-			
+
 }
 
 void MethodMetadata::InitializeContainingClass(ICorProfilerInfo3 * pProfilerInfo, mdTypeDef classMdToken){
@@ -36,7 +36,7 @@ void MethodMetadata::InitializeContainingClass(ICorProfilerInfo3 * pProfilerInfo
 	bool genericClass = classId == 0;
 	if(genericClass)
 		classId = classMdToken;
-	
+
 	shared_ptr<ClassMetadata> pClassMetadata;
 	if(ClassMetadata::ContainsCache(classId)){
 		pClassMetadata = ClassMetadata::GetById(classId);
@@ -44,7 +44,7 @@ void MethodMetadata::InitializeContainingClass(ICorProfilerInfo3 * pProfilerInfo
 		pClassMetadata = shared_ptr<ClassMetadata>(new ClassMetadata(classId, classMdToken, moduleId, moduleMdToken, pProfilerInfo, this->_pMetaDataImport, genericClass));
 		ClassMetadata::AddMetadata(classId, pClassMetadata);
 	}
-	
+
 	this->pContainingTypeMetadata = pClassMetadata;
 }
 
@@ -56,16 +56,16 @@ void MethodMetadata::PopulateParameters(){
 	mdParamDef paramMdTokenArray[ENUM_ARRAY_SIZE];
 	do{
 		hr = _pMetaDataImport->EnumParams(&paramsEnum, this->MethodMdToken, paramMdTokenArray,ENUM_ARRAY_SIZE,&reaEnumlCount);
-		
+
 		CheckError(hr);
-		
+
 		for(unsigned int i = 0; i < reaEnumlCount; i++){
 			mdParamDef paramMdToken = paramMdTokenArray[i];
 			WCHAR paramName[NAME_BUFFER_SIZE];
 			hr = _pMetaDataImport->GetParamProps(paramMdToken,0,0, paramName, NAME_BUFFER_SIZE,0,0,0,0,0);
-			
+
 			CheckError(hr);
-			
+
 			wstring paramNameString;
 			paramNameString.append(paramName);
 			this->Parameters.push_back(paramNameString);
@@ -84,7 +84,7 @@ wstring MethodMetadata::ToString(){
 	wholeName.append(L"(");
 	for ( vector<wstring>::iterator it = this->Parameters.begin(); it < this->Parameters.end(); it++ ){
 		wholeName.append(*it);
-		
+
 		bool lastElement = (++it)-- == this->Parameters.end();
 		if(lastElement)
 			break;
@@ -92,11 +92,23 @@ wstring MethodMetadata::ToString(){
 	}
 	wholeName.append(L")");
 
-    return wholeName;
+	return wholeName;
 }
 
 shared_ptr<AssemblyMetadata> MethodMetadata:: GetDefiningAssembly(){
 	shared_ptr<AssemblyMetadata> pAssemblyMetadata = this->pContainingTypeMetadata->pParentModuleMetadata->pAssemblyMetadata;
 	return pAssemblyMetadata;
+}
+
+void MethodMetadata:: Serialize(SerializationBuffer * buffer){
+	buffer->SerializeMessageTypes(SerializationBuffer::MethodMedatada);
+	buffer->SerializeMetadataId(FunctionId);
+	buffer->SerializeMdToken(MethodMdToken);
+	buffer->SerializeWString(Name);
+	buffer->SerializeUINT(Parameters.size());
+	for(vector<wstring>::iterator it = Parameters.begin(); it != Parameters.end(); it++){
+		buffer->SerializeWString(*it);
+	}
+	buffer->SerializeMetadataId(pContainingTypeMetadata->ClassId);
 }
 
