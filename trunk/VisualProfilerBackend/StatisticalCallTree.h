@@ -18,6 +18,7 @@ public:
 	void ProcessSamples(vector<FunctionID> * functionIdsSnapshot, ICorProfilerInfo3 * pProfilerInfo);
 	void SetOsThreadInfo(DWORD osThreadId);
 	void UpdateUserAndKernelModeDurations();
+	virtual void Serialize(SerializationBuffer * buffer);
 	virtual void ToString(wstringstream & wsout);
 
 private:

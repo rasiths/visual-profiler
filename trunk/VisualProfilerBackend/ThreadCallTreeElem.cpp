@@ -27,7 +27,32 @@ void ThreadCallTreeElem::ToString(wstringstream & wsout, wstring indentation, ws
 		}
 		wsout << endl ;
 		it->second->ToString(wsout,indentation + indentationString);
-		
 	}
+}
+
+void ThreadCallTreeElem::Serialize(SerializationBuffer * buffer){
+	buffer->SerializeFunctionId(FunctionId);
+	buffer->SerializeUINT(EnterCount);
+	buffer->SerializeUINT(LeaveCount);
+	buffer->SerializeULONGLONG(WallClockDurationHns); 
+	buffer->SerializeULONGLONG(KernelModeDurationHns);
+	buffer->SerializeULONGLONG(UserModeDurationHns);
+	
+	UINT childrenSize = _pChildrenMap.size();
+	buffer->SerializeUINT(childrenSize);
+
+	map<FunctionID, shared_ptr<ThreadCallTreeElem>>::iterator it = _pChildrenMap.begin();
+	ThreadCallTreeElem** ppThreadCallTreeElemArray = new ThreadCallTreeElem*[childrenSize];
+	for(UINT i = 0; i < childrenSize; i++){
+		ThreadCallTreeElem * elem = it->second.get();
+		ppThreadCallTreeElemArray[i] = elem;
+		it++;
+	}
+
+	for(UINT i = 0; i < childrenSize; i++){
+		ppThreadCallTreeElemArray[i]->Serialize(buffer);
+	}
+
+	delete[] ppThreadCallTreeElemArray;
 }
 

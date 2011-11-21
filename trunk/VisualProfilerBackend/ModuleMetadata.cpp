@@ -22,13 +22,14 @@ ModuleMetadata::ModuleMetadata(ModuleID moduleId, mdToken moduleMdToken, ICorPro
 		AssemblyMetadata::AddMetadata(assemblyId, pAssemblyMetadata);
 	}
 	this->pAssemblyMetadata = pAssemblyMetadata;
+	_isProfilingEnabled = pAssemblyMetadata->IsProfilingEnabled();
 }
 
 void ModuleMetadata::Serialize(SerializationBuffer * buffer){
-	buffer->SerializeMessageTypes(SerializationBuffer::ModuleMedatada);
+	buffer->SerializeMessageTypes(MessageType_ModuleMedatada);
 	buffer->SerializeMetadataId(ModuleId);
 	buffer->SerializeMdToken(ModuleMdToken);
-	buffer->SerializeWString(FileName);
+	//buffer->SerializeWString(FileName);
 	buffer->SerializeMetadataId(pAssemblyMetadata->AssemblyId);
 }
 

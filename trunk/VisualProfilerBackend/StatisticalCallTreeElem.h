@@ -8,4 +8,6 @@ public:
 
 	StatisticalCallTreeElem(FunctionID functionId = 0, StatisticalCallTreeElem * pParent = NULL);
 	void ToString(wstringstream & wsout, wstring indentation = L"", wstring indentationString = L"   ");
+
+	void Serialize(SerializationBuffer * buffer);
 };

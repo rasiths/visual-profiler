@@ -28,14 +28,10 @@ void StatisticalCallTree::ProcessSamples(vector<FunctionID> * functionIdsSnapsho
 			pMethodMetadata = shared_ptr<MethodMetadata>(new MethodMetadata(functionId, pProfilerInfo));
 			MethodMetadata::AddMetadata(functionId, pMethodMetadata);
 		}
-		
-
 	
-		if(pMethodMetadata->GetDefiningAssembly()->IsProfilingEnabled){
+		if(pMethodMetadata->GetDefiningAssembly()->IsProfilingEnabled()){
 			isProfilingEnabledOnElem = true;
 			treeElem = treeElem->GetChildTreeElem(functionId);
-		
-			
 		}else{
 			isProfilingEnabledOnElem = false;
 		}
@@ -112,4 +108,18 @@ void StatisticalCallTree::ToString(wstringstream & wsout){
 	wsout << L"Twc=" << durationSec << L"s,Tum=" << userModeSec << L"s,Tkm=" << kernelModeSec << "s" << endl;
 
 	_rootCallTreeElem.ToString(wsout);
+}
+
+void StatisticalCallTree::Serialize(SerializationBuffer * buffer){
+	buffer->SerializeThreadId(_threadId);
+	
+	ULONGLONG wallClockTime;
+	_timer.GetElapsedTimeIn100NanoSeconds(&wallClockTime);
+	buffer->SerializeULONGLONG(wallClockTime);
+	
+	UpdateUserAndKernelModeDurations();
+	buffer->SerializeULONGLONG(KernelModeDurationHns);
+	buffer->SerializeULONGLONG(UserModeDurationHns);
+
+	_rootCallTreeElem.Serialize(buffer);
 }

@@ -24,6 +24,7 @@ ClassMetadata::ClassMetadata(ClassID classId, mdTypeDef classMdToken, ModuleID m
 	}
 
 	this->pParentModuleMetadata = pModuleMetadata;
+	_isProfilingEnabled = pModuleMetadata->IsProfilingEnabled();
 }
 
 wstring ClassMetadata::ToString(){
@@ -36,7 +37,7 @@ wstring ClassMetadata::ToString(){
 }
 
 void ClassMetadata::Serialize(SerializationBuffer * buffer){
-	buffer->SerializeMessageTypes(SerializationBuffer::ClassMedatada);
+	buffer->SerializeMessageTypes(MessageType_ClassMedatada);
 	buffer->SerializeMetadataId(ClassId);
 	buffer->SerializeMdToken(ClassMdToken);
 	buffer->SerializeWString(Name);

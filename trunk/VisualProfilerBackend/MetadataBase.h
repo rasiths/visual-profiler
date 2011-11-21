@@ -59,6 +59,9 @@ public:
 			map<TId, shared_ptr<TMetadata>>::iterator it;
 			for(it = _cacheMap.begin(); it != _cacheMap.end(); it++ ){
 				TMetadata * pMetadata = it->second.get();
+				bool skipSerialization = (pMetadata->_isAlreadySerialized || !pMetadata->IsProfilingEnabled());
+				if(skipSerialization)
+					continue;
 				pMetadata->Serialize(buffer);
 				pMetadata->_isAlreadySerialized = true;
 			}
@@ -66,11 +69,16 @@ public:
 		_criticalSection.Leave();
 	}
 
+	bool IsProfilingEnabled(){
+		return _isProfilingEnabled;
+	}
 	
 
 private:
 	static map<TId, shared_ptr<TMetadata>> _cacheMap;
 	static CriticalSection _criticalSection;
+protected:
+	bool _isProfilingEnabled;
 };
 
 template <class TId, class TMetadata>

@@ -28,7 +28,10 @@ public:
 		return childElem;
 	}
 
-	virtual void ToString(wstringstream & wsout, wstring indentation = L"", wstring indentationString = L"   ")=0;
+	virtual void ToString(wstringstream & wsout, wstring indentation = L"", wstring indentationString = L"   ") = 0;
+
+	virtual void Serialize(SerializationBuffer * buffer) = 0;
+
 
 	map<FunctionID,shared_ptr<TTreeElem>> * GetChildrenMap(){
 		return &_pChildrenMap;
