@@ -22,6 +22,7 @@ public:
 	MethodMetadata(FunctionID functionId, ICorProfilerInfo3 * pProfilerInfo);
 	shared_ptr<AssemblyMetadata> GetDefiningAssembly();
 	wstring ToString();
+	void Serialize(SerializationBuffer * buffer);
 
 private:
 	

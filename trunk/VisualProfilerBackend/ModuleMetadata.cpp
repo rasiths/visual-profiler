@@ -24,5 +24,13 @@ ModuleMetadata::ModuleMetadata(ModuleID moduleId, mdToken moduleMdToken, ICorPro
 	this->pAssemblyMetadata = pAssemblyMetadata;
 }
 
+void ModuleMetadata::Serialize(SerializationBuffer * buffer){
+	buffer->SerializeMessageTypes(SerializationBuffer::ModuleMedatada);
+	buffer->SerializeMetadataId(ModuleId);
+	buffer->SerializeMdToken(ModuleMdToken);
+	buffer->SerializeWString(FileName);
+	buffer->SerializeMetadataId(pAssemblyMetadata->AssemblyId);
+}
+
 
 

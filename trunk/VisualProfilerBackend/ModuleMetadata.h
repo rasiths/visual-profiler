@@ -15,9 +15,10 @@ public:
 	ModuleID ModuleId;
 	mdToken ModuleMdToken;
 	wstring FileName;
+	shared_ptr<AssemblyMetadata> pAssemblyMetadata;
 	LPCBYTE BaseLoadAddress;  
 
 	ModuleMetadata(ModuleID moduleId, mdToken moduleMdToken, ICorProfilerInfo3 * pProfilerInfo, IMetaDataImport2* pMetadataImport);
-	shared_ptr<AssemblyMetadata> pAssemblyMetadata;
+	virtual void Serialize(SerializationBuffer * buffer);
 };
 

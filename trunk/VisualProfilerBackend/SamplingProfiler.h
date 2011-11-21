@@ -14,6 +14,7 @@
 #include "VisualProfilerBackend_i.h"
 #include "StackWalker.h"
 #include <fstream>
+#include "SerializationBuffer.h"
 
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -56,8 +57,19 @@ public:
 		return S_OK;
 	}
 
+	void Serial(){
+
+		SerializationBuffer s;
+		AssemblyMetadata::SerializeMetadata(&s);
+
+	}
+
 	void FinalRelease()
 	{  
+		Serial();
+		return;
+
+
 		cout << endl <<"----- Profiler output -----" << endl;
 		map<ThreadID, shared_ptr<StatisticalCallTree>> * pStatCallTreeMap = StatisticalCallTree::GetCallTreeMap();
 		wstringstream wsout;	
@@ -66,7 +78,7 @@ public:
 			pStatCallTree->ToString(wsout);
 			wsout << endl<< endl;
 		}
-	//	wcout << wsout.rdbuf();
+		//wcout << wsout.rdbuf();
 		wofstream file;
 		file.open("d:\\sampling.txt",fstream::out);
 		file << wsout.rdbuf();
