@@ -24,7 +24,7 @@ AssemblyMetadata::AssemblyMetadata(AssemblyID assemblyId,ICorProfilerInfo3 * pPr
 	hr = pMetadataImport->GetCustomAttributeByName(this->AssemblyMdToken, VISUAL_PROFILER_TARGET_ATTR, (const void**)&pBytes, &byteCount);
 	bool visualProfilerTargetAttrApplied = hr == S_OK;
 	if(!visualProfilerTargetAttrApplied){
-		this->IsProfilingEnabled = false;
+		_isProfilingEnabled = false;
 		return;
 	}
 	
@@ -32,19 +32,19 @@ AssemblyMetadata::AssemblyMetadata(AssemblyID assemblyId,ICorProfilerInfo3 * pPr
 	int booleanBytePosition = 2;
 	if(byteCount == expectedNumberOfBytes){
 		BYTE isProfilingEnabledByte = pBytes[booleanBytePosition];
-		this->IsProfilingEnabled = isProfilingEnabledByte > 0;
+		_isProfilingEnabled = isProfilingEnabledByte > 0;
 	}else{
-		this->IsProfilingEnabled = false;
+		_isProfilingEnabled = false;
 	}
     
 }
 
 void AssemblyMetadata::Serialize(SerializationBuffer * buffer){
-	buffer->SerializeMessageTypes(SerializationBuffer::AssemblyMetadata);
+	buffer->SerializeMessageTypes(MessageType_AssemblyMetadata);
 	buffer->SerializeMetadataId(AssemblyId);
 	buffer->SerializeMdToken(AssemblyMdToken);
 	buffer->SerializeWString(Name);
-	buffer->SerializeBool(IsProfilingEnabled);
+	buffer->SerializeBool(IsProfilingEnabled());
 }
 
 

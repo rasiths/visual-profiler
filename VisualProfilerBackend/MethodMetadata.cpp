@@ -46,6 +46,7 @@ void MethodMetadata::InitializeContainingClass(ICorProfilerInfo3 * pProfilerInfo
 	}
 
 	this->pContainingTypeMetadata = pClassMetadata;
+	_isProfilingEnabled = pClassMetadata->IsProfilingEnabled();
 }
 
 void MethodMetadata::PopulateParameters(){
@@ -101,7 +102,7 @@ shared_ptr<AssemblyMetadata> MethodMetadata:: GetDefiningAssembly(){
 }
 
 void MethodMetadata:: Serialize(SerializationBuffer * buffer){
-	buffer->SerializeMessageTypes(SerializationBuffer::MethodMedatada);
+	buffer->SerializeMessageTypes(MessageType_MethodMedatada);
 	buffer->SerializeMetadataId(FunctionId);
 	buffer->SerializeMdToken(MethodMdToken);
 	buffer->SerializeWString(Name);

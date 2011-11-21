@@ -1,36 +1,39 @@
 #include "StdAfx.h"
 #include "ThreadCallTree.h"
 
-__declspec(thread) HANDLE ThreadCallTree::_OSThreadHandle;
+/*__declspec(thread) HANDLE ThreadCallTree::_OSThreadHandle;*/
 
 ThreadCallTree::ThreadCallTree(ThreadID threadId):CallTreeBase<ThreadCallTree, ThreadCallTreeElem>(threadId){
 	_pActiveCallTreeElem = & _rootCallTreeElem;	
 }
 
 void ThreadCallTree::FunctionEnter(FunctionID functionId){
-	ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
-	ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->GetChildTreeElem(functionId);
+		ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
+		ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->GetChildTreeElem(functionId);
 
-	UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);			
-	_timer.GetElapsedTimeIn100NanoSeconds(&nextActiveElem->LastEnterTimeStampHns);
-	nextActiveElem->EnterCount++;
+		UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);			
+		_timer.GetElapsedTimeIn100NanoSeconds(&nextActiveElem->LastEnterTimeStampHns);
+		nextActiveElem->EnterCount++;
 
-	_pActiveCallTreeElem = nextActiveElem;
+		_pActiveCallTreeElem = nextActiveElem;
 }
 
 void ThreadCallTree::FunctionLeave(){
-	ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
-	ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->pParent;
+		ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
+		ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->pParent;
 
-	ULONGLONG actualTimeStamp;
-	_timer.GetElapsedTimeIn100NanoSeconds(&actualTimeStamp);
-	ULONGLONG funcitonDuration = actualTimeStamp - prevActiveElem->LastEnterTimeStampHns;
-	prevActiveElem->WallClockDurationHns += funcitonDuration;
-	prevActiveElem->LeaveCount++;
+		ULONGLONG actualTimeStamp;
+		_timer.GetElapsedTimeIn100NanoSeconds(&actualTimeStamp);
+		ULONGLONG funcitonDuration = actualTimeStamp - prevActiveElem->LastEnterTimeStampHns;
+		prevActiveElem->WallClockDurationHns += funcitonDuration;
+		prevActiveElem->LeaveCount++;
 
-	UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);
+		UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);
 
-	_pActiveCallTreeElem = nextActiveElem;
+		_pActiveCallTreeElem = nextActiveElem;
+
+		ULONGLONG dest = 0;
+		SerializationBuffer buf;
 }
 
 void ThreadCallTree::UpdateUserAndKernelMode(ThreadCallTreeElem * prevActiveElem, ThreadCallTreeElem* nextActiveElem){
@@ -50,6 +53,11 @@ void ThreadCallTree::SetOSThreadHandle(HANDLE osThreadHandle){
 
 HANDLE ThreadCallTree::GetOSThreadHandle(){
 	return _OSThreadHandle;
+}
+
+void ThreadCallTree::Serialize(SerializationBuffer * buffer){
+	buffer->SerializeThreadId(_threadId);
+	_rootCallTreeElem.Serialize(buffer);
 }
 
 

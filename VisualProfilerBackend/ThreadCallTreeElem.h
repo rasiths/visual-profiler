@@ -16,4 +16,5 @@ public:
 
 	ThreadCallTreeElem(FunctionID functionId = 0, ThreadCallTreeElem * pParent = NULL);
 	void ToString(wstringstream & wsout, wstring indentation = L"", wstring indentationString = L"   ");
+	virtual void Serialize(SerializationBuffer * buffer);
 };

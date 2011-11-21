@@ -88,7 +88,7 @@ UINT_PTR STDMETHODCALLTYPE CTracingProfiler::FunctionMapper(FunctionID functionI
 		MethodMetadata::AddMetadata(functionId, pMethodMetadata);
 	}
 
-	*pbHookFunction = pMethodMetadata->GetDefiningAssembly()->IsProfilingEnabled;
+	*pbHookFunction = pMethodMetadata->GetDefiningAssembly()->IsProfilingEnabled();
 	// *pbHookFunction = true; //uncomment to track all CLR functions
 	UINT_PTR internalCLRFunctionKey = functionId;
 	return internalCLRFunctionKey;

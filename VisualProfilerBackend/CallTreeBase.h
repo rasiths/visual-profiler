@@ -7,7 +7,8 @@
 #include <string>
 #include <sstream>
 #include "Utils.h"
-
+#include "SerializationBuffer.h"
+ 
 using namespace std;
 
 template<class TCallTree, class TTreeElem>
@@ -36,6 +37,8 @@ public:
 		_rootCallTreeElem.ToString(wsout);
 	}
 
+	virtual void Serialize(SerializationBuffer * buffer) = 0;
+
 	static TCallTree * AddThread(ThreadID threadId){
 		shared_ptr<TCallTree> pCallTree(new TCallTree(threadId));
 		_criticalSection.Enter();
@@ -58,6 +61,15 @@ public:
 
 	static map<ThreadID, shared_ptr<TCallTree>> * GetCallTreeMap(){
 		return &_callTreeMap;
+	}
+
+	static void SerializeAllTrees(SerializationBuffer * buffer){
+		map<ThreadID, shared_ptr<TCallTree>>::iterator it = _callTreeMap.begin();
+		for(;it != _callTreeMap.end(); it++){
+			TCallTree * pCallTree = it->second.get();
+			buffer->SerializeString("--tree--");
+			pCallTree->Serialize(buffer);
+		}
 	}
 
 };

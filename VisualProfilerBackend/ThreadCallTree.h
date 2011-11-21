@@ -8,7 +8,7 @@ using namespace std;
 class ThreadCallTree : public CallTreeBase<ThreadCallTree, ThreadCallTreeElem>
 {
 private:
-	__declspec(thread) static HANDLE _OSThreadHandle;
+	HANDLE _OSThreadHandle;
 	ThreadCallTreeElem * _pActiveCallTreeElem;
 
 public:
@@ -18,6 +18,7 @@ public:
 	ThreadCallTreeElem * GetActiveCallTreeElem();
 	void SetOSThreadHandle(HANDLE osThreadHandle);
 	HANDLE GetOSThreadHandle();
+	virtual void Serialize(SerializationBuffer * buffer);
 
 private:
 	void UpdateUserAndKernelMode(ThreadCallTreeElem * prevActiveElem, ThreadCallTreeElem* nextActiveElem);

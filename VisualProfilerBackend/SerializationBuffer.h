@@ -1,8 +1,5 @@
 #pragma once
 
-
-
-
 #include <cor.h>
 #include <corprof.h>
 #include <string>
@@ -13,42 +10,17 @@
 #define SIZE_OF_UINT_PTR sizeof(UINT_PTR)
 #define SIZE_OF_MDTOKEN sizeof(mdToken)
 #define SIZE_OF_WCHAR sizeof(WCHAR)
+#define SIZE_OF_CHAR sizeof(CHAR)
 #define SIZE_OF_UINT sizeof(UINT)
 #define SIZE_OF_BOOL sizeof(bool)
-
-
-////Frontend -> Backend
-//#define	MessageType_SendMetadata = 1,
-//#define	MessageType_SendProfilingData = 2,
-//#define	MessageType_Terminate = 3,
-//
-////Backend -> Frontend
-//#define	MessageType_AssemblyMetadata = 11,
-//#define	MessageType_ModuleMedatada = 12,
-//#define	MessageType_ClassMedatada = 13,
-//#define	MessageType_MethodMedatada = 14,
-//#define	MessageType_ProfilingData = 15
+#define SIZE_OF_ULONGLONG sizeof(ULONGLONG)
+#define SIZE_OF_DWORD sizeof(DWORD)
 
 using namespace std;
 
 class SerializationBuffer
 {
 public:
-	enum MessageTypes{
-		//Frontend -> Backend
-		SendMetadata = 1,
-		SendProfilingData = 2,
-		Terminate = 3,
-
-		//Backend -> Frontend
-		AssemblyMetadata = 11,
-		ModuleMedatada = 12,
-		ClassMedatada = 13,
-		MethodMedatada = 14,
-		ProfilingData = 15
-	};
-
-
 	SerializationBuffer(void):_currentIndex(0),_bufferSize(INITIAL_BUFFER_SIZE){
 		_buffer = new BYTE[INITIAL_BUFFER_SIZE];
 		ZeroBuffer(_buffer, _bufferSize);
@@ -62,6 +34,14 @@ public:
 
 	void SerializeMetadataId(const UINT_PTR & metadataId){
 		CopyToBuffer(&metadataId, SIZE_OF_UINT_PTR);
+	}
+
+	void SerializeThreadId(const UINT_PTR & threadId){
+		CopyToBuffer(&threadId, SIZE_OF_UINT_PTR);
+	}
+
+	void SerializeFunctionId(const UINT_PTR & functionId){
+		CopyToBuffer(&functionId, SIZE_OF_UINT_PTR);
 	}
 
 	void SerializeMdToken(const mdToken & mdToken){
@@ -84,8 +64,29 @@ public:
 		CopyToBuffer(wchars, byteCountOfStr);
 	}
 
-	void SerializeMessageTypes(const MessageTypes & messageType){
+	void SerializeString(const string & str){
+		UINT byteCountOfStr =  str.size() * SIZE_OF_CHAR;
+		SerializeUINT(byteCountOfStr);
+
+		const CHAR * chars = str.data();
+		CopyToBuffer(chars, byteCountOfStr);
+	}
+
+	void SerializeMessageTypes(const MessageTypes messageType){
 		CopyToBuffer(&messageType, SIZE_OF_MESSAGETYPES);
+	}
+
+	void SerializeULONGLONG(ULONGLONG & ull){
+		CopyToBuffer(&ull, SIZE_OF_ULONGLONG);
+	}
+
+
+	UINT Size(){
+		return _currentIndex;
+	}
+	
+	BYTE* GetBuffer(){
+		return _buffer;
 	}
 
 private:
@@ -103,7 +104,7 @@ private:
 	}
 
 	void CopyToBuffer(const void * sourceAddr, UINT numberOfBytes){
-		EnsureBufferCapacity(SIZE_OF_UINT_PTR);
+		EnsureBufferCapacity(numberOfBytes);
 		BYTE* destinationAddr = _buffer + _currentIndex;
 		memcpy(destinationAddr, sourceAddr, numberOfBytes);
 		_currentIndex += numberOfBytes;
@@ -112,7 +113,7 @@ private:
 	//TODO Remove this method, just debugging
 	void ZeroBuffer(BYTE * startAddr, UINT byteCount){
 		for(UINT i = 0; i < byteCount; i++){
-			startAddr[i] = 0;
+			startAddr[i] = 0xAA;
 		}
 	}
 

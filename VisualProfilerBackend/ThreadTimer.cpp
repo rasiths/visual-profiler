@@ -12,9 +12,8 @@ void ThreadTimer::Start(){
 }
 
 void ThreadTimer::GetElapsedTimeIn100NanoSeconds(ULONGLONG * elapsedTime){
-	if(_isStopped){
-		*elapsedTime = _elapsedTime;
-	}else{
+	*elapsedTime = _elapsedTime;
+	if(!_isStopped){
 		SubtractCurrentFromStartAndAddElapsedTime(elapsedTime); 
 	}
 }
