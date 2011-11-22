@@ -3,6 +3,7 @@
 #include <atlcomcli.h>
 #include <cor.h>
 #include <corprof.h>
+#include "VisualProfilerAccess.h"
 
 using namespace ATL;
 

@@ -8,6 +8,7 @@
 #include <sstream>
 #include "Utils.h"
 #include "SerializationBuffer.h"
+
  
 using namespace std;
 
@@ -16,13 +17,37 @@ class CallTreeBase{
 protected :
 	static map<ThreadID, shared_ptr<TCallTree>> _callTreeMap;
 	static CriticalSection _criticalSection;
-
+	
 	TTreeElem _rootCallTreeElem;
 	ThreadID _threadId;
 	ThreadTimer _timer;
+	bool _refreshCallTreeBuffer;
+	SerializationBuffer _callTreeBuffer;
+	CriticalSection _instanceCriticalSection;
+protected:
+	inline void RefreshCallTreeBuffer(){
+		if(_refreshCallTreeBuffer){
+			_instanceCriticalSection.Enter();
+			{
+				Serialize(&_callTreeBuffer);
+				_refreshCallTreeBuffer = false;
+			}
+			_instanceCriticalSection.Leave();
+		}
+	}
+
 public:
 
-	CallTreeBase(ThreadID threadId):_threadId(threadId){};
+	void CopyCallTreeBufferToBuffer(SerializationBuffer * destinationBuffer){
+		_instanceCriticalSection.Enter();
+		{
+			_callTreeBuffer.CopyToAnotherBuffer(destinationBuffer);
+			_refreshCallTreeBuffer = true;
+		}
+		_instanceCriticalSection.Leave();
+	}
+
+	CallTreeBase(ThreadID threadId):_threadId(threadId),_refreshCallTreeBuffer(false){};
 
 	ThreadID GetThreadId(){
 		return _threadId;

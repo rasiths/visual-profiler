@@ -1,13 +1,12 @@
 #include "StdAfx.h"
 #include "ThreadCallTree.h"
 
-/*__declspec(thread) HANDLE ThreadCallTree::_OSThreadHandle;*/
-
 ThreadCallTree::ThreadCallTree(ThreadID threadId):CallTreeBase<ThreadCallTree, ThreadCallTreeElem>(threadId){
 	_pActiveCallTreeElem = & _rootCallTreeElem;	
 }
 
 void ThreadCallTree::FunctionEnter(FunctionID functionId){
+		
 		ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
 		ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->GetChildTreeElem(functionId);
 
@@ -16,11 +15,13 @@ void ThreadCallTree::FunctionEnter(FunctionID functionId){
 		nextActiveElem->EnterCount++;
 
 		_pActiveCallTreeElem = nextActiveElem;
+		 RefreshCallTreeBuffer();
 }
 
 void ThreadCallTree::FunctionLeave(){
 		ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
 		ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->pParent;
+	
 
 		ULONGLONG actualTimeStamp;
 		_timer.GetElapsedTimeIn100NanoSeconds(&actualTimeStamp);
@@ -32,8 +33,7 @@ void ThreadCallTree::FunctionLeave(){
 
 		_pActiveCallTreeElem = nextActiveElem;
 
-		ULONGLONG dest = 0;
-		SerializationBuffer buf;
+		RefreshCallTreeBuffer();
 }
 
 void ThreadCallTree::UpdateUserAndKernelMode(ThreadCallTreeElem * prevActiveElem, ThreadCallTreeElem* nextActiveElem){

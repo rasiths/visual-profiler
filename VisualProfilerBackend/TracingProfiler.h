@@ -47,10 +47,15 @@ public:
 		ModuleMetadata::SerializeMetadata(&buffer);
 		ClassMetadata::SerializeMetadata(&buffer);
 		MethodMetadata::SerializeMetadata(&buffer);
-		ThreadCallTree::SerializeAllTrees(&buffer);
 
+		//ThreadCallTree::SerializeAllTrees(&buffer);
+
+		SerializationBuffer buffer2;
+	/*	buffer2.SerializeUINT(buffer.Size());
+		buffer.CopyToAnotherBuffer(&buffer2);*/
+		
 		fstream file;
-		file.open("d:\\tracingProfilerOutput.txt", fstream::out );
+		file.open("d:\\tracingProfilerOutput222.txt", fstream::out );
 		file.write((char*) buffer.GetBuffer(), buffer.Size());
 		file.close();
 		

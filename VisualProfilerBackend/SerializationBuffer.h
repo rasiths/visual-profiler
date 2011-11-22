@@ -80,6 +80,10 @@ public:
 		CopyToBuffer(&ull, SIZE_OF_ULONGLONG);
 	}
 
+	void CopyToAnotherBuffer(SerializationBuffer * destinationBuffer){
+		destinationBuffer->CopyToBuffer(_buffer, _currentIndex);
+	}
+
 
 	UINT Size(){
 		return _currentIndex;

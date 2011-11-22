@@ -7,10 +7,8 @@ using System.Text;
 
 namespace VisualProfilerAccess.Metadata
 {
-    class MetadataDeserializer
+    public class MetadataDeserializer
     {
-        
-
         private enum OutboundMessageTypes
         {
             //Frontend -> Backend
@@ -19,31 +17,32 @@ namespace VisualProfilerAccess.Metadata
             Terminate = 3,
         }
 
-        
-
         public static void DeserializeAllMetadataAndCacheIt(Stream byteStream)
         {
-            while (byteStream.Position < byteStream.Length)
+            uint metadataByteCount = DeserializationUtils.DeserializeUint32(byteStream);
+            uint metadataLastBytePosition = metadataByteCount + sizeof(uint);
+            while (byteStream.Position < metadataLastBytePosition)
             {
                 var metadataType = DeserializationUtils.DeserializeMetadataType(byteStream);
                 MetadataBase result = null;
                 switch (metadataType)
                 {
                     case MetadataTypes.AssemblyMetadata:
-                        result = AssemblyMetadata.DeserializeMetadataAndCacheIt(byteStream);
+                        result = AssemblyMetadata.DeserializeMetadata(byteStream);
                         break;
                     case MetadataTypes.ModuleMedatada:
-                        result = ModuleMetadata.DeserializeMetadataAndCacheIt(byteStream);
+                        result = ModuleMetadata.DeserializeMetadata(byteStream);
                         break;
                     case MetadataTypes.ClassMedatada:
+                        result = ClassMetadata.DeserializeMetadata(byteStream);
                         break;
                     case MetadataTypes.MethodMedatada:
-                        break;
-                    case MetadataTypes.ProfilingData:
+                        result = MethodMetadata.DeserializeMetadata(byteStream);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+                Contract.Assume(result != null);
                 Contract.Assume(metadataType == result.MetadataType);
             }
         }
