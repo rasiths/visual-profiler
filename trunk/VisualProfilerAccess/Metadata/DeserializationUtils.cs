@@ -4,7 +4,7 @@ using System.Text;
 
 namespace VisualProfilerAccess.Metadata
 {
-    internal class DeserializationUtils
+    public class DeserializationUtils
     {
         public static uint DeserializeUint32(Stream byteStream)
         {

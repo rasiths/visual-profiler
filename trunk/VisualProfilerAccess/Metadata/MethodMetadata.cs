@@ -7,7 +7,7 @@ using System.Text;
 
 namespace VisualProfilerAccess.Metadata
 {
-    class MethodMetadata : MetadataBase<MethodMetadata>
+    public class MethodMetadata : MetadataBase<MethodMetadata>
     {
         public string Name { get; set; }
         public string[] Parameters { get; set; }

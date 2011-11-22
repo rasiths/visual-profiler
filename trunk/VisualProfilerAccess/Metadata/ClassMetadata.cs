@@ -7,7 +7,7 @@ using System.Text;
 
 namespace VisualProfilerAccess.Metadata
 {
-    class ClassMetadata : MetadataBase<ClassMetadata>
+    public class ClassMetadata : MetadataBase<ClassMetadata>
     {
         public string Name { get; set; }
         public bool IsGeneric { get; set; }

@@ -110,6 +110,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <RegisterOutput>true</RegisterOutput>
+      <AdditionalDependencies>corguids.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -176,6 +177,7 @@
     <ClInclude Include="ThreadCallTree.h" />
     <ClInclude Include="TracingProfiler.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="VisualProfilerAccess.h" />
     <ClInclude Include="VisualProfilerBackend_i.h" />
   </ItemGroup>
   <ItemGroup>

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace VisualProfilerAccess.Metadata
 {
-    class AssemblyMetadata : MetadataBase<AssemblyMetadata>
+    public class AssemblyMetadata : MetadataBase<AssemblyMetadata>
     {
         public string Name { get; set; }
         public bool IsProfilingEnabled { get; set; }
