@@ -43,16 +43,19 @@ public:
 	void FinalRelease()
 	{
 		SerializationBuffer buffer;
-		AssemblyMetadata::SerializeMetadata(&buffer);
+		ULONGLONG ul2 = 0x123456789abcdef0;
+		buffer.SerializeULONGLONG(ul2);
+		
+	/*	AssemblyMetadata::SerializeMetadata(&buffer);
 		ModuleMetadata::SerializeMetadata(&buffer);
 		ClassMetadata::SerializeMetadata(&buffer);
-		MethodMetadata::SerializeMetadata(&buffer);
+		MethodMetadata::SerializeMetadata(&buffer);*/
 
 		//ThreadCallTree::SerializeAllTrees(&buffer);
 
-		SerializationBuffer buffer2;
-	/*	buffer2.SerializeUINT(buffer.Size());
-		buffer.CopyToAnotherBuffer(&buffer2);*/
+		//SerializationBuffer buffer2;
+		//buffer2.SerializeUINT(buffer.Size());
+		//buffer.CopyToAnotherBuffer(&buffer2);
 		
 		fstream file;
 		file.open("d:\\tracingProfilerOutput222.txt", fstream::out );

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using VisualProfilerAccess;
 using VisualProfilerAccess.Metadata;
 
 namespace VisualProfilerAccessTests.MetadataTests
@@ -69,15 +70,14 @@ namespace VisualProfilerAccessTests.MetadataTests
             metadataType = DeserializationUtils.DeserializeMetadataType(memoryStream);
             Assert.AreEqual(MetadataTypes.MethodMedatada, metadataType);
         }
-    }
 
-
-    static class Extensions
-    {
-        public static MemoryStream ConvertToMemoryStream(this byte[] byteArray)
+        [Test]
+        public void DeserializeUInt64Test()
         {
-            MemoryStream memoryStream = new MemoryStream(byteArray);
-            return memoryStream;
-        }
+            byte[] bytes = {0xF0, 0xDE, 0xBC, 0x9A, 0x78, 0x56, 0x34, 0x12};
+            UInt64 expectedValue = 0x123456789abcdef0;
+            UInt64 actualValue = DeserializationUtils.DeserializeUInt64(bytes.ConvertToMemoryStream());
+            Assert.AreEqual(expectedValue, actualValue);
+        }   
     }
 }
