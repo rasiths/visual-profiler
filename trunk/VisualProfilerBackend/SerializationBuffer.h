@@ -84,7 +84,6 @@ public:
 		destinationBuffer->CopyToBuffer(_buffer, _currentIndex);
 	}
 
-
 	UINT Size(){
 		return _currentIndex;
 	}

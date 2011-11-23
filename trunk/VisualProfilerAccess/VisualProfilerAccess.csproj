@@ -73,10 +73,12 @@
     <Compile Include="Metadata\ClassMetadata.cs" />
     <Compile Include="Metadata\MetadataTypes.cs" />
     <Compile Include="Metadata\MetadataBase.cs" />
-    <Compile Include="Metadata\DeserializationUtils.cs" />
+    <Compile Include="DeserializationUtils.cs" />
     <Compile Include="Metadata\MetadataDeserializer.cs" />
     <Compile Include="Metadata\MethodMetadata.cs" />
     <Compile Include="Metadata\ModuleMetadata.cs" />
+    <Compile Include="ProfilingData\TracingCallTree.cs" />
+    <Compile Include="ProfilingData\TracingCallTreeElem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

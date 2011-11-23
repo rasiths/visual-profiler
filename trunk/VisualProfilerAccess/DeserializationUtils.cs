@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using System.Text;
+using VisualProfilerAccess.Metadata;
 
-namespace VisualProfilerAccess.Metadata
+namespace VisualProfilerAccess
 {
     public class DeserializationUtils
     {
@@ -36,6 +37,14 @@ namespace VisualProfilerAccess.Metadata
             uint uint32 = DeserializeUint32(stream);
             MetadataTypes messageTypes = (MetadataTypes) uint32;
             return messageTypes;
+        }
+
+        public static UInt64 DeserializeUInt64(Stream byteStream)
+        {
+            byte[] buffer = new byte[sizeof(UInt64)];
+            byteStream.Read(buffer, 0, buffer.Length);
+            ulong uInt64 = BitConverter.ToUInt64(buffer, 0);
+            return uInt64;
         }
     }
 }
