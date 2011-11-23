@@ -30,8 +30,8 @@ namespace VisualProfilerAccess.Metadata
             Contract.Requires(byteStream != null);
             TMetadata metadata = new TMetadata();
 
-            metadata.Id = DeserializationUtils.DeserializeUint32(byteStream);
-            metadata.MdToken = DeserializationUtils.DeserializeUint32(byteStream);
+            metadata.Id = byteStream.DeserializeUint32();
+            metadata.MdToken = byteStream.DeserializeUint32();
             metadata.Deserialize(byteStream);
 
             if (addToCache)

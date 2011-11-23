@@ -21,11 +21,17 @@ namespace VisualProfilerAccess.Metadata
         {
             Contract.Ensures(Module != null);
 
-            Name = DeserializationUtils.DeserializeString(byteStream);
-            IsGeneric = DeserializationUtils.DeserializeBool(byteStream);
-            uint moduleId = DeserializationUtils.DeserializeUint32(byteStream);
+            Name = byteStream.DeserializeString();
+            IsGeneric = byteStream.DeserializeBool();
+            uint moduleId = byteStream.DeserializeUint32();
             Module = ModuleMetadata.Cache[moduleId];
 
+        }
+
+        public override string ToString()
+        {
+           string className = Name + (IsGeneric ? "<>" : string.Empty);
+           return className;
         }
     }
 }

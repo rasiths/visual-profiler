@@ -15,7 +15,7 @@ namespace VisualProfilerAccess.Metadata
         protected override void Deserialize(Stream byteStream)
         {
            	Contract.Ensures(Assembly != null);
-            uint assemblyId = DeserializationUtils.DeserializeUint32(byteStream);
+            uint assemblyId = byteStream.DeserializeUint32();
             Assembly = AssemblyMetadata.Cache[assemblyId];
         }
     }

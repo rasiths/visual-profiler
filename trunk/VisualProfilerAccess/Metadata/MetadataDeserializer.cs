@@ -7,23 +7,16 @@ using System.Text;
 
 namespace VisualProfilerAccess.Metadata
 {
-    public class MetadataDeserializer
+    public static class MetadataDeserializer
     {
-        private enum OutboundMessageTypes
-        {
-            //Frontend -> Backend
-            SendMetadata = 1,
-            SendProfilingData = 2,
-            Terminate = 3,
-        }
-
         public static void DeserializeAllMetadataAndCacheIt(Stream byteStream)
         {
-            uint metadataByteCount = DeserializationUtils.DeserializeUint32(byteStream);
-            uint metadataLastBytePosition = metadataByteCount + sizeof(uint);
+            long initialStreamPostion = byteStream.Position;
+            uint metadataByteCount = byteStream.DeserializeUint32();
+            long metadataLastBytePosition = metadataByteCount + sizeof(uint) + initialStreamPostion;
             while (byteStream.Position < metadataLastBytePosition)
             {
-                var metadataType = DeserializationUtils.DeserializeMetadataType(byteStream);
+                var metadataType = byteStream.DeserializeMetadataType();
                 MetadataBase result = null;
                 switch (metadataType)
                 {

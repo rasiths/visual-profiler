@@ -3,10 +3,13 @@
 #include <cor.h>
 #include <corprof.h>
 #include <string>
-#include "MessageTypes.h"
+#include "MetadataTypes.h"
+#include "ProfilingDataTypes.h"
+#include <iostream>
 
-#define INITIAL_BUFFER_SIZE 1024
-#define SIZE_OF_MESSAGETYPES sizeof(MessageTypes)
+#define INITIAL_BUFFER_SIZE 0x20000
+#define SIZE_OF_METADATATYPES sizeof(MetadataTypes)
+#define SIZE_OF_PROFILINGDATATYPES sizeof(ProfilingDataTypes)
 #define SIZE_OF_UINT_PTR sizeof(UINT_PTR)
 #define SIZE_OF_MDTOKEN sizeof(mdToken)
 #define SIZE_OF_WCHAR sizeof(WCHAR)
@@ -64,16 +67,18 @@ public:
 		CopyToBuffer(wchars, byteCountOfStr);
 	}
 
-	void SerializeString(const string & str){
+	void SerializeDebugString(const string & str){
 		UINT byteCountOfStr =  str.size() * SIZE_OF_CHAR;
-		SerializeUINT(byteCountOfStr);
-
 		const CHAR * chars = str.data();
 		CopyToBuffer(chars, byteCountOfStr);
 	}
 
-	void SerializeMessageTypes(const MessageTypes messageType){
-		CopyToBuffer(&messageType, SIZE_OF_MESSAGETYPES);
+	void SerializeMetadataTypes(const MetadataTypes metadataType){
+		CopyToBuffer(&metadataType, SIZE_OF_METADATATYPES);
+	}
+
+	void SerializeProfilingDataTypes(const ProfilingDataTypes profilingDataType){
+		CopyToBuffer(&profilingDataType, SIZE_OF_PROFILINGDATATYPES);
 	}
 
 	void SerializeULONGLONG(ULONGLONG & ull){
@@ -96,9 +101,9 @@ private:
 	void EnsureBufferCapacity(UINT requiredCapacity){
 		bool capicityExceeded = _bufferSize < (_currentIndex + requiredCapacity );
 		if(capicityExceeded){
-			UINT newBufferSize = _bufferSize + INITIAL_BUFFER_SIZE;
+			UINT newBufferSize = _bufferSize + INITIAL_BUFFER_SIZE + requiredCapacity;
 			BYTE * newBuffer = new BYTE[newBufferSize];
-			ZeroBuffer(newBuffer, newBufferSize);
+		//	ZeroBuffer(newBuffer, newBufferSize);
 			memcpy_s(newBuffer,newBufferSize, _buffer, _bufferSize);
 			delete [] _buffer;
 			_buffer = newBuffer;

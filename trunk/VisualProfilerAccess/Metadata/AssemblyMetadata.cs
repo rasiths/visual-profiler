@@ -18,8 +18,8 @@ namespace VisualProfilerAccess.Metadata
 
         protected override void Deserialize(Stream byteStream)
         {
-            Name = DeserializationUtils.DeserializeString(byteStream);
-            IsProfilingEnabled = DeserializationUtils.DeserializeBool(byteStream);
+            Name = byteStream.DeserializeString();
+            IsProfilingEnabled = byteStream.DeserializeBool();
         }
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using VisualProfilerAccess;
 using VisualProfilerAccess.Metadata;
 
 namespace VisualProfilerAccessTests.MetadataTests
@@ -58,31 +59,72 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void AssemblyCacheTest()
         {
-            Assert.AreEqual(1,AssemblyMetadata.Cache.Count);
+            Assert.AreEqual(1, AssemblyMetadata.Cache.Count);
         }
-        
+
         [Test]
         public void ModuleCacheTest()
         {
-            Assert.AreEqual(1,ModuleMetadata.Cache.Count);
+            Assert.AreEqual(1, ModuleMetadata.Cache.Count);
         }
-        
+
         [Test]
         public void ClassCacheTest()
         {
-            Assert.AreEqual(1,ClassMetadata.Cache.Count);
+            Assert.AreEqual(1, ClassMetadata.Cache.Count);
         }
-        
+
         [Test]
         public void MethodCacheTest()
         {
-            Assert.AreEqual(3,MethodMetadata.Cache.Count);
+            Assert.AreEqual(3, MethodMetadata.Cache.Count);
         }
 
         [Test]
         public void AllDataReadToEndTest()
         {
-            Assert.AreEqual(_memoryStream.Length,_memoryStream.Position);
+            Assert.AreEqual(_memoryStream.Length, _memoryStream.Position);
         }
     }
+
+    [TestFixture]
+    public class MetadataDeserializerTest2
+    {
+        [SetUp]
+        public void SetUp()
+        {
+            AssemblyMetadata.Cache.Clear();
+            ModuleMetadata.Cache.Clear();
+            ClassMetadata.Cache.Clear();
+            MethodMetadata.Cache.Clear();
+        }
+
+        private byte[] _empty = { 0x00, 0x00, 0x00, 0x00 };
+        private byte[] _emptyWithOffset = { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 };
+
+        [Test]
+        public void EmptyDataTest()
+        {
+            MetadataDeserializer.DeserializeAllMetadataAndCacheIt(_empty.ConvertToMemoryStream());
+
+            Assert.AreEqual(0, AssemblyMetadata.Cache.Count);
+            Assert.AreEqual(0, ModuleMetadata.Cache.Count);
+            Assert.AreEqual(0, ClassMetadata.Cache.Count);
+            Assert.AreEqual(0, MethodMetadata.Cache.Count);
+        }
+
+        [Test]
+        public void EmptyDataWithOffsetInStreamTest()
+        {
+            MemoryStream memoryStream = _emptyWithOffset.ConvertToMemoryStream();
+            uint dummy = memoryStream.DeserializeUint32();
+            MetadataDeserializer.DeserializeAllMetadataAndCacheIt(memoryStream);
+
+            Assert.AreEqual(0, AssemblyMetadata.Cache.Count);
+            Assert.AreEqual(0, ModuleMetadata.Cache.Count);
+            Assert.AreEqual(0, ClassMetadata.Cache.Count);
+            Assert.AreEqual(0, MethodMetadata.Cache.Count);
+        }
+    }
+
 }

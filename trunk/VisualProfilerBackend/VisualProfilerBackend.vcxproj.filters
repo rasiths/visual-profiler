@@ -44,6 +44,9 @@
     <Filter Include="Source Files\SamplingProfiler">
       <UniqueIdentifier>{b6f87f97-6206-44f4-a7d6-fa28d4d93799}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Enums">
+      <UniqueIdentifier>{2a808745-b119-4e66-a58c-aae282d236e9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -180,11 +183,14 @@
     <ClInclude Include="SerializationBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MessageTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="VisualProfilerAccess.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MetadataTypes.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="ProfilingDataTypes.h">
+      <Filter>Header Files\Enums</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -5,9 +5,9 @@ using VisualProfilerAccess.Metadata;
 
 namespace VisualProfilerAccess
 {
-    public class DeserializationUtils
+    public static class DeserializationExtensions
     {
-        public static uint DeserializeUint32(Stream byteStream)
+        public static uint DeserializeUint32(this Stream byteStream)
         {
             byte[] buffer = new byte[sizeof(uint)];
             byteStream.Read(buffer, 0, buffer.Length);
@@ -15,16 +15,16 @@ namespace VisualProfilerAccess
             return uInt32;
         }
 
-        public static string DeserializeString(Stream byteStream)
+        public static string DeserializeString(this Stream byteStream)
         {
-            uint stringLength = DeserializeUint32(byteStream);
+            uint stringLength = byteStream.DeserializeUint32();
             byte[] buffer = new byte[stringLength];
             byteStream.Read(buffer, 0, buffer.Length);
             string s = Encoding.Unicode.GetString(buffer);
             return s;
         }
 
-        public static bool DeserializeBool(Stream byteStream)
+        public static bool DeserializeBool(this Stream byteStream)
         {
             byte[] buffer = new byte[sizeof(bool)];
             byteStream.Read(buffer, 0, buffer.Length);
@@ -32,14 +32,14 @@ namespace VisualProfilerAccess
             return b;
         }
 
-        public static MetadataTypes DeserializeMetadataType(Stream stream)
+        public static MetadataTypes DeserializeMetadataType(this Stream stream)
         {
-            uint uint32 = DeserializeUint32(stream);
+            uint uint32 = stream.DeserializeUint32();
             MetadataTypes messageTypes = (MetadataTypes) uint32;
             return messageTypes;
         }
 
-        public static UInt64 DeserializeUInt64(Stream byteStream)
+        public static UInt64 DeserializeUInt64(this Stream byteStream)
         {
             byte[] buffer = new byte[sizeof(UInt64)];
             byteStream.Read(buffer, 0, buffer.Length);

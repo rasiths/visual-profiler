@@ -26,7 +26,7 @@ ModuleMetadata::ModuleMetadata(ModuleID moduleId, mdToken moduleMdToken, ICorPro
 }
 
 void ModuleMetadata::Serialize(SerializationBuffer * buffer){
-	buffer->SerializeMessageTypes(MessageType_ModuleMedatada);
+	buffer->SerializeMetadataTypes(MetadataTypes_ModuleMedatada);
 	buffer->SerializeMetadataId(ModuleId);
 	buffer->SerializeMdToken(ModuleMdToken);
 	//buffer->SerializeWString(FileName);

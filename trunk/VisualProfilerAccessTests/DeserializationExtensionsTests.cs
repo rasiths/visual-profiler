@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
 using VisualProfilerAccess;
 using VisualProfilerAccess.Metadata;
+using VisualProfilerAccessTests.MetadataTests;
 
-namespace VisualProfilerAccessTests.MetadataTests
+namespace VisualProfilerAccessTests
 {
     [TestFixture]
-    public class DeserializationUtilsTests
+    public class DeserializationExtensionsTests
     {
         [Test]
         public void DeserializeBoolTest()
@@ -18,10 +16,10 @@ namespace VisualProfilerAccessTests.MetadataTests
             byte[] bytes = { 0x00, 0x01 };
             MemoryStream memoryStream = bytes.ConvertToMemoryStream();
 
-            bool falseValue = DeserializationUtils.DeserializeBool(memoryStream);
+            bool falseValue = memoryStream.DeserializeBool();
             Assert.IsFalse(falseValue);
 
-            bool trueValue = DeserializationUtils.DeserializeBool(memoryStream);
+            bool trueValue = memoryStream.DeserializeBool();
             Assert.IsTrue(trueValue);
         }
 
@@ -31,7 +29,7 @@ namespace VisualProfilerAccessTests.MetadataTests
             byte[] bytes = { 0x40, 0xE2, 0x01, 0x00 };
 
             uint expectedUint32 = 123456; //0x001E240
-            uint actualUint32 = DeserializationUtils.DeserializeUint32(bytes.ConvertToMemoryStream());
+            uint actualUint32 = bytes.ConvertToMemoryStream().DeserializeUint32();
 
             Assert.AreEqual(expectedUint32, actualUint32);
         }
@@ -48,7 +46,7 @@ namespace VisualProfilerAccessTests.MetadataTests
                                0x00, 0x5B, 0x00, 0x5D, 0x00, 0x2B, 0x00, 0x5F, 0x00
                            };
             string expectedString = "This is a test string! 123456 !@#$%^[]+_";
-            string actualString = DeserializationUtils.DeserializeString(bytes.ConvertToMemoryStream());
+            string actualString = bytes.ConvertToMemoryStream().DeserializeString();
             Assert.AreEqual(expectedString, actualString);
         }
 
@@ -58,16 +56,16 @@ namespace VisualProfilerAccessTests.MetadataTests
             byte[] bytes = { 0x0B, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00, 0x00, 0x0E, 0x00, 0x00, 0x00 };
             MemoryStream memoryStream = bytes.ConvertToMemoryStream();
             
-            MetadataTypes metadataType = DeserializationUtils.DeserializeMetadataType(memoryStream);
+            MetadataTypes metadataType = memoryStream.DeserializeMetadataType();
             Assert.AreEqual(MetadataTypes.AssemblyMetadata, metadataType);
             
-            metadataType = DeserializationUtils.DeserializeMetadataType(memoryStream);
+            metadataType = memoryStream.DeserializeMetadataType();
             Assert.AreEqual(MetadataTypes.ModuleMedatada, metadataType);
             
-            metadataType = DeserializationUtils.DeserializeMetadataType(memoryStream);
+            metadataType = memoryStream.DeserializeMetadataType();
             Assert.AreEqual(MetadataTypes.ClassMedatada, metadataType);
             
-            metadataType = DeserializationUtils.DeserializeMetadataType(memoryStream);
+            metadataType = memoryStream.DeserializeMetadataType();
             Assert.AreEqual(MetadataTypes.MethodMedatada, metadataType);
         }
 
@@ -76,7 +74,7 @@ namespace VisualProfilerAccessTests.MetadataTests
         {
             byte[] bytes = {0xF0, 0xDE, 0xBC, 0x9A, 0x78, 0x56, 0x34, 0x12};
             UInt64 expectedValue = 0x123456789abcdef0;
-            UInt64 actualValue = DeserializationUtils.DeserializeUInt64(bytes.ConvertToMemoryStream());
+            UInt64 actualValue = bytes.ConvertToMemoryStream().DeserializeUInt64();
             Assert.AreEqual(expectedValue, actualValue);
         }   
     }
