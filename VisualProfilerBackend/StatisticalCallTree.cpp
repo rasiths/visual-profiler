@@ -111,6 +111,7 @@ void StatisticalCallTree::ToString(wstringstream & wsout){
 }
 
 void StatisticalCallTree::Serialize(SerializationBuffer * buffer){
+	buffer->SerializeProfilingDataTypes(ProfilingDataTypes_Sampling);
 	buffer->SerializeThreadId(_threadId);
 	
 	ULONGLONG wallClockTime;

@@ -6,34 +6,34 @@ ThreadCallTree::ThreadCallTree(ThreadID threadId):CallTreeBase<ThreadCallTree, T
 }
 
 void ThreadCallTree::FunctionEnter(FunctionID functionId){
-		
-		ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
-		ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->GetChildTreeElem(functionId);
 
-		UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);			
-		_timer.GetElapsedTimeIn100NanoSeconds(&nextActiveElem->LastEnterTimeStampHns);
-		nextActiveElem->EnterCount++;
+	ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
+	ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->GetChildTreeElem(functionId);
 
-		_pActiveCallTreeElem = nextActiveElem;
-		 RefreshCallTreeBuffer();
+	UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);			
+	_timer.GetElapsedTimeIn100NanoSeconds(&nextActiveElem->LastEnterTimeStampHns);
+	nextActiveElem->EnterCount++;
+
+	_pActiveCallTreeElem = nextActiveElem;
+	RefreshCallTreeBuffer();
 }
 
 void ThreadCallTree::FunctionLeave(){
-		ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
-		ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->pParent;
-	
+	ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
+	ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->pParent;
 
-		ULONGLONG actualTimeStamp;
-		_timer.GetElapsedTimeIn100NanoSeconds(&actualTimeStamp);
-		ULONGLONG funcitonDuration = actualTimeStamp - prevActiveElem->LastEnterTimeStampHns;
-		prevActiveElem->WallClockDurationHns += funcitonDuration;
-		prevActiveElem->LeaveCount++;
 
-		UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);
+	ULONGLONG actualTimeStamp;
+	_timer.GetElapsedTimeIn100NanoSeconds(&actualTimeStamp);
+	ULONGLONG funcitonDuration = actualTimeStamp - prevActiveElem->LastEnterTimeStampHns;
+	prevActiveElem->WallClockDurationHns += funcitonDuration;
+	prevActiveElem->LeaveCount++;
 
-		_pActiveCallTreeElem = nextActiveElem;
+	UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);
 
-		RefreshCallTreeBuffer();
+	_pActiveCallTreeElem = nextActiveElem;
+
+	RefreshCallTreeBuffer();
 }
 
 void ThreadCallTree::UpdateUserAndKernelMode(ThreadCallTreeElem * prevActiveElem, ThreadCallTreeElem* nextActiveElem){
@@ -56,6 +56,7 @@ HANDLE ThreadCallTree::GetOSThreadHandle(){
 }
 
 void ThreadCallTree::Serialize(SerializationBuffer * buffer){
+	buffer->SerializeProfilingDataTypes(ProfilingDataTypes_Tracing);
 	buffer->SerializeThreadId(_threadId);
 	_rootCallTreeElem.Serialize(buffer);
 }

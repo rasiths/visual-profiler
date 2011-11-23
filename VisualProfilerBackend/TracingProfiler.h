@@ -40,31 +40,35 @@ public:
 
 	HRESULT FinalConstruct(){ return S_OK; }
 
+
+
 	void FinalRelease()
 	{
-		SerializationBuffer buffer;
-		ULONGLONG ul2 = 0x123456789abcdef0;
-		buffer.SerializeULONGLONG(ul2);
 		
-	/*	AssemblyMetadata::SerializeMetadata(&buffer);
+		cout << endl <<"----- Serializing 1 -----" << endl;
+		SerializationBuffer buffer;
+
+		AssemblyMetadata::SerializeMetadata(&buffer);
 		ModuleMetadata::SerializeMetadata(&buffer);
 		ClassMetadata::SerializeMetadata(&buffer);
-		MethodMetadata::SerializeMetadata(&buffer);*/
+		MethodMetadata::SerializeMetadata(&buffer);
+			
+		cout << endl <<"----- Serializing 2 -----" << endl;
+		SerializationBuffer buffer2;
+		buffer2.SerializeUINT(buffer.Size());
+		buffer.CopyToAnotherBuffer(&buffer2);
 
-		//ThreadCallTree::SerializeAllTrees(&buffer);
+		ThreadCallTree::SerializeAllTrees(&buffer2);
 
-		//SerializationBuffer buffer2;
-		//buffer2.SerializeUINT(buffer.Size());
-		//buffer.CopyToAnotherBuffer(&buffer2);
-		
-		fstream file;
-		file.open("d:\\tracingProfilerOutput222.txt", fstream::out );
-		file.write((char*) buffer.GetBuffer(), buffer.Size());
-		file.close();
-		
-		return;
+		FILE * pFile;
 
+		pFile = fopen ( "d:\\tracingProfilerOutput.txt" , "wb" );
+		fwrite (buffer2.GetBuffer() , 1 , buffer2.Size() , pFile );
+		fclose (pFile);
+	
+	
 		cout << endl <<"----- Profiler output -----" << endl;
+		
 		map<ThreadID, shared_ptr<ThreadCallTree>> * pThreadCallTreeMap = ThreadCallTree::GetCallTreeMap();
 		wstringstream wsout;	
 		for(map<ThreadID, shared_ptr<ThreadCallTree>>::iterator it = pThreadCallTreeMap->begin(); it != pThreadCallTreeMap->end(); it++ ){
@@ -72,10 +76,19 @@ public:
 			pThreadCallTree->ToString(wsout);
 			wsout << endl<< endl;
 		}
-		wcout << wsout.rdbuf();
+	//	wcout << wsout.rdbuf();
+
+		wfstream wfs;
+		wfs.open("d:\\tracingProfilerTextOutput_c++.txt", wfstream::out);
+		wfs << wsout.rdbuf();
+		wfs.close();
 
 		int a;
 		cin >> a;
+	}
+
+	virtual HRESULT STDMETHODCALLTYPE Shutdown(){
+				return S_OK;
 	}
 
 public:
@@ -93,7 +106,7 @@ public:
 private:
 	static void __stdcall FunctionEnterHook(FunctionIDOrClientID functionIDOrClientID);
 	static void __stdcall FunctionLeaveHook(FunctionIDOrClientID functionIDOrClientID);
-	
+
 	//thread local storage static variables
 	static __declspec(thread)  ThreadCallTree * _pThreadCallTree;
 	static __declspec(thread)  UINT _exceptionSearchCount;

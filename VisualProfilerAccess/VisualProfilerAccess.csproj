@@ -73,16 +73,20 @@
     <Compile Include="Metadata\ClassMetadata.cs" />
     <Compile Include="Metadata\MetadataTypes.cs" />
     <Compile Include="Metadata\MetadataBase.cs" />
-    <Compile Include="DeserializationUtils.cs" />
+    <Compile Include="DeserializationExtensions.cs" />
     <Compile Include="Metadata\MetadataDeserializer.cs" />
     <Compile Include="Metadata\MethodMetadata.cs" />
     <Compile Include="Metadata\ModuleMetadata.cs" />
-    <Compile Include="ProfilingData\TracingCallTree.cs" />
-    <Compile Include="ProfilingData\TracingCallTreeElem.cs" />
+    <Compile Include="ProfilingData\CallTrees\CallTree.cs" />
+    <Compile Include="ProfilingData\CallTreeElems\CallTreeElem.cs" />
+    <Compile Include="ProfilingData\ProfilingDataTypes.cs" />
+    <Compile Include="ProfilingData\CallTrees\SamplingCallTree.cs" />
+    <Compile Include="ProfilingData\CallTreeElems\SamplingCallTreeElem.cs" />
+    <Compile Include="ProfilingData\CallTrees\TracingCallTree.cs" />
+    <Compile Include="ProfilingData\CallTreeElems\TracingCallTreeElem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

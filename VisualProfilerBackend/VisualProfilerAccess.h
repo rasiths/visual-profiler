@@ -1,6 +1,6 @@
 #pragma once
 #include "SerializationBuffer.h"
-#include "MessageTypes.h"
+#include "MetadataTypes.h"
 #include "stdafx.h"
 #include <string>
 #include "Utils.h"

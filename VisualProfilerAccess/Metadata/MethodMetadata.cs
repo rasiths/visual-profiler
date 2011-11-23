@@ -22,18 +22,33 @@ namespace VisualProfilerAccess.Metadata
         {
             Contract.Ensures(Class != null);
 
-            Name = DeserializationUtils.DeserializeString(byteStream);
+            Name = byteStream.DeserializeString();
 
-            uint paramCount = DeserializationUtils.DeserializeUint32(byteStream);
+            uint paramCount = byteStream.DeserializeUint32();
             Parameters = new string[paramCount];
             for (int i = 0; i < paramCount; i++)
             {
-                string param = DeserializationUtils.DeserializeString(byteStream);
+                string param = byteStream.DeserializeString();
                 Parameters[i] = param;
             }
 
-            uint classId = DeserializationUtils.DeserializeUint32(byteStream);
+            uint classId = byteStream.DeserializeUint32();
             Class = ClassMetadata.Cache[classId];
         }
+
+        public override string ToString()
+        {
+            string parameterString = string.Empty;
+            foreach (var parameter in Parameters)
+            {
+                parameterString += parameter + ", ";
+            }
+            parameterString = parameterString.TrimEnd(", ".ToCharArray());
+
+            string str = string.Format("[{0}]{1}.{2}({3})", Class.Module.Assembly.Name, Class.ToString() ,Name, parameterString);
+            return str;
+        }
+
+        
     }
 }

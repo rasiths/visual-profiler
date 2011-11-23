@@ -102,7 +102,7 @@ shared_ptr<AssemblyMetadata> MethodMetadata:: GetDefiningAssembly(){
 }
 
 void MethodMetadata:: Serialize(SerializationBuffer * buffer){
-	buffer->SerializeMessageTypes(MessageType_MethodMedatada);
+	buffer->SerializeMetadataTypes(MetadataTypes_MethodMedatada);
 	buffer->SerializeMetadataId(FunctionId);
 	buffer->SerializeMdToken(MethodMdToken);
 	buffer->SerializeWString(Name);

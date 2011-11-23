@@ -37,7 +37,7 @@ wstring ClassMetadata::ToString(){
 }
 
 void ClassMetadata::Serialize(SerializationBuffer * buffer){
-	buffer->SerializeMessageTypes(MessageType_ClassMedatada);
+	buffer->SerializeMetadataTypes(MetadataTypes_ClassMedatada);
 	buffer->SerializeMetadataId(ClassId);
 	buffer->SerializeMdToken(ClassMdToken);
 	buffer->SerializeWString(Name);

@@ -58,7 +58,7 @@ public:
 	}
 
 	virtual void ToString(wstringstream & wsout){
-		wsout << "Thread Id = " << _threadId << ", Number of stack divisions = " << _rootCallTreeElem.GetChildrenMap()->size() <<  endl ;
+		wsout << "Thread Id = " <<_threadId << ", Number of stack divisions = " << _rootCallTreeElem.GetChildrenMap()->size() <<  endl ;
 		_rootCallTreeElem.ToString(wsout);
 	}
 
@@ -92,8 +92,8 @@ public:
 		map<ThreadID, shared_ptr<TCallTree>>::iterator it = _callTreeMap.begin();
 		for(;it != _callTreeMap.end(); it++){
 			TCallTree * pCallTree = it->second.get();
-			buffer->SerializeString("--tree--");
 			pCallTree->Serialize(buffer);
+			//buffer->SerializeDebugString("----tree----");
 		}
 	}
 

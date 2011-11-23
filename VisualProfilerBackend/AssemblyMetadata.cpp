@@ -12,9 +12,8 @@ AssemblyMetadata::AssemblyMetadata(AssemblyID assemblyId,ICorProfilerInfo3 * pPr
 	this->Name.append(name);
 	
 	IMetaDataAssemblyImport * pMetadataAssemblyImport = 0;
-	hr = pMetadataImport->QueryInterface(IID_IMetaDataAssemblyImport,(void **)&pMetadataAssemblyImport);
+	hr = pMetadataImport->QueryInterface(IID_IMetaDataAssemblyImport, (void **)&pMetadataAssemblyImport);
 	CheckError(hr);
-
 	
 	hr = pMetadataAssemblyImport->GetAssemblyFromScope(&this->AssemblyMdToken);
 	CheckError(hr);
@@ -36,11 +35,10 @@ AssemblyMetadata::AssemblyMetadata(AssemblyID assemblyId,ICorProfilerInfo3 * pPr
 	}else{
 		_isProfilingEnabled = false;
 	}
-    
 }
 
 void AssemblyMetadata::Serialize(SerializationBuffer * buffer){
-	buffer->SerializeMessageTypes(MessageType_AssemblyMetadata);
+	buffer->SerializeMetadataTypes(MetadataTypes_AssemblyMetadata);
 	buffer->SerializeMetadataId(AssemblyId);
 	buffer->SerializeMdToken(AssemblyMdToken);
 	buffer->SerializeWString(Name);
