@@ -7,7 +7,7 @@
 #include "ProfilingDataTypes.h"
 #include <iostream>
 
-#define INITIAL_BUFFER_SIZE 0x20000
+#define INITIAL_BUFFER_SIZE 0x2000
 #define SIZE_OF_METADATATYPES sizeof(MetadataTypes)
 #define SIZE_OF_PROFILINGDATATYPES sizeof(ProfilingDataTypes)
 #define SIZE_OF_UINT_PTR sizeof(UINT_PTR)
@@ -26,13 +26,23 @@ class SerializationBuffer
 public:
 	SerializationBuffer(void):_currentIndex(0),_bufferSize(INITIAL_BUFFER_SIZE){
 		_buffer = new BYTE[INITIAL_BUFFER_SIZE];
-		ZeroBuffer(_buffer, _bufferSize);
+		//ZeroBuffer(_buffer, _bufferSize);
 	}
 
 	~SerializationBuffer(void){
 		delete [] _buffer;
 		_bufferSize = _currentIndex= -1;
 		_buffer = NULL;
+	}
+
+	void Clear(){
+		bool bufferAlreadyUsed = 0 < _currentIndex ;
+		if(bufferAlreadyUsed){
+			delete [] _buffer;
+			_buffer = new BYTE[INITIAL_BUFFER_SIZE];
+			_bufferSize = INITIAL_BUFFER_SIZE;
+			_currentIndex = 0;
+		}
 	}
 
 	void SerializeMetadataId(const UINT_PTR & metadataId){

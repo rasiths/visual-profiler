@@ -21,14 +21,18 @@ protected :
 	TTreeElem _rootCallTreeElem;
 	ThreadID _threadId;
 	ThreadTimer _timer;
+	
 	bool _refreshCallTreeBuffer;
 	SerializationBuffer _callTreeBuffer;
 	CriticalSection _instanceCriticalSection;
-protected:
-	inline void RefreshCallTreeBuffer(){
-		if(_refreshCallTreeBuffer){
+
+public:
+
+	void RefreshCallTreeBuffer(bool force = false){
+		if(force || _refreshCallTreeBuffer){
 			_instanceCriticalSection.Enter();
 			{
+				_callTreeBuffer.Clear();
 				Serialize(&_callTreeBuffer);
 				_refreshCallTreeBuffer = false;
 			}
@@ -36,13 +40,12 @@ protected:
 		}
 	}
 
-public:
-
 	void CopyCallTreeBufferToBuffer(SerializationBuffer * destinationBuffer){
 		_instanceCriticalSection.Enter();
 		{
 			_callTreeBuffer.CopyToAnotherBuffer(destinationBuffer);
 			_refreshCallTreeBuffer = true;
+			
 		}
 		_instanceCriticalSection.Leave();
 	}
@@ -66,6 +69,7 @@ public:
 
 	static TCallTree * AddThread(ThreadID threadId){
 		shared_ptr<TCallTree> pCallTree(new TCallTree(threadId));
+		pCallTree->RefreshCallTreeBuffer();
 		_criticalSection.Enter();
 		{
 			_callTreeMap[threadId] = pCallTree;

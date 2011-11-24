@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -12,7 +14,102 @@ namespace VisualProfilerAccess
 {
     class Program
     {
+        private static NamedPipeServerStream _pipeServer;
+
+        static void ReadFromPipe(object o)
+        {
+            while (true)
+            {
+                Console.WriteLine("Reading async: ");
+                byte[] bytes = new byte[256];
+
+                _pipeServer.Read(bytes, 0, bytes.Length);
+                var str = Encoding.Unicode.GetString(bytes);
+                Console.Write(str);
+                Console.WriteLine();
+            }
+
+
+        }
+
+        static void ReadFromPipe2(object o)
+        {
+
+            Console.WriteLine("Reading bytes: ");
+
+            byte[] byteSizeBytes = new byte[sizeof(UInt32)];
+            _pipeServer.Read(byteSizeBytes, 0, byteSizeBytes.Length);
+            var streamLength = BitConverter.ToUInt32(byteSizeBytes, 0);
+
+            if (streamLength == 0)
+                return;
+
+            byte[] bytes = new byte[streamLength];
+
+           
+
+            _pipeServer.Read(bytes, 0, bytes.Length);
+
+            MemoryStream memoryStream = new MemoryStream(bytes);
+            MetadataDeserializer.DeserializeAllMetadataAndCacheIt(memoryStream);
+
+
+            //Console.ForegroundColor = Console.ForegroundColor == ConsoleColor.Blue ? ConsoleColor.Red : ConsoleColor.Blue;
+            Console.Clear();
+
+
+            while (memoryStream.Position < memoryStream.Length)
+            {
+                var deserializeCallTree = TracingCallTree.DeserializeCallTree(memoryStream);
+                var s = deserializeCallTree.ToString();
+                Console.WriteLine(s);
+                Console.WriteLine();
+            }
+
+        }
+
+
         static void Main(string[] args)
+        {
+
+            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
+            _pipeServer = new NamedPipeServerStream("VisualProfilerAccessPipe", PipeDirection.InOut, 1,
+                                                    PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+
+
+            //ProcessStartInfo processStartInfo = new ProcessStartInfo();
+            //processStartInfo.FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe";
+            //processStartInfo.EnvironmentVariables.Add("COR_ENABLE_PROFILING", "1");
+            //processStartInfo.EnvironmentVariables.Add("COR_PROFILER", "{19840906-C001-0000-000C-000000000002}");
+            //processStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", "VisualProfilerAccessPipe");
+            //processStartInfo.UseShellExecute = false;
+            //var process = Process.Start(processStartInfo);
+
+            Console.Write("Waiting for client connection...");
+            _pipeServer.WaitForConnection();
+            Console.WriteLine("Client connected.");
+            //_pipeServer.BeginRead(bytes, 0, bytes.Length, AsyncCallback, bytes);
+            // ThreadPool.QueueUserWorkItem(ReadFromPipe);
+            TextWriter tw = new StreamWriter(_pipeServer);
+            while (true)
+            {
+                try
+                {
+                    tw.Write(101);
+                    tw.Flush();
+                    ReadFromPipe2(null);
+
+                }
+
+                catch (IOException e)
+                {
+                    Console.WriteLine("ERROR: {0}", e.Message);
+                }
+                Thread.Sleep(1000);
+            }
+        }
+
+        static void Main2(string[] args)
         {
             #region bytes
 
@@ -87,7 +184,7 @@ namespace VisualProfilerAccess
                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                0x00
                            };
-#endregion
+            #endregion
 
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
             var fileStream = File.OpenRead(@"D:\tracingProfilerOutput.txt");
@@ -95,7 +192,7 @@ namespace VisualProfilerAccess
 
             MetadataDeserializer.DeserializeAllMetadataAndCacheIt(fileStream);
 
-            
+
             var openWrite = File.OpenWrite(@"D:\tracingProfilerTextOutput_c#.txt");
             TextWriter tw = new StreamWriter(openWrite);
             while (fileStream.Position < fileStream.Length)

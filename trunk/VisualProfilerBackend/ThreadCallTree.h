@@ -22,4 +22,5 @@ public:
 
 private:
 	void UpdateUserAndKernelMode(ThreadCallTreeElem * prevActiveElem, ThreadCallTreeElem* nextActiveElem);
+	void SerializeTreeElem(ThreadCallTreeElem * elem, SerializationBuffer * buffer);
 };

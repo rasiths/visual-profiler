@@ -109,6 +109,7 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadDestroyed(ThreadID threadId){
 		_pThreadCallTree->FunctionLeave();
 		activeElem = _pThreadCallTree->GetActiveCallTreeElem();
 	}
+	_pThreadCallTree->RefreshCallTreeBuffer(true);
 	return S_OK;
 }
 
