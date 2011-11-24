@@ -59,7 +59,7 @@ public:
 			map<TId, shared_ptr<TMetadata>>::iterator it;
 			for(it = _cacheMap.begin(); it != _cacheMap.end(); it++ ){
 				TMetadata * pMetadata = it->second.get();
-				bool skipSerialization = (pMetadata->_isAlreadySerialized || !pMetadata->IsProfilingEnabled());
+				bool skipSerialization = (pMetadata == NULL || pMetadata->_isAlreadySerialized || !pMetadata->IsProfilingEnabled());
 				if(skipSerialization)
 					continue;
 				pMetadata->Serialize(buffer);

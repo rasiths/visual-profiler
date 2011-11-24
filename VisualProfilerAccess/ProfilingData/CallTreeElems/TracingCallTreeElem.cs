@@ -25,12 +25,12 @@ namespace VisualProfilerAccess.ProfilingData.CallTreeElems
         protected override void ToString(StringBuilder stringBuilder)
         {
             var methodMetadata = MethodMetadata.Cache[FunctionId];
-            //double durationSec = WallClockDurationHns / 1e7;
-            //double userModeSec = UserModeDurationHns / 1e7;
-            //double kernelModeSec = KernelModeDurationHns/1e7;
-           UInt64 durationSec = WallClockDurationHns; // 1e7;
-           UInt64 userModeSec = UserModeDurationHns ;// 1e7;
-           UInt64 kernelModeSec = KernelModeDurationHns ;// 1e7;
+            double durationSec = WallClockDurationHns / 1e7;
+            double userModeSec = UserModeDurationHns / 1e7;
+            double kernelModeSec = KernelModeDurationHns / 1e7;
+           //UInt64 durationSec = WallClockDurationHns; // 1e7;
+           //UInt64 userModeSec = UserModeDurationHns ;// 1e7;
+           //UInt64 kernelModeSec = KernelModeDurationHns ;// 1e7;
             stringBuilder.AppendFormat("{0},Twc={1}s,Tum={2}s,Tkm={3}s,Ec={4},Lc={5}", methodMetadata,
                                        durationSec, userModeSec, kernelModeSec, EnterCount, LeaveCount);
         }

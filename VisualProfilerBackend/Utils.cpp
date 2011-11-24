@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "Utils.h"
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 1024
 
 void SubtractFILETIMESAndAddToResult(FILETIME * ft1, FILETIME * ft2, ULONGLONG * result ){
 	ULARGE_INTEGER temp1;
@@ -18,7 +18,7 @@ wstring GetEnvirnomentalVariable(WCHAR * variableName){
 	wstring variable;
 	variable.resize(BUFFER_SIZE);
 
-	DWORD numberOfChar = GetEnvironmentVariableW(variableName, &variable[BUFFER_SIZE], BUFFER_SIZE);
+	DWORD numberOfChar = GetEnvironmentVariableW(variableName, &variable[0], BUFFER_SIZE);
 	variable.resize(numberOfChar);
 	return variable;
 }

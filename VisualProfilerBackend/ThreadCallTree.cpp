@@ -12,6 +12,7 @@ void ThreadCallTree::FunctionEnter(FunctionID functionId){
 
 	UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);			
 	_timer.GetElapsedTimeIn100NanoSeconds(&nextActiveElem->LastEnterTimeStampHns);
+	
 	nextActiveElem->EnterCount++;
 
 	_pActiveCallTreeElem = nextActiveElem;
@@ -21,12 +22,12 @@ void ThreadCallTree::FunctionEnter(FunctionID functionId){
 void ThreadCallTree::FunctionLeave(){
 	ThreadCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
 	ThreadCallTreeElem * nextActiveElem = _pActiveCallTreeElem->pParent;
-
-
+	
 	ULONGLONG actualTimeStamp;
 	_timer.GetElapsedTimeIn100NanoSeconds(&actualTimeStamp);
 	ULONGLONG funcitonDuration = actualTimeStamp - prevActiveElem->LastEnterTimeStampHns;
 	prevActiveElem->WallClockDurationHns += funcitonDuration;
+	
 	prevActiveElem->LeaveCount++;
 
 	UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);
@@ -40,7 +41,7 @@ void ThreadCallTree::UpdateUserAndKernelMode(ThreadCallTreeElem * prevActiveElem
 	FILETIME dummy;
 	GetThreadTimes(_OSThreadHandle,&dummy, &dummy, &nextActiveElem->LastEnterKernelModeTimeStamp, &nextActiveElem->LastEnterUserModeTimeStamp);
 	SubtractFILETIMESAndAddToResult( &nextActiveElem->LastEnterKernelModeTimeStamp, &prevActiveElem->LastEnterKernelModeTimeStamp, &prevActiveElem->KernelModeDurationHns);
-	SubtractFILETIMESAndAddToResult( &nextActiveElem->LastEnterUserModeTimeStamp,   &prevActiveElem->LastEnterUserModeTimeStamp,   &prevActiveElem->UserModeDurationHns);
+	SubtractFILETIMESAndAddToResult( &nextActiveElem->LastEnterUserModeTimeStamp,   &prevActiveElem->LastEnterUserModeTimeStamp, &prevActiveElem->UserModeDurationHns);
 }
 
 ThreadCallTreeElem * ThreadCallTree::GetActiveCallTreeElem(){
@@ -58,7 +59,33 @@ HANDLE ThreadCallTree::GetOSThreadHandle(){
 void ThreadCallTree::Serialize(SerializationBuffer * buffer){
 	buffer->SerializeProfilingDataTypes(ProfilingDataTypes_Tracing);
 	buffer->SerializeThreadId(_threadId);
-	_rootCallTreeElem.Serialize(buffer);
+	SerializeTreeElem(&_rootCallTreeElem, buffer);
 }
 
+void ThreadCallTree::SerializeTreeElem(ThreadCallTreeElem * elem, SerializationBuffer * buffer){
+	buffer->SerializeFunctionId(elem->FunctionId);
+	buffer->SerializeUINT(elem->EnterCount);
+	buffer->SerializeUINT(elem->LeaveCount);
 
+	bool functionNotFinished = elem->EnterCount != elem->LeaveCount;
+	if(functionNotFinished){
+		ULONGLONG actualTimeStamp;
+		_timer.GetElapsedTimeIn100NanoSeconds(&actualTimeStamp);
+		ULONGLONG funcitonDuration = actualTimeStamp - elem->LastEnterTimeStampHns + elem->WallClockDurationHns;
+		buffer->SerializeULONGLONG(actualTimeStamp); 
+	}else{
+		buffer->SerializeULONGLONG(elem->WallClockDurationHns);
+	}
+	buffer->SerializeULONGLONG(elem->KernelModeDurationHns);
+	buffer->SerializeULONGLONG(elem->UserModeDurationHns);
+	
+	map<FunctionID, shared_ptr<ThreadCallTreeElem>> * pChildrenMap = elem->GetChildrenMap();
+	UINT childrenSize = pChildrenMap->size();
+	buffer->SerializeUINT(childrenSize);
+
+	map<FunctionID, shared_ptr<ThreadCallTreeElem>>::iterator it = pChildrenMap->begin();
+	for(; it != pChildrenMap->end(); it++){
+		ThreadCallTreeElem * childElem = it->second.get();
+		SerializeTreeElem(childElem, buffer);
+	}
+}
