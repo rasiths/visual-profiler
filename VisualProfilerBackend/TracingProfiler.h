@@ -39,7 +39,7 @@ public:
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
-	VisualProfilerAccess _profilerAccess;
+	
 	HRESULT FinalConstruct(){ 
 		_profilerAccess.StartListeningAsync();
 		return S_OK; 
@@ -50,7 +50,16 @@ public:
 	void FinalRelease()
 	{
 		_profilerAccess.StopListening();
+		bool useShapshots= false;
+		_profilerAccess.CarryOutAction(Actions_SendingProfilingData, &useShapshots);
+		_profilerAccess.CarryOutAction(Actions_ProfilingFinished, NULL);
+
+		cout << endl <<"----- Serializing 1 -----" << endl;
+		int a;
+		cin >> a;
 		return;
+		cout << endl <<"----- Serializing 1 -----" << endl;
+		
 		cout << endl <<"----- Serializing 1 -----" << endl;
 		SerializationBuffer buffer;
 
@@ -89,8 +98,8 @@ public:
 		wfs << wsout.rdbuf();
 		wfs.close();
 
-		int a;
-		cin >> a;
+		//int a;
+		//cin >> a;
 	}
 
 	virtual HRESULT STDMETHODCALLTYPE Shutdown(){
@@ -116,6 +125,8 @@ private:
 	//thread local storage static variables
 	static __declspec(thread)  ThreadCallTree * _pThreadCallTree;
 	static __declspec(thread)  UINT _exceptionSearchCount;
+
+	VisualProfilerAccess<ThreadCallTree> _profilerAccess;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(TracingProfiler), CTracingProfiler)

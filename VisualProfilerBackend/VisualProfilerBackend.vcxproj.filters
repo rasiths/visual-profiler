@@ -29,9 +29,6 @@
     <Filter Include="Header Files\Metadata">
       <UniqueIdentifier>{87c0e19d-41a2-4328-a63b-cbdf5be4638f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Metadata">
-      <UniqueIdentifier>{4a098e5a-6120-4a20-8092-8e72442437bf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\TracingProfiler">
       <UniqueIdentifier>{3d7fcef4-287f-469b-9ff6-8334cc6e4c3e}</UniqueIdentifier>
     </Filter>
@@ -46,6 +43,15 @@
     </Filter>
     <Filter Include="Header Files\Enums">
       <UniqueIdentifier>{2a808745-b119-4e66-a58c-aae282d236e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CommonStuff">
+      <UniqueIdentifier>{d75af6fd-7c88-4cd9-92af-007be6f8f72f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CommonStuff">
+      <UniqueIdentifier>{d8a1bc9e-a8e4-4d02-a3a8-e7a075c09890}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Metadata">
+      <UniqueIdentifier>{4a098e5a-6120-4a20-8092-8e72442437bf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -76,9 +82,6 @@
     <ClCompile Include="ClassMetadata.cpp">
       <Filter>Source Files\Metadata</Filter>
     </ClCompile>
-    <ClCompile Include="Utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ThreadCallTree.cpp">
       <Filter>Source Files\TracingProfiler</Filter>
     </ClCompile>
@@ -94,9 +97,6 @@
     <ClCompile Include="ThreadCallTreeElem.cpp">
       <Filter>Source Files\TracingProfiler</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StatisticalCallTree.cpp">
       <Filter>Source Files\SamplingProfiler</Filter>
     </ClCompile>
@@ -105,6 +105,12 @@
     </ClCompile>
     <ClCompile Include="MetadataSerializer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadTimer.cpp">
+      <Filter>Source Files\CommonStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>Source Files\CommonStuff</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -141,12 +147,6 @@
     <ClInclude Include="ClassMetadata.h">
       <Filter>Header Files\Metadata</Filter>
     </ClInclude>
-    <ClInclude Include="CriticalSection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TracingProfiler.h">
       <Filter>Header Files\TracingProfiler</Filter>
     </ClInclude>
@@ -168,9 +168,6 @@
     <ClInclude Include="CallTreeBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadTimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="StatisticalCallTreeElem.h">
       <Filter>Header Files\SamplingProfiler</Filter>
     </ClInclude>
@@ -180,16 +177,31 @@
     <ClInclude Include="MetadataSerializer.h">
       <Filter>Header Files\Metadata</Filter>
     </ClInclude>
-    <ClInclude Include="SerializationBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VisualProfilerAccess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MetadataTypes.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
     <ClInclude Include="ProfilingDataTypes.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="CriticalSection.h">
+      <Filter>Header Files\CommonStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="SerializationBuffer.h">
+      <Filter>Header Files\CommonStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadTimer.h">
+      <Filter>Header Files\CommonStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Header Files\CommonStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="VisualProfilerAccess.h">
+      <Filter>Header Files\CommonStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="Commands.h">
+      <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions.h">
       <Filter>Header Files\Enums</Filter>
     </ClInclude>
   </ItemGroup>

@@ -59,13 +59,13 @@ public:
 
 	void Serial(){
 
-		SerializationBuffer s;
-		AssemblyMetadata::SerializeMetadata(&s);
+		_profilerAccess.StartListeningAsync();
 
 	}
 
 	void FinalRelease()
 	{  
+		_profilerAccess.StopListening();
 		Serial();
 		return;
 
@@ -97,6 +97,7 @@ public:
 
 private:
 	shared_ptr<StackWalker> _stackWalker;
+	VisualProfilerAccess<StatisticalCallTree> _profilerAccess;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(SamplingProfiler), CSamplingProfiler)

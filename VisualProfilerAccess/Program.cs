@@ -12,9 +12,22 @@ using VisualProfilerAccess.ProfilingData.CallTrees;
 
 namespace VisualProfilerAccess
 {
+    enum Commands
+    {
+        SendProfilingData = 101
+    }
+
+    public enum Actions
+    {
+        SendingProfilingData = 201,
+        ProfilingFinished = 202
+    }
+
+
     class Program
     {
         private static NamedPipeServerStream _pipeServer;
+        private static bool _stop = false;
 
         static void ReadFromPipe(object o)
         {
@@ -32,40 +45,64 @@ namespace VisualProfilerAccess
 
         }
 
-        static void ReadFromPipe2(object o)
+
+
+        static void ReadActions(object o)
         {
-
-            Console.WriteLine("Reading bytes: ");
-
-            byte[] byteSizeBytes = new byte[sizeof(UInt32)];
-            _pipeServer.Read(byteSizeBytes, 0, byteSizeBytes.Length);
-            var streamLength = BitConverter.ToUInt32(byteSizeBytes, 0);
-
-            if (streamLength == 0)
-                return;
-
-            byte[] bytes = new byte[streamLength];
-
-           
-
-            _pipeServer.Read(bytes, 0, bytes.Length);
-
-            MemoryStream memoryStream = new MemoryStream(bytes);
-            MetadataDeserializer.DeserializeAllMetadataAndCacheIt(memoryStream);
-
-
-            //Console.ForegroundColor = Console.ForegroundColor == ConsoleColor.Blue ? ConsoleColor.Red : ConsoleColor.Blue;
-            Console.Clear();
-
-
-            while (memoryStream.Position < memoryStream.Length)
+            while (true)
             {
-                var deserializeCallTree = TracingCallTree.DeserializeCallTree(memoryStream);
-                var s = deserializeCallTree.ToString();
-                Console.WriteLine(s);
-                Console.WriteLine();
-            }
+                Actions action = _pipeServer.DeserializeActions();
+                switch (action)
+                {
+                    case Actions.SendingProfilingData:
+                        byte[] byteSizeBytes = new byte[sizeof (UInt32)];
+                        _pipeServer.Read(byteSizeBytes, 0, byteSizeBytes.Length);
+                        var streamLength = BitConverter.ToUInt32(byteSizeBytes, 0);
 
+                        //if (streamLength == 0)
+                        //    return;
+
+                        byte[] bytes = new byte[streamLength];
+
+                        _pipeServer.Read(bytes, 0, bytes.Length);
+
+                        MemoryStream memoryStream = new MemoryStream(bytes);
+                        MetadataDeserializer.DeserializeAllMetadataAndCacheIt(memoryStream);
+
+
+                        //Console.ForegroundColor = Console.ForegroundColor == ConsoleColor.Blue ? ConsoleColor.Red : ConsoleColor.Blue;
+                        Console.Clear();
+
+                        //Console.WriteLine("Methods={0}, Classes={1}, Modules={2}, Assemblies={3}, TreeSize={4}KB", 
+                        //    MethodMetadata.Cache.Count,
+                        //    ClassMetadata.Cache.Count,
+                        //    ModuleMetadata.Cache.Count,
+                        //    AssemblyMetadata.Cache.Count,
+                        //    (memoryStream.Length - memoryStream.Position)/(1024.0)
+                        //    );
+
+                        //foreach (var assembly in AssemblyMetadata.Cache.Values)
+                        //{
+                        //    Console.WriteLine("{0}, mdToken={1}",assembly.MdToken, assembly.Name);
+                        //}
+
+                        while (memoryStream.Position < memoryStream.Length)
+                        {
+                            Console.WriteLine("Methods={0}, Classes={1}, ");
+                            var deserializeCallTree = TracingCallTree.DeserializeCallTree(memoryStream);
+                            var s = deserializeCallTree.ToString();
+                            Console.WriteLine(s);
+                            Console.WriteLine();
+                        }
+                        break;
+                    case Actions.ProfilingFinished:
+                        _stop = true;
+                        return;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
 
 
@@ -77,35 +114,34 @@ namespace VisualProfilerAccess
                                                     PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 
 
-            //ProcessStartInfo processStartInfo = new ProcessStartInfo();
-            //processStartInfo.FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe";
-            //processStartInfo.EnvironmentVariables.Add("COR_ENABLE_PROFILING", "1");
-            //processStartInfo.EnvironmentVariables.Add("COR_PROFILER", "{19840906-C001-0000-000C-000000000002}");
-            //processStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", "VisualProfilerAccessPipe");
-            //processStartInfo.UseShellExecute = false;
-            //var process = Process.Start(processStartInfo);
+            ProcessStartInfo processStartInfo = new ProcessStartInfo();
+            processStartInfo.FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe";
+            processStartInfo.EnvironmentVariables.Add("COR_ENABLE_PROFILING", "1");
+            processStartInfo.EnvironmentVariables.Add("COR_PROFILER", "{19840906-C001-0000-000C-000000000002}");
+            processStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", "VisualProfilerAccessPipe");
+            processStartInfo.UseShellExecute = false;
+            var process = Process.Start(processStartInfo);
 
             Console.Write("Waiting for client connection...");
             _pipeServer.WaitForConnection();
             Console.WriteLine("Client connected.");
             //_pipeServer.BeginRead(bytes, 0, bytes.Length, AsyncCallback, bytes);
-            // ThreadPool.QueueUserWorkItem(ReadFromPipe);
-            TextWriter tw = new StreamWriter(_pipeServer);
-            while (true)
+             ThreadPool.QueueUserWorkItem(ReadActions);
+
+            while (!_stop)
             {
                 try
                 {
-                    tw.Write(101);
-                    tw.Flush();
-                    ReadFromPipe2(null);
+                    byte[] commandBytes = BitConverter.GetBytes((UInt32)Commands.SendProfilingData);
 
+                    _pipeServer.Write(commandBytes, 0, commandBytes.Length);
                 }
 
                 catch (IOException e)
                 {
                     Console.WriteLine("ERROR: {0}", e.Message);
                 }
-                Thread.Sleep(1000);
+                Thread.Sleep(2000);
             }
         }
 

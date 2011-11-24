@@ -8,7 +8,6 @@
 #include <sstream>
 #include "Utils.h"
 #include "SerializationBuffer.h"
-
  
 using namespace std;
 
@@ -25,6 +24,8 @@ protected :
 	bool _refreshCallTreeBuffer;
 	SerializationBuffer _callTreeBuffer;
 	CriticalSection _instanceCriticalSection;
+	
+	virtual void SerializeCallTreeElem(TTreeElem * elem, SerializationBuffer * buffer) = 0;
 
 public:
 
@@ -45,7 +46,6 @@ public:
 		{
 			_callTreeBuffer.CopyToAnotherBuffer(destinationBuffer);
 			_refreshCallTreeBuffer = true;
-			
 		}
 		_instanceCriticalSection.Leave();
 	}
@@ -93,12 +93,28 @@ public:
 	}
 
 	static void SerializeAllTrees(SerializationBuffer * buffer){
-		map<ThreadID, shared_ptr<TCallTree>>::iterator it = _callTreeMap.begin();
-		for(;it != _callTreeMap.end(); it++){
-			TCallTree * pCallTree = it->second.get();
-			pCallTree->Serialize(buffer);
-			//buffer->SerializeDebugString("----tree----");
+		_criticalSection.Enter();
+		{
+			map<ThreadID, shared_ptr<TCallTree>>::iterator it = _callTreeMap.begin();
+			for(;it != _callTreeMap.end(); it++){
+				TCallTree * pCallTree = it->second.get();
+				pCallTree->Serialize(buffer);
+			}
 		}
+		_criticalSection.Leave();
+	}
+
+	static void SerializeAllTreeSnapShots(SerializationBuffer * buffer){
+		_criticalSection.Enter();
+		{
+			map<ThreadID, shared_ptr<TCallTree>>::iterator it = _callTreeMap.begin();
+			for(;it != _callTreeMap.end(); it++){
+				TCallTree * pCallTree = it->second.get();
+				pCallTree->CopyCallTreeBufferToBuffer(buffer);
+			}
+		}
+		_criticalSection.Leave();
+
 	}
 
 };
