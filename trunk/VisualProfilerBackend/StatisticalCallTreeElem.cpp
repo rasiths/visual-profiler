@@ -20,25 +20,5 @@ void StatisticalCallTreeElem::ToString(wstringstream & wsout, wstring indentatio
 	}
 }
 
-void StatisticalCallTreeElem::Serialize(SerializationBuffer * buffer){
-	buffer->SerializeFunctionId(FunctionId);
-	buffer->SerializeUINT(StackTopOccurrenceCount);
-	buffer->SerializeUINT(LastProfiledFrameInStackCount);
+
 	
-	UINT childrenSize = _pChildrenMap.size();
-	buffer->SerializeUINT(childrenSize);
-
-	map<FunctionID, shared_ptr<StatisticalCallTreeElem>>::iterator it = _pChildrenMap.begin();
-	StatisticalCallTreeElem** ppElemArray = new StatisticalCallTreeElem*[childrenSize];
-	for(UINT i = 0; i < childrenSize; i++){
-		StatisticalCallTreeElem * elem = it->second.get();
-		ppElemArray[i] = elem;
-		it++;
-	}
-
-	for(UINT i = 0; i < childrenSize; i++){
-		ppElemArray[i]->Serialize(buffer);
-	}
-
-	delete[] ppElemArray;
-}

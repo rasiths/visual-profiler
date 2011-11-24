@@ -82,8 +82,13 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Full</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
     </ClCompile>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -152,10 +157,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Actions.h" />
     <ClInclude Include="AssemblyMetadata.h" />
     <ClInclude Include="CallTreeBase.h" />
     <ClInclude Include="CallTreeElemBase.h" />
     <ClInclude Include="ClassMetadata.h" />
+    <ClInclude Include="Commands.h" />
     <ClInclude Include="MetadataTypes.h" />
     <ClInclude Include="MetadataBase.h" />
     <ClInclude Include="CorProfilerCallbackBase.h" />

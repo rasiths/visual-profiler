@@ -59,10 +59,10 @@ HANDLE ThreadCallTree::GetOSThreadHandle(){
 void ThreadCallTree::Serialize(SerializationBuffer * buffer){
 	buffer->SerializeProfilingDataTypes(ProfilingDataTypes_Tracing);
 	buffer->SerializeThreadId(_threadId);
-	SerializeTreeElem(&_rootCallTreeElem, buffer);
+	SerializeCallTreeElem(&_rootCallTreeElem, buffer);
 }
 
-void ThreadCallTree::SerializeTreeElem(ThreadCallTreeElem * elem, SerializationBuffer * buffer){
+void ThreadCallTree::SerializeCallTreeElem(ThreadCallTreeElem * elem, SerializationBuffer * buffer){
 	buffer->SerializeFunctionId(elem->FunctionId);
 	buffer->SerializeUINT(elem->EnterCount);
 	buffer->SerializeUINT(elem->LeaveCount);
@@ -86,6 +86,6 @@ void ThreadCallTree::SerializeTreeElem(ThreadCallTreeElem * elem, SerializationB
 	map<FunctionID, shared_ptr<ThreadCallTreeElem>>::iterator it = pChildrenMap->begin();
 	for(; it != pChildrenMap->end(); it++){
 		ThreadCallTreeElem * childElem = it->second.get();
-		SerializeTreeElem(childElem, buffer);
+		SerializeCallTreeElem(childElem, buffer);
 	}
 }

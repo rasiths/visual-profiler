@@ -21,6 +21,9 @@ public:
 	virtual void Serialize(SerializationBuffer * buffer);
 	virtual void ToString(wstringstream & wsout);
 
+protected:
+	void SerializeCallTreeElem(StatisticalCallTreeElem * elem, SerializationBuffer * buffer);
+
 private:
 	#pragma region waitJoinSleep
 	//FILETIME user;

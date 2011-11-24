@@ -5,11 +5,15 @@
 #include <string>
 #include "MetadataTypes.h"
 #include "ProfilingDataTypes.h"
+#include "Commands.h"
+#include "Actions.h"
 #include <iostream>
 
 #define INITIAL_BUFFER_SIZE 0x2000
 #define SIZE_OF_METADATATYPES sizeof(MetadataTypes)
 #define SIZE_OF_PROFILINGDATATYPES sizeof(ProfilingDataTypes)
+#define SIZE_OF_COMMANDS sizeof(Commands)
+#define SIZE_OF_ACTIONS sizeof(Actions)
 #define SIZE_OF_UINT_PTR sizeof(UINT_PTR)
 #define SIZE_OF_MDTOKEN sizeof(mdToken)
 #define SIZE_OF_WCHAR sizeof(WCHAR)
@@ -89,6 +93,14 @@ public:
 
 	void SerializeProfilingDataTypes(const ProfilingDataTypes profilingDataType){
 		CopyToBuffer(&profilingDataType, SIZE_OF_PROFILINGDATATYPES);
+	}
+
+	void SerializeCommands(const Commands command){
+		CopyToBuffer(&command, SIZE_OF_COMMANDS);
+	}
+
+	void SerializeActions(const Actions action){
+		CopyToBuffer(&action, SIZE_OF_ACTIONS);
 	}
 
 	void SerializeULONGLONG(ULONGLONG & ull){

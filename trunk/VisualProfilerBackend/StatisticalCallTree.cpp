@@ -71,8 +71,6 @@ void StatisticalCallTree::ProcessSamples(vector<FunctionID> * functionIdsSnapsho
 	}
 }
 
-
-
 void StatisticalCallTree::SetOsThreadInfo(DWORD osThreadId){
 	HANDLE osThreadHandle = OpenThread(THREAD_QUERY_INFORMATION,false,osThreadId);
 	if(osThreadHandle == NULL){
@@ -122,5 +120,22 @@ void StatisticalCallTree::Serialize(SerializationBuffer * buffer){
 	buffer->SerializeULONGLONG(KernelModeDurationHns);
 	buffer->SerializeULONGLONG(UserModeDurationHns);
 
-	_rootCallTreeElem.Serialize(buffer);
+	SerializeCallTreeElem(&_rootCallTreeElem, buffer);
+}
+
+void StatisticalCallTree::SerializeCallTreeElem(StatisticalCallTreeElem * elem, SerializationBuffer * buffer){
+	buffer->SerializeFunctionId(elem->FunctionId);
+	buffer->SerializeUINT(elem->StackTopOccurrenceCount);
+	buffer->SerializeUINT(elem->LastProfiledFrameInStackCount);
+	
+	map<FunctionID, shared_ptr<StatisticalCallTreeElem>> * childrenMap =  elem->GetChildrenMap();
+	UINT childrenSize = childrenMap->size();
+	buffer->SerializeUINT(childrenSize);
+
+	map<FunctionID, shared_ptr<StatisticalCallTreeElem>>::iterator it = childrenMap->begin();
+	
+	for(; it != childrenMap->end(); it++){
+		StatisticalCallTreeElem * childElem = it->second.get();
+		SerializeCallTreeElem(childElem, buffer);	
+	}
 }

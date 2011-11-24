@@ -46,5 +46,14 @@ namespace VisualProfilerAccess
             ulong uInt64 = BitConverter.ToUInt64(buffer, 0);
             return uInt64;
         }
+
+        public static Actions DeserializeActions(this Stream byteStream)
+        {
+            byte[] buffer = new byte[sizeof(UInt32)];
+            byteStream.Read(buffer, 0, buffer.Length);
+
+            Actions action = (Actions)BitConverter.ToUInt32(buffer, 0);
+            return action;
+        }
     }
 }
