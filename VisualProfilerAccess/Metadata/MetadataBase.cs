@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace VisualProfilerAccess.Metadata
 {
@@ -18,7 +16,7 @@ namespace VisualProfilerAccess.Metadata
     public abstract class MetadataBase<TMetadata> : MetadataBase where TMetadata : MetadataBase<TMetadata>, new()
     {
         private static Dictionary<uint, TMetadata> _cache = new Dictionary<uint, TMetadata>();
-      
+
         public static Dictionary<uint, TMetadata> Cache
         {
             get { return _cache; }
@@ -28,7 +26,7 @@ namespace VisualProfilerAccess.Metadata
         public static TMetadata DeserializeMetadata(Stream byteStream, bool addToCache = true)
         {
             Contract.Requires(byteStream != null);
-            TMetadata metadata = new TMetadata();
+            var metadata = new TMetadata();
 
             metadata.Id = byteStream.DeserializeUint32();
             metadata.MdToken = byteStream.DeserializeUint32();
@@ -43,4 +41,3 @@ namespace VisualProfilerAccess.Metadata
         }
     }
 }
-

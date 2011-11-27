@@ -5,8 +5,6 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using VisualProfilerAccess.Metadata;
@@ -18,17 +16,30 @@ namespace VisualProfilerAccess
     public class ProfilerAccess<TCallTree> where TCallTree : CallTree, new()
     {
         private const string NamePipeName = "VisualProfilerAccessPipe";
-        private Task _actionReceiverTask;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private Task _actionReceiverTask;
         private Task _commandSenderTask;
         private NamedPipeServerStream _pipeServer;
+
+        public ProfilerAccess(ProcessStartInfo profileeProcessStartInfo, ProfilerTypes profilerType,
+                              TimeSpan profilerDataUpdatePeriod,
+                              EventHandler<ProfilerDataUpdateEventArgs<TCallTree>> updateCallback)
+        {
+            Contract.Requires(profileeProcessStartInfo != null);
+            Contract.Requires(updateCallback != null);
+            ProfileeProcessStartInfo = profileeProcessStartInfo;
+            ProfilerType = profilerType;
+            ProfilerDataUpdatePeriod = profilerDataUpdatePeriod;
+            UpdateCallback = updateCallback;
+        }
 
         private Guid ProfilerCClassGuid
         {
             get
             {
-                string profilerGuidString = string.Format("{{19840906-C001-0000-000C-00000000000{0}}}", (int)ProfilerType);
-                Guid profilerGuid = new Guid(profilerGuidString);
+                string profilerGuidString = string.Format("{{19840906-C001-0000-000C-00000000000{0}}}",
+                                                          (int) ProfilerType);
+                var profilerGuid = new Guid(profilerGuidString);
                 return profilerGuid;
             }
         }
@@ -40,16 +51,6 @@ namespace VisualProfilerAccess
         public Process ProfileeProcess { get; set; }
         public EventHandler<ProfilerDataUpdateEventArgs<TCallTree>> UpdateCallback { get; private set; }
 
-        public ProfilerAccess(ProcessStartInfo profileeProcessStartInfo, ProfilerTypes profilerType, TimeSpan profilerDataUpdatePeriod, EventHandler<ProfilerDataUpdateEventArgs<TCallTree>> updateCallback)
-        {
-            Contract.Requires(profileeProcessStartInfo != null);
-            Contract.Requires(updateCallback != null);
-            ProfileeProcessStartInfo = profileeProcessStartInfo;
-            ProfilerType = profilerType;
-            ProfilerDataUpdatePeriod = profilerDataUpdatePeriod;
-            UpdateCallback = updateCallback;
-        }
-
         private void InitNamePipe()
         {
             _pipeServer = new NamedPipeServerStream("VisualProfilerAccessPipe", PipeDirection.InOut, 1,
@@ -58,13 +59,15 @@ namespace VisualProfilerAccess
 
         private void StartReceiveActionsFromProfilee()
         {
-            _actionReceiverTask = new Task(ReceiveActionsFromProfilee, _cancellationTokenSource, TaskCreationOptions.LongRunning);
+            _actionReceiverTask = new Task(ReceiveActionsFromProfilee, _cancellationTokenSource,
+                                           TaskCreationOptions.LongRunning);
             _actionReceiverTask.Start();
         }
 
         private void StartSendingCommandsToProfilee()
         {
-            _commandSenderTask = new Task(SendCommandsToProfilee, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning);
+            _commandSenderTask = new Task(SendCommandsToProfilee, _cancellationTokenSource.Token,
+                                          TaskCreationOptions.LongRunning);
             _commandSenderTask.Start();
         }
 
@@ -94,20 +97,20 @@ namespace VisualProfilerAccess
                 switch (receivedAction)
                 {
                     case Actions.SendingProfilingData:
-                        byte[] streamLengthBytes = new byte[sizeof(UInt32)];
+                        var streamLengthBytes = new byte[sizeof (UInt32)];
                         _pipeServer.Read(streamLengthBytes, 0, streamLengthBytes.Length);
 
-                        var streamLength = BitConverter.ToUInt32(streamLengthBytes, 0);
-                        byte[] profilingDataBytes = new byte[streamLength];
+                        uint streamLength = BitConverter.ToUInt32(streamLengthBytes, 0);
+                        var profilingDataBytes = new byte[streamLength];
                         _pipeServer.Read(profilingDataBytes, 0, profilingDataBytes.Length);
 
-                        MemoryStream profilingDataStream = new MemoryStream(profilingDataBytes);
+                        var profilingDataStream = new MemoryStream(profilingDataBytes);
                         MetadataDeserializer.DeserializeAllMetadataAndCacheIt(profilingDataStream);
 
-                        List<TCallTree> callTrees = new List<TCallTree>();
+                        var callTrees = new List<TCallTree>();
                         while (profilingDataStream.Position < profilingDataStream.Length)
                         {
-                            TCallTree callTree = new TCallTree();
+                            var callTree = new TCallTree();
                             callTree.Deserialize(profilingDataStream);
                             callTrees.Add(callTree);
                         }
@@ -138,7 +141,7 @@ namespace VisualProfilerAccess
         public void Wait()
         {
             _commandSenderTask.Wait();
-            _actionReceiverTask.Wait();            
+            _actionReceiverTask.Wait();
         }
 
         public void SendCommandsToProfilee(object state)
@@ -148,7 +151,7 @@ namespace VisualProfilerAccess
             StartReceiveActionsFromProfilee();
             while (!cancellationToken.IsCancellationRequested)
             {
-                byte[] commandBytes = BitConverter.GetBytes((UInt32)Commands.SendProfilingData);
+                byte[] commandBytes = BitConverter.GetBytes((UInt32) Commands.SendProfilingData);
                 _pipeServer.Write(commandBytes, 0, commandBytes.Length);
                 Thread.Sleep(ProfilerDataUpdatePeriod);
             }
@@ -176,7 +179,7 @@ namespace VisualProfilerAccess
         TracingProfiler = 2
     }
 
-    enum Commands
+    internal enum Commands
     {
         SendProfilingData = 101
     }
@@ -188,76 +191,12 @@ namespace VisualProfilerAccess
         Error = 203
     }
 
-
-    class Program
+    internal class Program
     {
-     
-        //static void ReadActions(object o)
-        //{
-        //    while (true)
-        //    {
-        //        Actions action = _pipeServer.DeserializeActions();
-        //        switch (action)
-        //        {
-        //            case Actions.SendingProfilingData:
-        //                byte[] byteSizeBytes = new byte[sizeof(UInt32)];
-        //                _pipeServer.Read(byteSizeBytes, 0, byteSizeBytes.Length);
-        //                var streamLength = BitConverter.ToUInt32(byteSizeBytes, 0);
-
-        //                //if (streamLength == 0)
-        //                //    return;
-
-        //                byte[] bytes = new byte[streamLength];
-
-        //                _pipeServer.Read(bytes, 0, bytes.Length);
-
-        //                MemoryStream memoryStream = new MemoryStream(bytes);
-        //                MetadataDeserializer.DeserializeAllMetadataAndCacheIt(memoryStream);
-
-
-        //                //Console.ForegroundColor = Console.ForegroundColor == ConsoleColor.Blue ? ConsoleColor.Red : ConsoleColor.Blue;
-        //                Console.Clear();
-
-        //                //Console.WriteLine("Methods={0}, Classes={1}, Modules={2}, Assemblies={3}, TreeSize={4}KB", 
-        //                //    MethodMetadata.Cache.Count,
-        //                //    ClassMetadata.Cache.Count,
-        //                //    ModuleMetadata.Cache.Count,
-        //                //    AssemblyMetadata.Cache.Count,
-        //                //    (memoryStream.Length - memoryStream.Position)/(1024.0)
-        //                //    );
-
-        //                //foreach (var assembly in AssemblyMetadata.Cache.Values)
-        //                //{
-        //                //    Console.WriteLine("{0}, mdToken={1}",assembly.MdToken, assembly.Name);
-        //                //}
-
-        //                while (memoryStream.Position < memoryStream.Length)
-        //                {
-        //                    Console.WriteLine("Methods={0}, Classes={1}, ");
-        //                    var deserializeCallTree = TracingCallTree.DeserializeCallTree(memoryStream);
-        //                    //  var deserializeCallTree = SamplingCallTree.DeserializeCallTree(memoryStream);
-        //                    var s = deserializeCallTree.ToString();
-        //                    Console.WriteLine(s);
-        //                    Console.WriteLine();
-        //                }
-        //                break;
-        //            case Actions.ProfilingFinished:
-        //                _stop = true;
-        //                return;
-
-        //            default:
-        //                //exception was thrown in the profilee...
-        //                goto case Actions.ProfilingFinished;
-        //        }
-        //    }
-        //}
-
-
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
-            ProcessStartInfo processStartInfo = new ProcessStartInfo();
+            var processStartInfo = new ProcessStartInfo();
             processStartInfo.FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe";
 
             var profilerAccess = new ProfilerAccess<TracingCallTree>(processStartInfo,
@@ -272,7 +211,7 @@ namespace VisualProfilerAccess
         private static void UpdateCallback(object sender, ProfilerDataUpdateEventArgs<TracingCallTree> eventArgs)
         {
             Console.Clear();
-            foreach (var callTree in eventArgs.CallTrees)
+            foreach (TracingCallTree callTree in eventArgs.CallTrees)
             {
                 string callTreeString = callTree.ToString();
                 Console.WriteLine(callTree);

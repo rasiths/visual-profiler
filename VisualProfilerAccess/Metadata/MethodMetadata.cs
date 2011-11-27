@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+﻿using System.Diagnostics.Contracts;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace VisualProfilerAccess.Metadata
 {
@@ -39,16 +35,14 @@ namespace VisualProfilerAccess.Metadata
         public override string ToString()
         {
             string parameterString = string.Empty;
-            foreach (var parameter in Parameters)
+            foreach (string parameter in Parameters)
             {
                 parameterString += parameter + ", ";
             }
             parameterString = parameterString.TrimEnd(", ".ToCharArray());
 
-            string str = string.Format("[{0}]{1}.{2}({3})", Class.Module.Assembly.Name, Class.ToString() ,Name, parameterString);
+            string str = string.Format("[{0}]{1}.{2}({3})", Class.Module.Assembly.Name, Class, Name, parameterString);
             return str;
         }
-
-        
     }
 }

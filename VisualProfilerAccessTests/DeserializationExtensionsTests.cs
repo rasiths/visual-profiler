@@ -13,7 +13,7 @@ namespace VisualProfilerAccessTests
         [Test]
         public void DeserializeBoolTest()
         {
-            byte[] bytes = { 0x00, 0x01 };
+            byte[] bytes = {0x00, 0x01};
             MemoryStream memoryStream = bytes.ConvertToMemoryStream();
 
             bool falseValue = memoryStream.DeserializeBool();
@@ -24,14 +24,25 @@ namespace VisualProfilerAccessTests
         }
 
         [Test]
-        public void DeserializeUInt32Test()
+        public void DeserializeMetadataTypesTest()
         {
-            byte[] bytes = { 0x40, 0xE2, 0x01, 0x00 };
+            byte[] bytes = {
+                               0x0B, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00, 0x00, 0x0E, 0x00, 0x00,
+                               0x00
+                           };
+            MemoryStream memoryStream = bytes.ConvertToMemoryStream();
 
-            uint expectedUint32 = 123456; //0x001E240
-            uint actualUint32 = bytes.ConvertToMemoryStream().DeserializeUint32();
+            MetadataTypes metadataType = memoryStream.DeserializeMetadataType();
+            Assert.AreEqual(MetadataTypes.AssemblyMetadata, metadataType);
 
-            Assert.AreEqual(expectedUint32, actualUint32);
+            metadataType = memoryStream.DeserializeMetadataType();
+            Assert.AreEqual(MetadataTypes.ModuleMedatada, metadataType);
+
+            metadataType = memoryStream.DeserializeMetadataType();
+            Assert.AreEqual(MetadataTypes.ClassMedatada, metadataType);
+
+            metadataType = memoryStream.DeserializeMetadataType();
+            Assert.AreEqual(MetadataTypes.MethodMedatada, metadataType);
         }
 
         [Test]
@@ -51,22 +62,14 @@ namespace VisualProfilerAccessTests
         }
 
         [Test]
-        public void DeserializeMetadataTypesTest()
+        public void DeserializeUInt32Test()
         {
-            byte[] bytes = { 0x0B, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00, 0x00, 0x0E, 0x00, 0x00, 0x00 };
-            MemoryStream memoryStream = bytes.ConvertToMemoryStream();
-            
-            MetadataTypes metadataType = memoryStream.DeserializeMetadataType();
-            Assert.AreEqual(MetadataTypes.AssemblyMetadata, metadataType);
-            
-            metadataType = memoryStream.DeserializeMetadataType();
-            Assert.AreEqual(MetadataTypes.ModuleMedatada, metadataType);
-            
-            metadataType = memoryStream.DeserializeMetadataType();
-            Assert.AreEqual(MetadataTypes.ClassMedatada, metadataType);
-            
-            metadataType = memoryStream.DeserializeMetadataType();
-            Assert.AreEqual(MetadataTypes.MethodMedatada, metadataType);
+            byte[] bytes = {0x40, 0xE2, 0x01, 0x00};
+
+            uint expectedUint32 = 123456; //0x001E240
+            uint actualUint32 = bytes.ConvertToMemoryStream().DeserializeUint32();
+
+            Assert.AreEqual(expectedUint32, actualUint32);
         }
 
         [Test]
@@ -76,6 +79,6 @@ namespace VisualProfilerAccessTests
             UInt64 expectedValue = 0x123456789abcdef0;
             UInt64 actualValue = bytes.ConvertToMemoryStream().DeserializeUInt64();
             Assert.AreEqual(expectedValue, actualValue);
-        }   
+        }
     }
 }

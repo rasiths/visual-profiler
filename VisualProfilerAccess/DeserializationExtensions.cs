@@ -9,7 +9,7 @@ namespace VisualProfilerAccess
     {
         public static uint DeserializeUint32(this Stream byteStream)
         {
-            byte[] buffer = new byte[sizeof(uint)];
+            var buffer = new byte[sizeof (uint)];
             byteStream.Read(buffer, 0, buffer.Length);
             uint uInt32 = BitConverter.ToUInt32(buffer, 0);
             return uInt32;
@@ -18,7 +18,7 @@ namespace VisualProfilerAccess
         public static string DeserializeString(this Stream byteStream)
         {
             uint stringLength = byteStream.DeserializeUint32();
-            byte[] buffer = new byte[stringLength];
+            var buffer = new byte[stringLength];
             byteStream.Read(buffer, 0, buffer.Length);
             string s = Encoding.Unicode.GetString(buffer);
             return s;
@@ -26,7 +26,7 @@ namespace VisualProfilerAccess
 
         public static bool DeserializeBool(this Stream byteStream)
         {
-            byte[] buffer = new byte[sizeof(bool)];
+            var buffer = new byte[sizeof (bool)];
             byteStream.Read(buffer, 0, buffer.Length);
             bool b = BitConverter.ToBoolean(buffer, 0);
             return b;
@@ -35,13 +35,13 @@ namespace VisualProfilerAccess
         public static MetadataTypes DeserializeMetadataType(this Stream stream)
         {
             uint uint32 = stream.DeserializeUint32();
-            MetadataTypes messageTypes = (MetadataTypes) uint32;
+            var messageTypes = (MetadataTypes) uint32;
             return messageTypes;
         }
 
         public static UInt64 DeserializeUInt64(this Stream byteStream)
         {
-            byte[] buffer = new byte[sizeof(UInt64)];
+            var buffer = new byte[sizeof (UInt64)];
             byteStream.Read(buffer, 0, buffer.Length);
             ulong uInt64 = BitConverter.ToUInt64(buffer, 0);
             return uInt64;
@@ -49,10 +49,10 @@ namespace VisualProfilerAccess
 
         public static Actions DeserializeActions(this Stream byteStream)
         {
-            byte[] buffer = new byte[sizeof(UInt32)];
+            var buffer = new byte[sizeof (UInt32)];
             byteStream.Read(buffer, 0, buffer.Length);
 
-            Actions action = (Actions)BitConverter.ToUInt32(buffer, 0);
+            var action = (Actions) BitConverter.ToUInt32(buffer, 0);
             return action;
         }
     }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
+﻿using System.Diagnostics.Contracts;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace VisualProfilerAccess.Metadata
 {
@@ -12,6 +8,7 @@ namespace VisualProfilerAccess.Metadata
         public string Name { get; set; }
         public bool IsGeneric { get; set; }
         public ModuleMetadata Module { get; set; }
+
         public override MetadataTypes MetadataType
         {
             get { return MetadataTypes.ClassMedatada; }
@@ -25,13 +22,12 @@ namespace VisualProfilerAccess.Metadata
             IsGeneric = byteStream.DeserializeBool();
             uint moduleId = byteStream.DeserializeUint32();
             Module = ModuleMetadata.Cache[moduleId];
-
         }
 
         public override string ToString()
         {
-           string className = Name + (IsGeneric ? "<>" : string.Empty);
-           return className;
+            string className = Name + (IsGeneric ? "<>" : string.Empty);
+            return className;
         }
     }
 }
