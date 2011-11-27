@@ -48,44 +48,17 @@ public:
 		COM_INTERFACE_ENTRY(ICorProfilerCallback3)
 	END_COM_MAP()
 
-
-
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
 	HRESULT FinalConstruct()
 	{
-		return S_OK;
-	}
-
-	void Serial(){
-
 		_profilerAccess.StartListeningAsync();
-
+		return S_OK;
 	}
 
 	void FinalRelease()
 	{  
-		_profilerAccess.StopListening();
-		Serial();
-		return;
-
-
-		cout << endl <<"----- Profiler output -----" << endl;
-		map<ThreadID, shared_ptr<StatisticalCallTree>> * pStatCallTreeMap = StatisticalCallTree::GetCallTreeMap();
-		wstringstream wsout;	
-		for(map<ThreadID, shared_ptr<StatisticalCallTree>>::iterator it = pStatCallTreeMap->begin(); it != pStatCallTreeMap->end(); it++ ){
-			StatisticalCallTree * pStatCallTree = it->second.get();
-			pStatCallTree->ToString(wsout);
-			wsout << endl<< endl;
-		}
-		//wcout << wsout.rdbuf();
-		wofstream file;
-		file.open("d:\\sampling.txt",fstream::out);
-		file << wsout.rdbuf();
-		file.close();
-
-		int a;
-		cin >> a;
+		_profilerAccess.FinishProfiling();
 	}
 
 public:

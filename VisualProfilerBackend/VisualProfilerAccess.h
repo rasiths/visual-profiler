@@ -35,6 +35,7 @@ public:
 	}
 
 	~VisualProfilerAccess(){
+		if(IsHandleInvalid()) return ;
 		CloseHandle(_pipeHandle);
 	}
 
@@ -45,23 +46,24 @@ public:
 
 
 	void StartListeningAsync(){
-		if(IsHandleInvalid()){
-			return ;
-		}
+		if(IsHandleInvalid()) return ;
+
 		_listeningThread = CreateThread(NULL,NULL,StartListening, this, NULL, NULL);
 	}
 
 	void StopListening(){
+		if(IsHandleInvalid()) return ;
+
 		_stopListening = true;
 		CancelIoEx(_pipeHandle, NULL);
-		/*wstring message = L"Bye Bye";
-		DWORD written = 0;*/
-		//WriteFile(_pipeHandle, message.data(), message.size(), &written, NULL);
 	}
 
 	void CarryOutAction(Actions action, void * actionData){
+		if(IsHandleInvalid()) return ;
+
 		SerializationBuffer buffer;
 		buffer.SerializeActions(action);
+		
 		switch(action){
 		case Actions_SendingProfilingData:
 			Actions_SendingProfilingDataMethod(&buffer, actionData);
@@ -72,7 +74,17 @@ public:
 			CheckError(false);
 			break;
 		}
+		
 		SendBuffer(&buffer);
+	}
+
+	void FinishProfiling(){
+		if(IsHandleInvalid()) return ;
+
+		StopListening();
+		bool useShapshots= false;
+		CarryOutAction(Actions_SendingProfilingData, &useShapshots);
+		CarryOutAction(Actions_ProfilingFinished, NULL);
 	}
 
 private:
@@ -90,7 +102,7 @@ private:
 			bool useSnapshot = true;
 			switch(command){
 			case Commands_SendProfilingData:
-				
+
 				pThis->CarryOutAction(Actions_SendingProfilingData, &useSnapshot);
 				break;
 			case Commands_FishishProfiling:
@@ -104,7 +116,6 @@ private:
 		DWORD success = 1;
 		return success;
 	}
-
 
 	void SerializeProfilingData(SerializationBuffer * buffer, bool useSnapshotBefore){
 		SerializationBuffer bufferProfilingData;
@@ -132,7 +143,7 @@ private:
 	void SendBuffer(SerializationBuffer * buffer){
 		DWORD writtenBytesCount = 0;
 		WriteFile(_pipeHandle,buffer->GetBuffer(),buffer->Size(),&writtenBytesCount,0);
-		CheckError(writtenBytesCount == buffer->Size());
+//		CheckError(writtenBytesCount == buffer->Size());
 	}
 
 	Commands WaitForCommand(){
@@ -148,11 +159,3 @@ private:
 	}
 };
 
-//class MessageDispatcher{
-//
-//}
-//
-//class Message{
-//	virtual void Dispatch(HANDLE pipeHandle, SerializationBuffer * buffer, void* context) = 0;
-//	static shared_ptr<Message> Wait
-//}

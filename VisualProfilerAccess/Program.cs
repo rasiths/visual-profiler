@@ -1,17 +1,181 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using VisualProfilerAccess.Metadata;
+using VisualProfilerAccess.ProfilingData;
 using VisualProfilerAccess.ProfilingData.CallTrees;
 
 namespace VisualProfilerAccess
 {
+    public class ProfilerAccess<TCallTree> where TCallTree : CallTree, new()
+    {
+        private const string NamePipeName = "VisualProfilerAccessPipe";
+        private Task _actionReceiverTask;
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private Task _commandSenderTask;
+        private NamedPipeServerStream _pipeServer;
+
+        private Guid ProfilerCClassGuid
+        {
+            get
+            {
+                string profilerGuidString = string.Format("{{19840906-C001-0000-000C-00000000000{0}}}", (int)ProfilerType);
+                Guid profilerGuid = new Guid(profilerGuidString);
+                return profilerGuid;
+            }
+        }
+
+        public ProcessStartInfo ProfileeProcessStartInfo { get; private set; }
+        public ProfilerTypes ProfilerType { get; private set; }
+        public TimeSpan ProfilerDataUpdatePeriod { get; set; }
+
+        public Process ProfileeProcess { get; set; }
+        public EventHandler<ProfilerDataUpdateEventArgs<TCallTree>> UpdateCallback { get; private set; }
+
+        public ProfilerAccess(ProcessStartInfo profileeProcessStartInfo, ProfilerTypes profilerType, TimeSpan profilerDataUpdatePeriod, EventHandler<ProfilerDataUpdateEventArgs<TCallTree>> updateCallback)
+        {
+            Contract.Requires(profileeProcessStartInfo != null);
+            Contract.Requires(updateCallback != null);
+            ProfileeProcessStartInfo = profileeProcessStartInfo;
+            ProfilerType = profilerType;
+            ProfilerDataUpdatePeriod = profilerDataUpdatePeriod;
+            UpdateCallback = updateCallback;
+        }
+
+        private void InitNamePipe()
+        {
+            _pipeServer = new NamedPipeServerStream("VisualProfilerAccessPipe", PipeDirection.InOut, 1,
+                                                    PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+        }
+
+        private void StartReceiveActionsFromProfilee()
+        {
+            _actionReceiverTask = new Task(ReceiveActionsFromProfilee, _cancellationTokenSource, TaskCreationOptions.LongRunning);
+            _actionReceiverTask.Start();
+        }
+
+        private void StartSendingCommandsToProfilee()
+        {
+            _commandSenderTask = new Task(SendCommandsToProfilee, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning);
+            _commandSenderTask.Start();
+        }
+
+        private void StartProfileeProcess()
+        {
+            ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_ENABLE_PROFILING", "1");
+            ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER", ProfilerCClassGuid.ToString("B"));
+            ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER_PATH",
+                                                              @"D:\Honzik\Desktop\visual-profiler\Debug\VisualProfilerBackend.dll");
+            ProfileeProcessStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", NamePipeName);
+            ProfileeProcessStartInfo.UseShellExecute = false;
+            ProfileeProcess = Process.Start(ProfileeProcessStartInfo);
+        }
+
+        private void ReceiveActionsFromProfilee(object state)
+        {
+            CancellationToken cancellationToken = _cancellationTokenSource.Token;
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                Actions receivedAction = _pipeServer.DeserializeActions();
+                var eventArgs = new ProfilerDataUpdateEventArgs<TCallTree>();
+                eventArgs.Action = receivedAction;
+                eventArgs.ProfilerAccess = this;
+                eventArgs.ProfilerType = ProfilerType;
+                eventArgs.ProfilingDataType = ProfilingDataTypes.Nothing;
+
+                switch (receivedAction)
+                {
+                    case Actions.SendingProfilingData:
+                        byte[] streamLengthBytes = new byte[sizeof(UInt32)];
+                        _pipeServer.Read(streamLengthBytes, 0, streamLengthBytes.Length);
+
+                        var streamLength = BitConverter.ToUInt32(streamLengthBytes, 0);
+                        byte[] profilingDataBytes = new byte[streamLength];
+                        _pipeServer.Read(profilingDataBytes, 0, profilingDataBytes.Length);
+
+                        MemoryStream profilingDataStream = new MemoryStream(profilingDataBytes);
+                        MetadataDeserializer.DeserializeAllMetadataAndCacheIt(profilingDataStream);
+
+                        List<TCallTree> callTrees = new List<TCallTree>();
+                        while (profilingDataStream.Position < profilingDataStream.Length)
+                        {
+                            TCallTree callTree = new TCallTree();
+                            callTree.Deserialize(profilingDataStream);
+                            callTrees.Add(callTree);
+                        }
+                        eventArgs.CallTrees = callTrees;
+                        break;
+
+                    case Actions.ProfilingFinished:
+                        _cancellationTokenSource.Cancel();
+                        return;
+
+                    default:
+                        eventArgs.Action = Actions.Error;
+                        eventArgs.CallTrees = null;
+                        _cancellationTokenSource.Cancel();
+                        return;
+                }
+                ThreadPool.QueueUserWorkItem(o => UpdateCallback(this, eventArgs));
+            }
+        }
+
+        public void StartProfiler()
+        {
+            InitNamePipe();
+            StartSendingCommandsToProfilee();
+            StartProfileeProcess();
+        }
+
+        public void Wait()
+        {
+            _commandSenderTask.Wait();
+            _actionReceiverTask.Wait();            
+        }
+
+        public void SendCommandsToProfilee(object state)
+        {
+            CancellationToken cancellationToken = _cancellationTokenSource.Token;
+            _pipeServer.WaitForConnection();
+            StartReceiveActionsFromProfilee();
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                byte[] commandBytes = BitConverter.GetBytes((UInt32)Commands.SendProfilingData);
+                _pipeServer.Write(commandBytes, 0, commandBytes.Length);
+                Thread.Sleep(ProfilerDataUpdatePeriod);
+            }
+        }
+    }
+
+    public class ProfilerDataUpdateEventArgs : EventArgs
+    {
+        public ProfilerTypes ProfilerType { get; set; }
+        public ProfilingDataTypes ProfilingDataType { get; set; }
+        public Actions Action { get; set; }
+    }
+
+
+    public class ProfilerDataUpdateEventArgs<TCallTree> : ProfilerDataUpdateEventArgs where TCallTree : CallTree, new()
+    {
+        public List<TCallTree> CallTrees { get; set; }
+        public ProfilerAccess<TCallTree> ProfilerAccess { get; set; }
+    }
+
+    public enum ProfilerTypes
+    {
+        Nothing = 0,
+        SamplingProfiler = 1,
+        TracingProfiler = 2
+    }
+
     enum Commands
     {
         SendProfilingData = 101
@@ -20,228 +184,100 @@ namespace VisualProfilerAccess
     public enum Actions
     {
         SendingProfilingData = 201,
-        ProfilingFinished = 202
+        ProfilingFinished = 202,
+        Error = 203
     }
 
 
     class Program
     {
-        private static NamedPipeServerStream _pipeServer;
-        private static bool _stop = false;
+     
+        //static void ReadActions(object o)
+        //{
+        //    while (true)
+        //    {
+        //        Actions action = _pipeServer.DeserializeActions();
+        //        switch (action)
+        //        {
+        //            case Actions.SendingProfilingData:
+        //                byte[] byteSizeBytes = new byte[sizeof(UInt32)];
+        //                _pipeServer.Read(byteSizeBytes, 0, byteSizeBytes.Length);
+        //                var streamLength = BitConverter.ToUInt32(byteSizeBytes, 0);
 
-        static void ReadFromPipe(object o)
-        {
-            while (true)
-            {
-                Console.WriteLine("Reading async: ");
-                byte[] bytes = new byte[256];
+        //                //if (streamLength == 0)
+        //                //    return;
 
-                _pipeServer.Read(bytes, 0, bytes.Length);
-                var str = Encoding.Unicode.GetString(bytes);
-                Console.Write(str);
-                Console.WriteLine();
-            }
+        //                byte[] bytes = new byte[streamLength];
 
+        //                _pipeServer.Read(bytes, 0, bytes.Length);
 
-        }
-
-
-
-        static void ReadActions(object o)
-        {
-            while (true)
-            {
-                Actions action = _pipeServer.DeserializeActions();
-                switch (action)
-                {
-                    case Actions.SendingProfilingData:
-                        byte[] byteSizeBytes = new byte[sizeof (UInt32)];
-                        _pipeServer.Read(byteSizeBytes, 0, byteSizeBytes.Length);
-                        var streamLength = BitConverter.ToUInt32(byteSizeBytes, 0);
-
-                        //if (streamLength == 0)
-                        //    return;
-
-                        byte[] bytes = new byte[streamLength];
-
-                        _pipeServer.Read(bytes, 0, bytes.Length);
-
-                        MemoryStream memoryStream = new MemoryStream(bytes);
-                        MetadataDeserializer.DeserializeAllMetadataAndCacheIt(memoryStream);
+        //                MemoryStream memoryStream = new MemoryStream(bytes);
+        //                MetadataDeserializer.DeserializeAllMetadataAndCacheIt(memoryStream);
 
 
-                        //Console.ForegroundColor = Console.ForegroundColor == ConsoleColor.Blue ? ConsoleColor.Red : ConsoleColor.Blue;
-                        Console.Clear();
+        //                //Console.ForegroundColor = Console.ForegroundColor == ConsoleColor.Blue ? ConsoleColor.Red : ConsoleColor.Blue;
+        //                Console.Clear();
 
-                        //Console.WriteLine("Methods={0}, Classes={1}, Modules={2}, Assemblies={3}, TreeSize={4}KB", 
-                        //    MethodMetadata.Cache.Count,
-                        //    ClassMetadata.Cache.Count,
-                        //    ModuleMetadata.Cache.Count,
-                        //    AssemblyMetadata.Cache.Count,
-                        //    (memoryStream.Length - memoryStream.Position)/(1024.0)
-                        //    );
+        //                //Console.WriteLine("Methods={0}, Classes={1}, Modules={2}, Assemblies={3}, TreeSize={4}KB", 
+        //                //    MethodMetadata.Cache.Count,
+        //                //    ClassMetadata.Cache.Count,
+        //                //    ModuleMetadata.Cache.Count,
+        //                //    AssemblyMetadata.Cache.Count,
+        //                //    (memoryStream.Length - memoryStream.Position)/(1024.0)
+        //                //    );
 
-                        //foreach (var assembly in AssemblyMetadata.Cache.Values)
-                        //{
-                        //    Console.WriteLine("{0}, mdToken={1}",assembly.MdToken, assembly.Name);
-                        //}
+        //                //foreach (var assembly in AssemblyMetadata.Cache.Values)
+        //                //{
+        //                //    Console.WriteLine("{0}, mdToken={1}",assembly.MdToken, assembly.Name);
+        //                //}
 
-                        while (memoryStream.Position < memoryStream.Length)
-                        {
-                            Console.WriteLine("Methods={0}, Classes={1}, ");
-                            var deserializeCallTree = TracingCallTree.DeserializeCallTree(memoryStream);
-                            var s = deserializeCallTree.ToString();
-                            Console.WriteLine(s);
-                            Console.WriteLine();
-                        }
-                        break;
-                    case Actions.ProfilingFinished:
-                        _stop = true;
-                        return;
+        //                while (memoryStream.Position < memoryStream.Length)
+        //                {
+        //                    Console.WriteLine("Methods={0}, Classes={1}, ");
+        //                    var deserializeCallTree = TracingCallTree.DeserializeCallTree(memoryStream);
+        //                    //  var deserializeCallTree = SamplingCallTree.DeserializeCallTree(memoryStream);
+        //                    var s = deserializeCallTree.ToString();
+        //                    Console.WriteLine(s);
+        //                    Console.WriteLine();
+        //                }
+        //                break;
+        //            case Actions.ProfilingFinished:
+        //                _stop = true;
+        //                return;
 
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
+        //            default:
+        //                //exception was thrown in the profilee...
+        //                goto case Actions.ProfilingFinished;
+        //        }
+        //    }
+        //}
 
 
         static void Main(string[] args)
         {
 
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
-            _pipeServer = new NamedPipeServerStream("VisualProfilerAccessPipe", PipeDirection.InOut, 1,
-                                                    PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
-
-
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
             processStartInfo.FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe";
-            processStartInfo.EnvironmentVariables.Add("COR_ENABLE_PROFILING", "1");
-            processStartInfo.EnvironmentVariables.Add("COR_PROFILER", "{19840906-C001-0000-000C-000000000002}");
-            processStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", "VisualProfilerAccessPipe");
-            processStartInfo.UseShellExecute = false;
-            var process = Process.Start(processStartInfo);
 
-            Console.Write("Waiting for client connection...");
-            _pipeServer.WaitForConnection();
-            Console.WriteLine("Client connected.");
-            //_pipeServer.BeginRead(bytes, 0, bytes.Length, AsyncCallback, bytes);
-             ThreadPool.QueueUserWorkItem(ReadActions);
-
-            while (!_stop)
-            {
-                try
-                {
-                    byte[] commandBytes = BitConverter.GetBytes((UInt32)Commands.SendProfilingData);
-
-                    _pipeServer.Write(commandBytes, 0, commandBytes.Length);
-                }
-
-                catch (IOException e)
-                {
-                    Console.WriteLine("ERROR: {0}", e.Message);
-                }
-                Thread.Sleep(2000);
-            }
+            var profilerAccess = new ProfilerAccess<TracingCallTree>(processStartInfo,
+                                                                     ProfilerTypes.TracingProfiler,
+                                                                     TimeSpan.FromMilliseconds(500),
+                                                                     UpdateCallback);
+            profilerAccess.StartProfiler();
+            profilerAccess.Wait();
+            Console.WriteLine("bye bye");
         }
 
-        static void Main2(string[] args)
+        private static void UpdateCallback(object sender, ProfilerDataUpdateEventArgs<TracingCallTree> eventArgs)
         {
-            #region bytes
-
-            byte[] bytes = {
-                               0x64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6C, 0x34, 0x18, 0x00, 0x0E, 0x00, 0x00, 0x00, 0x4C,
-                               0x34, 0x18, 0x00, 0x03, 0x00, 0x00, 0x06, 0x16, 0x00, 0x00, 0x00, 0x4F, 0x00, 0x74, 0x00,
-                               0x68, 0x00, 0x65, 0x00, 0x72, 0x00, 0x4D, 0x00, 0x65, 0x00, 0x74, 0x00, 0x68, 0x00, 0x6F,
-                               0x00, 0x64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6C, 0x34, 0x18, 0x00, 0x0E, 0x00, 0x00, 0x00,
-                               0x58, 0x34, 0x18, 0x00, 0x04, 0x00, 0x00, 0x06, 0x32, 0x00, 0x00, 0x00, 0x54, 0x00, 0x65,
-                               0x00, 0x73, 0x00, 0x74, 0x00, 0x4D, 0x00, 0x65, 0x00, 0x73, 0x00, 0x73, 0x00, 0x61, 0x00,
-                               0x67, 0x00, 0x65, 0x00, 0x57, 0x00, 0x69, 0x00, 0x74, 0x00, 0x68, 0x00, 0x32, 0x00, 0x41,
-                               0x00, 0x72, 0x00, 0x67, 0x00, 0x75, 0x00, 0x6D, 0x00, 0x65, 0x00, 0x6E, 0x00, 0x74, 0x00,
-                               0x73, 0x00, 0x02, 0x00, 0x00, 0x00, 0x1A, 0x00, 0x00, 0x00, 0x74, 0x00, 0x65, 0x00, 0x73,
-                               0x00, 0x74, 0x00, 0x41, 0x00, 0x72, 0x00, 0x67, 0x00, 0x75, 0x00, 0x6D, 0x00, 0x65, 0x00,
-                               0x6E, 0x00, 0x74, 0x00, 0x41, 0x00, 0x1A, 0x00, 0x00, 0x00, 0x74, 0x00, 0x65, 0x00, 0x73,
-                               0x00, 0x74, 0x00, 0x41, 0x00, 0x72, 0x00, 0x67, 0x00, 0x75, 0x00, 0x6D, 0x00, 0x65, 0x00,
-                               0x6E, 0x00, 0x74, 0x00, 0x42, 0x00, 0x6C, 0x34, 0x18, 0x00
-                           };
-
-            byte[] bytes2 = {
-
-                               0xAA, 0x01, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x00, 0xF8, 0xAF, 0x53, 0x00, 0x01, 0x00, 0x00,
-                               0x20, 0x18, 0x00, 0x00, 0x00, 0x54, 0x00, 0x65, 0x00, 0x73, 0x00, 0x74, 0x00, 0x41, 0x00,
-                               0x73, 0x00, 0x73, 0x00, 0x65, 0x00, 0x6D, 0x00, 0x62, 0x00, 0x6C, 0x00, 0x79, 0x00, 0x01,
-                               0x0C, 0x00, 0x00, 0x00, 0x9C, 0x2E, 0x19, 0x00, 0x01, 0x00, 0x00, 0x06, 0xF8, 0xAF, 0x53,
-                               0x00, 0x0D, 0x00, 0x00, 0x00, 0x6C, 0x34, 0x19, 0x00, 0x02, 0x00, 0x00, 0x02, 0x2E, 0x00,
-                               0x00, 0x00, 0x54, 0x00, 0x65, 0x00, 0x73, 0x00, 0x74, 0x00, 0x4E, 0x00, 0x61, 0x00, 0x6D,
-                               0x00, 0x65, 0x00, 0x73, 0x00, 0x70, 0x00, 0x61, 0x00, 0x63, 0x00, 0x65, 0x00, 0x2E, 0x00,
-                               0x54, 0x00, 0x65, 0x00, 0x73, 0x00, 0x74, 0x00, 0x43, 0x00, 0x6C, 0x00, 0x61, 0x00, 0x73,
-                               0x00, 0x73, 0x00, 0x00, 0x9C, 0x2E, 0x19, 0x00, 0x0E, 0x00, 0x00, 0x00, 0x34, 0x34, 0x19,
-                               0x00, 0x01, 0x00, 0x00, 0x06, 0x08, 0x00, 0x00, 0x00, 0x4D, 0x00, 0x61, 0x00, 0x69, 0x00,
-                               0x6E, 0x00, 0x01, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x61, 0x00, 0x72, 0x00, 0x67,
-                               0x00, 0x73, 0x00, 0x6C, 0x34, 0x19, 0x00, 0x0E, 0x00, 0x00, 0x00, 0x40, 0x34, 0x19, 0x00,
-                               0x02, 0x00, 0x00, 0x06, 0x36, 0x00, 0x00, 0x00, 0x4D, 0x00, 0x65, 0x00, 0x73, 0x00, 0x73,
-                               0x00, 0x61, 0x00, 0x67, 0x00, 0x65, 0x00, 0x54, 0x00, 0x68, 0x00, 0x61, 0x00, 0x74, 0x00,
-                               0x43, 0x00, 0x61, 0x00, 0x6C, 0x00, 0x6C, 0x00, 0x73, 0x00, 0x4F, 0x00, 0x74, 0x00, 0x68,
-                               0x00, 0x65, 0x00, 0x72, 0x00, 0x4D, 0x00, 0x65, 0x00, 0x74, 0x00, 0x68, 0x00, 0x6F, 0x00,
-                               0x64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6C, 0x34, 0x19, 0x00, 0x0E, 0x00, 0x00, 0x00, 0x4C,
-                               0x34, 0x19, 0x00, 0x03, 0x00, 0x00, 0x06, 0x16, 0x00, 0x00, 0x00, 0x4F, 0x00, 0x74, 0x00,
-                               0x68, 0x00, 0x65, 0x00, 0x72, 0x00, 0x4D, 0x00, 0x65, 0x00, 0x74, 0x00, 0x68, 0x00, 0x6F,
-                               0x00, 0x64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6C, 0x34, 0x19, 0x00, 0x0E, 0x00, 0x00, 0x00,
-                               0x58, 0x34, 0x19, 0x00, 0x04, 0x00, 0x00, 0x06, 0x32, 0x00, 0x00, 0x00, 0x54, 0x00, 0x65,
-                               0x00, 0x73, 0x00, 0x74, 0x00, 0x4D, 0x00, 0x65, 0x00, 0x73, 0x00, 0x73, 0x00, 0x61, 0x00,
-                               0x67, 0x00, 0x65, 0x00, 0x57, 0x00, 0x69, 0x00, 0x74, 0x00, 0x68, 0x00, 0x32, 0x00, 0x41,
-                               0x00, 0x72, 0x00, 0x67, 0x00, 0x75, 0x00, 0x6D, 0x00, 0x65, 0x00, 0x6E, 0x00, 0x74, 0x00,
-                               0x73, 0x00, 0x02, 0x00, 0x00, 0x00, 0x1A, 0x00, 0x00, 0x00, 0x74, 0x00, 0x65, 0x00, 0x73,
-                               0x00, 0x74, 0x00, 0x41, 0x00, 0x72, 0x00, 0x67, 0x00, 0x75, 0x00, 0x6D, 0x00, 0x65, 0x00,
-                               0x6E, 0x00, 0x74, 0x00, 0x41, 0x00, 0x1A, 0x00, 0x00, 0x00, 0x74, 0x00, 0x65, 0x00, 0x73,
-                               0x00, 0x74, 0x00, 0x41, 0x00, 0x72, 0x00, 0x67, 0x00, 0x75, 0x00, 0x6D, 0x00, 0x65, 0x00,
-                               0x6E, 0x00, 0x74, 0x00, 0x42, 0x00, 0x6C, 0x34, 0x19, 0x00, 0x34, 0x00, 0x00, 0x00, 0x60,
-                               0xE3, 0x51, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x84, 0x85, 0x09, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x71, 0x77, 0x28, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x34, 0x34,
-                               0x19, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x30, 0xAA, 0x99, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC2, 0xC2, 0x04, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x40, 0x34, 0x19, 0x00, 0x02, 0x00, 0x00,
-                               0x00, 0x02, 0x00, 0x00, 0x00, 0x9F, 0x8A, 0x8C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x23, 0x24, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
-                               0x00, 0x00, 0x00, 0x4C, 0x34, 0x19, 0x00, 0x14, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00, 0x00,
-                               0xC7, 0x67, 0x5B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x66, 0x74, 0x5A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x58, 0x34,
-                               0x19, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x49, 0xBE, 0x28, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xD2, 0xD8, 0x2A, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4C, 0x34, 0x19, 0x00, 0x01, 0x00, 0x00,
-                               0x00, 0x01, 0x00, 0x00, 0x00, 0x22, 0x09, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC2, 0xC2, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x58, 0x34, 0x19, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
-                               0xC0, 0x1E, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x61, 0x61, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x34, 0x00,
-                               0x00, 0x00, 0x00, 0x8A, 0x52, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00
-                           };
-            #endregion
-
-            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
-            var fileStream = File.OpenRead(@"D:\tracingProfilerOutput.txt");
-
-
-            MetadataDeserializer.DeserializeAllMetadataAndCacheIt(fileStream);
-
-
-            var openWrite = File.OpenWrite(@"D:\tracingProfilerTextOutput_c#.txt");
-            TextWriter tw = new StreamWriter(openWrite);
-            while (fileStream.Position < fileStream.Length)
+            Console.Clear();
+            foreach (var callTree in eventArgs.CallTrees)
             {
-                var deserializeCallTree = TracingCallTree.DeserializeCallTree(fileStream);
-                var s = deserializeCallTree.ToString();
-                //Console.WriteLine(s);
-                //Console.WriteLine();
-                tw.WriteLine(s);
-                tw.WriteLine();
-                tw.Flush();
+                string callTreeString = callTree.ToString();
+                Console.WriteLine(callTree);
+                Console.WriteLine();
             }
-            tw.Close();
         }
     }
 }

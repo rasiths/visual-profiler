@@ -50,7 +50,7 @@ public:
 		_instanceCriticalSection.Leave();
 	}
 
-	CallTreeBase(ThreadID threadId):_threadId(threadId),_refreshCallTreeBuffer(false){};
+	CallTreeBase(ThreadID threadId):_threadId(threadId),_refreshCallTreeBuffer(true){};
 
 	ThreadID GetThreadId(){
 		return _threadId;
@@ -69,7 +69,6 @@ public:
 
 	static TCallTree * AddThread(ThreadID threadId){
 		shared_ptr<TCallTree> pCallTree(new TCallTree(threadId));
-		pCallTree->RefreshCallTreeBuffer();
 		_criticalSection.Enter();
 		{
 			_callTreeMap[threadId] = pCallTree;
@@ -114,7 +113,6 @@ public:
 			}
 		}
 		_criticalSection.Leave();
-
 	}
 
 };
