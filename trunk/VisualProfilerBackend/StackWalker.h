@@ -13,7 +13,7 @@
 class StackWalker
 {
 public:
-	StackWalker(ICorProfilerInfo3 * pProfilerInfo, UINT samplingPeriodMs = 0);
+	StackWalker(ICorProfilerInfo3 * pProfilerInfo, UINT samplingPeriodMs);
 	void RegisterThread(ThreadID threadId);
 	void DeregisterThread(ThreadID threadId);
 	void StartSampling();

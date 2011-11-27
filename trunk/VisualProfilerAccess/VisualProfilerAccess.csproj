@@ -69,6 +69,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProfilingData\Actions.cs" />
+    <Compile Include="ProfilingData\Commands.cs" />
     <Compile Include="Metadata\AssemblyMetadata.cs" />
     <Compile Include="Metadata\ClassMetadata.cs" />
     <Compile Include="Metadata\MetadataTypes.cs" />
@@ -77,6 +79,9 @@
     <Compile Include="Metadata\MetadataDeserializer.cs" />
     <Compile Include="Metadata\MethodMetadata.cs" />
     <Compile Include="Metadata\ModuleMetadata.cs" />
+    <Compile Include="ProfilingData\ProfilerAccess.cs" />
+    <Compile Include="ProfilingData\ProfilerDataUpdateEventArgs.cs" />
+    <Compile Include="ProfilingData\ProfilerTypes.cs" />
     <Compile Include="ProfilingData\CallTrees\CallTree.cs" />
     <Compile Include="ProfilingData\CallTreeElems\CallTreeElem.cs" />
     <Compile Include="ProfilingData\ProfilingDataTypes.cs" />
