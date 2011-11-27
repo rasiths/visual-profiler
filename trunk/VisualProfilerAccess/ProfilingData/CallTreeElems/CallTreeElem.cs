@@ -35,7 +35,7 @@ namespace VisualProfilerAccess.ProfilingData.CallTreeElems
                 Children = new TTreeElem[ChildrenCount];
                 for (int i = 0; i < ChildrenCount; i++)
                 {
-                    TTreeElem treeElem = new TTreeElem();
+                    var treeElem = new TTreeElem();
                     Children[i] = treeElem;
                     treeElem.Deserialize(byteStream, true);
                 }
@@ -52,7 +52,7 @@ namespace VisualProfilerAccess.ProfilingData.CallTreeElems
             }
 
             int stackDivisionCount = 0;
-            foreach (var childTreeElem in Children)
+            foreach (TTreeElem childTreeElem in Children)
             {
                 if (IsRootElem())
                 {
@@ -62,7 +62,6 @@ namespace VisualProfilerAccess.ProfilingData.CallTreeElems
                 stringBuilder.AppendLine();
                 childTreeElem.ConverToString(stringBuilder, indentation + indentationChars);
             }
-
         }
     }
 }

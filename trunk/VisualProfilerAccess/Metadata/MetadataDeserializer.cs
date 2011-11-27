@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace VisualProfilerAccess.Metadata
 {
@@ -13,10 +10,10 @@ namespace VisualProfilerAccess.Metadata
         {
             long initialStreamPostion = byteStream.Position;
             uint metadataByteCount = byteStream.DeserializeUint32();
-            long metadataLastBytePosition = metadataByteCount + sizeof(uint) + initialStreamPostion;
+            long metadataLastBytePosition = metadataByteCount + sizeof (uint) + initialStreamPostion;
             while (byteStream.Position < metadataLastBytePosition)
             {
-                var metadataType = byteStream.DeserializeMetadataType();
+                MetadataTypes metadataType = byteStream.DeserializeMetadataType();
                 MetadataBase result = null;
                 switch (metadataType)
                 {

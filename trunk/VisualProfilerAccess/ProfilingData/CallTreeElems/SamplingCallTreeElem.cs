@@ -20,7 +20,7 @@ namespace VisualProfilerAccess.ProfilingData.CallTreeElems
         {
             MethodMetadata methodMetadata = MethodMetadata.Cache[FunctionId];
             stringBuilder.AppendFormat("{0}, TopFrameCount={1}, LastProfiledFrameCount={2}",
-                                       methodMetadata.ToString(), StackTopOccurrenceCount,
+                                       methodMetadata, StackTopOccurrenceCount,
                                        LastProfiledFrameInStackCount);
         }
     }
