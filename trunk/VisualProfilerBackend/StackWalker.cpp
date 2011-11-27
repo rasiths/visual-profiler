@@ -29,6 +29,7 @@ void StackWalker::DeregisterThread(ThreadID threadId){
 	StatisticalCallTree * callTree = StatisticalCallTree::GetCallTree(threadId);
 	callTree->GetTimer()->Stop();
 	callTree->UpdateUserAndKernelModeDurations();
+	callTree->RefreshCallTreeBuffer(true);
 }
 
 DWORD WINAPI StackWalker::Sample(void * data){
@@ -46,6 +47,7 @@ DWORD WINAPI StackWalker::Sample(void * data){
 				if(SUCCEEDED(hr)){
 					StatisticalCallTree * pCallTree = StatisticalCallTree::GetCallTree(threadId);
 					pCallTree->ProcessSamples(&functionIdsSnapshot, pThis->_pProfilerInfo);
+					pCallTree->RefreshCallTreeBuffer();
 				}
 			}
 		}

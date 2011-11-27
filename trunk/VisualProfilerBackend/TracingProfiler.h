@@ -45,61 +45,9 @@ public:
 		return S_OK; 
 	}
 
-
-
 	void FinalRelease()
 	{
-		_profilerAccess.StopListening();
-		bool useShapshots= false;
-		_profilerAccess.CarryOutAction(Actions_SendingProfilingData, &useShapshots);
-		_profilerAccess.CarryOutAction(Actions_ProfilingFinished, NULL);
-
-		cout << endl <<"----- Serializing 1 -----" << endl;
-		int a;
-		cin >> a;
-		return;
-		cout << endl <<"----- Serializing 1 -----" << endl;
-		
-		cout << endl <<"----- Serializing 1 -----" << endl;
-		SerializationBuffer buffer;
-
-		AssemblyMetadata::SerializeMetadata(&buffer);
-		ModuleMetadata::SerializeMetadata(&buffer);
-		ClassMetadata::SerializeMetadata(&buffer);
-		MethodMetadata::SerializeMetadata(&buffer);
-			
-		cout << endl <<"----- Serializing 2 -----" << endl;
-		SerializationBuffer buffer2;
-		buffer2.SerializeUINT(buffer.Size());
-		buffer.CopyToAnotherBuffer(&buffer2);
-
-		ThreadCallTree::SerializeAllTrees(&buffer2);
-
-		FILE * pFile;
-
-		pFile = fopen ( "d:\\tracingProfilerOutput.txt" , "wb" );
-		fwrite (buffer2.GetBuffer() , 1 , buffer2.Size() , pFile );
-		fclose (pFile);
-	
-	
-		cout << endl <<"----- Profiler output -----" << endl;
-		
-		map<ThreadID, shared_ptr<ThreadCallTree>> * pThreadCallTreeMap = ThreadCallTree::GetCallTreeMap();
-		wstringstream wsout;	
-		for(map<ThreadID, shared_ptr<ThreadCallTree>>::iterator it = pThreadCallTreeMap->begin(); it != pThreadCallTreeMap->end(); it++ ){
-			ThreadCallTree * pThreadCallTree = it->second.get();
-			pThreadCallTree->ToString(wsout);
-			wsout << endl<< endl;
-		}
-		wcout << wsout.rdbuf();
-
-		wfstream wfs;
-		wfs.open("d:\\tracingProfilerTextOutput_c++.txt", wfstream::out);
-		wfs << wsout.rdbuf();
-		wfs.close();
-
-		//int a;
-		//cin >> a;
+		_profilerAccess.FinishProfiling();
 	}
 
 	virtual HRESULT STDMETHODCALLTYPE Shutdown(){
@@ -130,31 +78,3 @@ private:
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(TracingProfiler), CTracingProfiler)
-
-#pragma region debug things
-	//
-	//	void CacheStats(){
-	//		int methodsCache =		MethodMetadata::CacheSize();
-	//		int classesCache =		ClassMetadata::CacheSize();
-	//		int modulesCache =		ModuleMetadata::CacheSize();	
-	//		int assembliesCache =	AssemblyMetadata::CacheSize();
-	//		cout<< "methodsCache = " << methodsCache << endl;
-	//		cout<< "classesCache = " << classesCache << endl;
-	//		cout<< "modulesCache = " << modulesCache << endl;
-	//		cout<< "assembliesCache = " << assembliesCache << endl << endl;
-	//
-	//		cout<< "methodsCache2 = " <<		MethodMetadata::Count<< endl;
-	//		cout<< "classesCache2 = " <<		ClassMetadata::Count<< endl;
-	//		cout<< "modulesCache2 = " <<		ModuleMetadata::Count<< endl;
-	//		cout<< "assembliesCache2 = " <<	AssemblyMetadata::Count << endl;
-	//
-	/*	for (map<ThreadID, set<DWORD>>::iterator it=ThreadIdsMap.begin() ; it != ThreadIdsMap.end(); it++ ){
-	cout << "managed threadId = " << (*it).first << endl;
-	set<DWORD> * setOsIds = &(*it).second;
-	for (set<DWORD>::iterator it = setOsIds->begin() ; it != setOsIds->end(); it++ ){
-	cout << "\tos threadId = " << *it << endl;
-	}
-	cout << endl;
-	}*/
-	//}
-#pragma endregion

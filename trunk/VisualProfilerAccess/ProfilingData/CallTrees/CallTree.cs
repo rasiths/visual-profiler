@@ -9,9 +9,9 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
     public abstract class CallTree
     {
         public UInt32 ThreadId { get; set; }
-        public virtual void Deserialize(Stream byteStream) { }
+        public virtual void DeserializeFields(Stream byteStream) { }
+        public abstract void Deserialize(Stream byteStream, bool deserializeCallTreeElems = true);
         public abstract ProfilingDataTypes ProfilingDataType { get; }
-       
     }
 
     public abstract class CallTree<TCallTree, TCallTreeElem> : CallTree
@@ -21,22 +21,26 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
 
         public TCallTreeElem RootElem { get; set; }
 
-        public static TCallTree DeserializeCallTree(Stream byteStream, bool deserializeCallTreeElems = true)
+        public override void Deserialize(Stream byteStream, bool deserializeCallTreeElems = true)
         {
-            TCallTree callTree = new TCallTree();
             ProfilingDataTypes profilingDataType = (ProfilingDataTypes)byteStream.DeserializeUint32();
-            Contract.Assume(callTree.ProfilingDataType == profilingDataType, "The profiling data type derived from stream does not match the type's one.");
+            Contract.Assume(ProfilingDataType == profilingDataType, "The profiling data type derived from stream does not match the type's one.");
 
-            callTree.ThreadId = byteStream.DeserializeUint32();
-            callTree.Deserialize(byteStream);
+            ThreadId = byteStream.DeserializeUint32();
+            DeserializeFields(byteStream);
 
             if (deserializeCallTreeElems)
             {
                 TCallTreeElem callTreeElem = new TCallTreeElem();
                 callTreeElem.Deserialize(byteStream, true);
-                callTree.RootElem = callTreeElem;
+                RootElem = callTreeElem;
             }
+        }
 
+        public static TCallTree DeserializeCallTree(Stream byteStream, bool deserializeCallTreeElems = true)
+        {
+            TCallTree callTree = new TCallTree();
+            callTree.Deserialize(byteStream, deserializeCallTreeElems);
             return callTree;
         }
 
