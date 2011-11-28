@@ -15,25 +15,27 @@ namespace VisualProfilerAccess
             var processStartInfo = new ProcessStartInfo();
             processStartInfo.FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe";
 
-            var profilerAccess = new ProfilerAccess<SamplingCallTree>(processStartInfo,
-                                                                      ProfilerTypes.SamplingProfiler,
+            var profilerAccess = new ProfilerAccess<TracingCallTree>(processStartInfo,
+                                                                      ProfilerTypes.TracingProfiler,
                                                                       TimeSpan.FromMilliseconds(500),
-                                                                      (sender, eventArgs) =>
-                                                                          {
-                                                                              Console.Clear();
-                                                                              foreach (
-                                                                                  SamplingCallTree callTree in
-                                                                                      eventArgs.CallTrees)
-                                                                              {
-                                                                                  string callTreeString =
-                                                                                      callTree.ToString();
-                                                                                  Console.WriteLine(callTree);
-                                                                                  Console.WriteLine();
-                                                                              }
-                                                                          });
+                                                                      OnUpdateCallback);
             profilerAccess.StartProfiler();
             profilerAccess.Wait();
             Console.WriteLine("bye bye");
+        }
+
+        private static void OnUpdateCallback(object sender, ProfilerDataUpdateEventArgs<TracingCallTree> eventArgs)
+        {
+
+            Console.Clear();
+            foreach (var callTree in
+                eventArgs.CallTrees)
+            {
+                //string callTreeString = callTree.ToString();
+                //Console.WriteLine(callTree);
+                //Console.WriteLine();
+
+            }
         }
     }
 }

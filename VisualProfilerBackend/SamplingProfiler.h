@@ -70,7 +70,7 @@ public:
 
 private:
 	shared_ptr<StackWalker> _stackWalker;
-	VisualProfilerAccess<StatisticalCallTree> _profilerAccess;
+	VisualProfilerAccess<SamplingCallTree> _profilerAccess;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(SamplingProfiler), CSamplingProfiler)

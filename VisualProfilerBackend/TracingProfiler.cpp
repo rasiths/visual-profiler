@@ -3,19 +3,19 @@
 #include "stdafx.h"
 #include "TracingProfiler.h"
 #include <iostream>
-#include "ThreadCallTree.h"
+#include "TracingCallTree.h"
 
 CTracingProfiler * tracingProfiler;
 
-__declspec(thread)  ThreadCallTree * CTracingProfiler::_pThreadCallTree = 0;
+__declspec(thread)  TracingCallTree * CTracingProfiler::_pTracingCallTree = 0;
 __declspec(thread)  UINT CTracingProfiler::_exceptionSearchCount = 0;
 
 void __stdcall CTracingProfiler::FunctionEnterHook(FunctionIDOrClientID functionIDOrClientID){
-	_pThreadCallTree->FunctionEnter(functionIDOrClientID.functionID);
+	_pTracingCallTree->FunctionEnter(functionIDOrClientID.functionID);
 }
 
 void __stdcall CTracingProfiler::FunctionLeaveHook(FunctionIDOrClientID functionIDOrClientID){
-	_pThreadCallTree->FunctionLeave();
+	_pTracingCallTree->FunctionLeave();
 }
 
 void  _declspec(naked) FunctionEnter3Naked(FunctionIDOrClientID functionIDOrClientID)
@@ -95,47 +95,47 @@ UINT_PTR STDMETHODCALLTYPE CTracingProfiler::FunctionMapper(FunctionID functionI
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadCreated(ThreadID threadId){
-	_pThreadCallTree = ThreadCallTree::AddThread(threadId);
-	_pThreadCallTree->GetTimer()->Start();
+	_pTracingCallTree = TracingCallTree::AddThread(threadId);
+	_pTracingCallTree->GetTimer()->Start();
 	HANDLE osThreadHandle = GetCurrentThread();
-	_pThreadCallTree->SetOSThreadHandle(osThreadHandle);
+	_pTracingCallTree->SetOSThreadHandle(osThreadHandle);
 
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadDestroyed(ThreadID threadId){
-	ThreadCallTreeElem * activeElem = _pThreadCallTree->GetActiveCallTreeElem();
+	TracingCallTreeElem * activeElem = _pTracingCallTree->GetActiveCallTreeElem();
 	while(!activeElem->IsRootElem()){
-		_pThreadCallTree->FunctionLeave();
-		activeElem = _pThreadCallTree->GetActiveCallTreeElem();
+		_pTracingCallTree->FunctionLeave();
+		activeElem = _pTracingCallTree->GetActiveCallTreeElem();
 	}
-	_pThreadCallTree->RefreshCallTreeBuffer(true);
+	_pTracingCallTree->RefreshCallTreeBuffer(true);
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::RuntimeThreadSuspended(ThreadID threadId){
-	_pThreadCallTree->GetTimer()->Stop();
+	_pTracingCallTree->GetTimer()->Stop();
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::RuntimeThreadResumed(ThreadID threadId){
-	_pThreadCallTree->GetTimer()->Start();
+	_pTracingCallTree->GetTimer()->Start();
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadAssignedToOSThread(ThreadID managedThreadId, DWORD osThreadId){
-	bool needOSThreadInitialization = _pThreadCallTree == NULL || _pThreadCallTree->GetThreadId() != managedThreadId;
+	bool needOSThreadInitialization = _pTracingCallTree == NULL || _pTracingCallTree->GetThreadId() != managedThreadId;
 	if(needOSThreadInitialization){
-		_pThreadCallTree =  ThreadCallTree::GetCallTree(managedThreadId);
+		_pTracingCallTree =  TracingCallTree::GetCallTree(managedThreadId);
 		HANDLE osThreadHandle = GetCurrentThread();
-		_pThreadCallTree->SetOSThreadHandle(osThreadHandle);
+		_pTracingCallTree->SetOSThreadHandle(osThreadHandle);
 
 		//update thread kernel and user mode time stamps when a new os thread is assigned to the managed thread 
-		ThreadCallTreeElem * pCallTreeElem = _pThreadCallTree->GetActiveCallTreeElem();
+		TracingCallTreeElem * pCallTreeElem = _pTracingCallTree->GetActiveCallTreeElem();
 		if(pCallTreeElem != NULL){
 			while(!pCallTreeElem->IsRootElem()){
 				FILETIME dummy;
-				GetThreadTimes(_pThreadCallTree->GetOSThreadHandle(),&dummy, &dummy, &pCallTreeElem->LastEnterKernelModeTimeStamp, &pCallTreeElem->LastEnterUserModeTimeStamp);
+				GetThreadTimes(_pTracingCallTree->GetOSThreadHandle(),&dummy, &dummy, &pCallTreeElem->LastEnterKernelModeTimeStamp, &pCallTreeElem->LastEnterUserModeTimeStamp);
 				pCallTreeElem = pCallTreeElem->pParent;
 			}
 		}
@@ -151,7 +151,7 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::ExceptionSearchFunctionEnter(Functio
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ExceptionSearchCatcherFound(FunctionID functionId){
 	for(UINT i = 0; i < _exceptionSearchCount - 1; i++){
-		_pThreadCallTree->FunctionLeave();
+		_pTracingCallTree->FunctionLeave();
 	}
 	_exceptionSearchCount = 0;
 	return S_OK;

@@ -82,9 +82,6 @@
     <ClCompile Include="ClassMetadata.cpp">
       <Filter>Source Files\Metadata</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadCallTree.cpp">
-      <Filter>Source Files\TracingProfiler</Filter>
-    </ClCompile>
     <ClCompile Include="TracingProfiler.cpp">
       <Filter>Source Files\TracingProfiler</Filter>
     </ClCompile>
@@ -94,23 +91,23 @@
     <ClCompile Include="StackWalker.cpp">
       <Filter>Source Files\SamplingProfiler</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadCallTreeElem.cpp">
-      <Filter>Source Files\TracingProfiler</Filter>
-    </ClCompile>
-    <ClCompile Include="StatisticalCallTree.cpp">
-      <Filter>Source Files\SamplingProfiler</Filter>
-    </ClCompile>
-    <ClCompile Include="StatisticalCallTreeElem.cpp">
-      <Filter>Source Files\SamplingProfiler</Filter>
-    </ClCompile>
-    <ClCompile Include="MetadataSerializer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ThreadTimer.cpp">
       <Filter>Source Files\CommonStuff</Filter>
     </ClCompile>
     <ClCompile Include="Utils.cpp">
       <Filter>Source Files\CommonStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="SamplingCallTree.cpp">
+      <Filter>Source Files\SamplingProfiler</Filter>
+    </ClCompile>
+    <ClCompile Include="SamplingCallTreeElem.cpp">
+      <Filter>Source Files\SamplingProfiler</Filter>
+    </ClCompile>
+    <ClCompile Include="TracingCallTree.cpp">
+      <Filter>Source Files\TracingProfiler</Filter>
+    </ClCompile>
+    <ClCompile Include="TracingCallTreeElem.cpp">
+      <Filter>Source Files\TracingProfiler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -150,12 +147,6 @@
     <ClInclude Include="TracingProfiler.h">
       <Filter>Header Files\TracingProfiler</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadCallTree.h">
-      <Filter>Header Files\TracingProfiler</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadCallTreeElem.h">
-      <Filter>Header Files\TracingProfiler</Filter>
-    </ClInclude>
     <ClInclude Include="CallTreeElemBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -167,12 +158,6 @@
     </ClInclude>
     <ClInclude Include="CallTreeBase.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StatisticalCallTreeElem.h">
-      <Filter>Header Files\SamplingProfiler</Filter>
-    </ClInclude>
-    <ClInclude Include="StatisticalCallTree.h">
-      <Filter>Header Files\SamplingProfiler</Filter>
     </ClInclude>
     <ClInclude Include="MetadataSerializer.h">
       <Filter>Header Files\Metadata</Filter>
@@ -203,6 +188,18 @@
     </ClInclude>
     <ClInclude Include="Actions.h">
       <Filter>Header Files\Enums</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplingCallTree.h">
+      <Filter>Header Files\SamplingProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplingCallTreeElem.h">
+      <Filter>Header Files\SamplingProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="TracingCallTree.h">
+      <Filter>Header Files\TracingProfiler</Filter>
+    </ClInclude>
+    <ClInclude Include="TracingCallTreeElem.h">
+      <Filter>Header Files\TracingProfiler</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

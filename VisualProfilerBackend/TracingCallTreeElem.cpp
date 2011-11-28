@@ -1,9 +1,9 @@
 #include "StdAfx.h"
-#include "ThreadCallTreeElem.h"
+#include "TracingCallTreeElem.h"
 
 
-ThreadCallTreeElem::ThreadCallTreeElem(FunctionID functionId , ThreadCallTreeElem * pParent)
-	:CallTreeElemBase<ThreadCallTreeElem>(functionId, pParent),  EnterCount(0), LeaveCount(0), 
+TracingCallTreeElem::TracingCallTreeElem(FunctionID functionId , TracingCallTreeElem * pParent)
+	:CallTreeElemBase<TracingCallTreeElem>(functionId, pParent),  EnterCount(0), LeaveCount(0), 
 	WallClockDurationHns(0), LastEnterTimeStampHns(0), UserModeDurationHns(0),KernelModeDurationHns(0) {
 		LastEnterKernelModeTimeStamp.dwHighDateTime = 0;
 		LastEnterKernelModeTimeStamp.dwLowDateTime = 0;
@@ -11,7 +11,7 @@ ThreadCallTreeElem::ThreadCallTreeElem(FunctionID functionId , ThreadCallTreeEle
 		LastEnterUserModeTimeStamp.dwLowDateTime = 0;
 };
 
-void ThreadCallTreeElem::ToString(wstringstream & wsout, wstring indentation, wstring indentationString){
+void TracingCallTreeElem::ToString(wstringstream & wsout, wstring indentation, wstring indentationString){
 	if(!IsRootElem()){
 		MethodMetadata * pMethodMd = MethodMetadata::GetById(this->FunctionId).get();
 		double durationSec = this->WallClockDurationHns/1e7;
@@ -24,7 +24,7 @@ void ThreadCallTreeElem::ToString(wstringstream & wsout, wstring indentation, ws
 	}
 	
 	int stackDivisionCount = 0;
-	for(map<FunctionID,shared_ptr<ThreadCallTreeElem>>::iterator it = _pChildrenMap.begin(); it != _pChildrenMap.end(); it ++){
+	for(map<FunctionID,shared_ptr<TracingCallTreeElem>>::iterator it = _pChildrenMap.begin(); it != _pChildrenMap.end(); it ++){
 		if(IsRootElem()){
 			wsout << endl << indentation << "-------------- Stack division "<< stackDivisionCount++ <<" --------------";
 		}
@@ -33,7 +33,7 @@ void ThreadCallTreeElem::ToString(wstringstream & wsout, wstring indentation, ws
 	}
 }
 
-void ThreadCallTreeElem::Serialize(SerializationBuffer * buffer){
+void TracingCallTreeElem::Serialize(SerializationBuffer * buffer){
 	//delete me
 }
 
