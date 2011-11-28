@@ -130,14 +130,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="MetadataSerializer.cpp" />
     <ClCompile Include="MethodMetadata.cpp" />
     <ClCompile Include="ModuleMetadata.cpp" />
     <ClCompile Include="StackWalker.cpp" />
-    <ClCompile Include="StatisticalCallTree.cpp" />
-    <ClCompile Include="StatisticalCallTreeElem.cpp" />
-    <ClCompile Include="ThreadCallTree.cpp" />
-    <ClCompile Include="ThreadCallTreeElem.cpp" />
+    <ClCompile Include="SamplingCallTree.cpp" />
+    <ClCompile Include="SamplingCallTreeElem.cpp" />
+    <ClCompile Include="TracingCallTree.cpp" />
+    <ClCompile Include="TracingCallTreeElem.cpp" />
     <ClCompile Include="ThreadTimer.cpp" />
     <ClCompile Include="SamplingProfiler.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -174,15 +173,15 @@
     <ClInclude Include="ProfilingDataTypes.h" />
     <ClInclude Include="SerializationBuffer.h" />
     <ClInclude Include="StackWalker.h" />
-    <ClInclude Include="StatisticalCallTree.h" />
-    <ClInclude Include="StatisticalCallTreeElem.h" />
-    <ClInclude Include="ThreadCallTreeElem.h" />
+    <ClInclude Include="SamplingCallTree.h" />
+    <ClInclude Include="SamplingCallTreeElem.h" />
+    <ClInclude Include="TracingCallTreeElem.h" />
     <ClInclude Include="ThreadTimer.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SamplingProfiler.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="ThreadCallTree.h" />
+    <ClInclude Include="TracingCallTree.h" />
     <ClInclude Include="TracingProfiler.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="VisualProfilerAccess.h" />

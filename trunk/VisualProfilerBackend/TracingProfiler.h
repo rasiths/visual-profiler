@@ -3,7 +3,7 @@
 #include <iostream>
 #include "CorProfilerCallbackBase.h"
 #include "VisualProfilerBackend_i.h"
-#include "ThreadCallTree.h"
+#include "TracingCallTree.h"
 #include <fstream>
 #include "SerializationBuffer.h"
 #include "VisualProfilerAccess.h"
@@ -71,10 +71,10 @@ private:
 	static void __stdcall FunctionLeaveHook(FunctionIDOrClientID functionIDOrClientID);
 
 	//thread local storage static variables
-	static __declspec(thread)  ThreadCallTree * _pThreadCallTree;
+	static __declspec(thread)  TracingCallTree * _pTracingCallTree;
 	static __declspec(thread)  UINT _exceptionSearchCount;
 
-	VisualProfilerAccess<ThreadCallTree> _profilerAccess;
+	VisualProfilerAccess<TracingCallTree> _profilerAccess;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(TracingProfiler), CTracingProfiler)

@@ -10,7 +10,7 @@ void StackWalker::RegisterThread(ThreadID threadId){
 		_registeredThreadIds.insert(threadId);
 	}
 	_criticalSection.Leave();
-	StatisticalCallTree * callTree = StatisticalCallTree::AddThread(threadId);
+	SamplingCallTree * callTree = SamplingCallTree::AddThread(threadId);
 
 	DWORD osThreadId;
 	_pProfilerInfo->GetThreadInfo(threadId, &osThreadId);
@@ -26,7 +26,7 @@ void StackWalker::DeregisterThread(ThreadID threadId){
 	}
 	_criticalSection.Leave();
 
-	StatisticalCallTree * callTree = StatisticalCallTree::GetCallTree(threadId);
+	SamplingCallTree * callTree = SamplingCallTree::GetCallTree(threadId);
 	callTree->GetTimer()->Stop();
 	callTree->UpdateUserAndKernelModeDurations();
 	callTree->RefreshCallTreeBuffer(true);
@@ -45,7 +45,7 @@ DWORD WINAPI StackWalker::Sample(void * data){
 				functionIdsSnapshot.clear();
 				hr = pThis->_pProfilerInfo->DoStackSnapshot(threadId,&MakeFrameWalk,0, &functionIdsSnapshot,0,0);
 				if(SUCCEEDED(hr)){
-					StatisticalCallTree * pCallTree = StatisticalCallTree::GetCallTree(threadId);
+					SamplingCallTree * pCallTree = SamplingCallTree::GetCallTree(threadId);
 					pCallTree->ProcessSamples(&functionIdsSnapshot, pThis->_pProfilerInfo);
 					pCallTree->RefreshCallTreeBuffer();
 				}

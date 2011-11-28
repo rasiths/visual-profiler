@@ -3,7 +3,7 @@
 #include "CallTreeElemBase.h"
 
 
-class ThreadCallTreeElem: public CallTreeElemBase<ThreadCallTreeElem> { 
+class TracingCallTreeElem: public CallTreeElemBase<TracingCallTreeElem> { 
 public:
 	UINT EnterCount;
 	UINT LeaveCount;
@@ -14,7 +14,7 @@ public:
 	FILETIME LastEnterUserModeTimeStamp;
 	FILETIME LastEnterKernelModeTimeStamp;
 
-	ThreadCallTreeElem(FunctionID functionId = 0, ThreadCallTreeElem * pParent = NULL);
+	TracingCallTreeElem(FunctionID functionId = 0, TracingCallTreeElem * pParent = NULL);
 	void ToString(wstringstream & wsout, wstring indentation = L"", wstring indentationString = L"   ");
 	virtual void Serialize(SerializationBuffer * buffer);
 };

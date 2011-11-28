@@ -7,8 +7,8 @@
 #include <map>
 #include <iostream>
 #include "ThreadTimer.h"
-#include "StatisticalCallTreeElem.h"
-#include "StatisticalCallTree.h"
+#include "SamplingCallTreeElem.h"
+#include "SamplingCallTree.h"
 
 class StackWalker
 {

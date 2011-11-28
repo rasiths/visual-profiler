@@ -1,9 +1,9 @@
 #pragma once
 
 #include "CallTreeBase.h"
-#include "StatisticalCallTreeElem.h"
+#include "SamplingCallTreeElem.h"
 
-class StatisticalCallTree : public CallTreeBase<StatisticalCallTree, StatisticalCallTreeElem> {
+class SamplingCallTree : public CallTreeBase<SamplingCallTree, SamplingCallTreeElem> {
 public:
 	FILETIME CreationUserModeTimeStamp;
 	FILETIME CreationKernelModeTimeStamp;
@@ -14,7 +14,7 @@ public:
 	HANDLE OsThreadHandle;
 	DWORD OsThreadId;
 
-	StatisticalCallTree(ThreadID threadId);
+	SamplingCallTree(ThreadID threadId);
 	void ProcessSamples(vector<FunctionID> * functionIdsSnapshot, ICorProfilerInfo3 * pProfilerInfo);
 	void SetOsThreadInfo(DWORD osThreadId);
 	void UpdateUserAndKernelModeDurations();
@@ -22,7 +22,7 @@ public:
 	virtual void ToString(wstringstream & wsout);
 
 protected:
-	void SerializeCallTreeElem(StatisticalCallTreeElem * elem, SerializationBuffer * buffer);
+	void SerializeCallTreeElem(SamplingCallTreeElem * elem, SerializationBuffer * buffer);
 
 private:
 	#pragma region waitJoinSleep

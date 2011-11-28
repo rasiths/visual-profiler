@@ -1,9 +1,9 @@
 #include "StdAfx.h"
-#include "StatisticalCallTree.h"
+#include "SamplingCallTree.h"
 #include <iostream>
 
-StatisticalCallTree::StatisticalCallTree(ThreadID threadId):
-CallTreeBase<StatisticalCallTree, StatisticalCallTreeElem>(threadId),
+SamplingCallTree::SamplingCallTree(ThreadID threadId):
+CallTreeBase<SamplingCallTree, SamplingCallTreeElem>(threadId),
 	OsThreadHandle(0), KernelModeDurationHns(0), UserModeDurationHns(0){
 		CreationUserModeTimeStamp.dwHighDateTime=0;
 		CreationUserModeTimeStamp.dwLowDateTime=0;
@@ -15,8 +15,8 @@ void printFT(FILETIME * ft){
 	cout << ft->dwHighDateTime << ft->dwLowDateTime << endl;
 }
 
-void StatisticalCallTree::ProcessSamples(vector<FunctionID> * functionIdsSnapshot, ICorProfilerInfo3 * pProfilerInfo){
-	StatisticalCallTreeElem * treeElem = &_rootCallTreeElem;
+void SamplingCallTree::ProcessSamples(vector<FunctionID> * functionIdsSnapshot, ICorProfilerInfo3 * pProfilerInfo){
+	SamplingCallTreeElem * treeElem = &_rootCallTreeElem;
 	bool isProfilingEnabledOnElem = false;
 	for(vector<FunctionID>::reverse_iterator it = functionIdsSnapshot->rbegin(); it < functionIdsSnapshot->rend(); it++){
 		FunctionID functionId = *it;
@@ -71,7 +71,7 @@ void StatisticalCallTree::ProcessSamples(vector<FunctionID> * functionIdsSnapsho
 	}
 }
 
-void StatisticalCallTree::SetOsThreadInfo(DWORD osThreadId){
+void SamplingCallTree::SetOsThreadInfo(DWORD osThreadId){
 	HANDLE osThreadHandle = OpenThread(THREAD_QUERY_INFORMATION,false,osThreadId);
 	if(osThreadHandle == NULL){
 		CheckError(false);
@@ -85,7 +85,7 @@ void StatisticalCallTree::SetOsThreadInfo(DWORD osThreadId){
 	CheckError2(success);
 }
 
-void StatisticalCallTree::UpdateUserAndKernelModeDurations(){
+void SamplingCallTree::UpdateUserAndKernelModeDurations(){
 	FILETIME dummy;
 	FILETIME currentUserModeTimeStamp;
 	FILETIME currentKernelModeTimeStamp;
@@ -97,7 +97,7 @@ void StatisticalCallTree::UpdateUserAndKernelModeDurations(){
 
 }
 
-void StatisticalCallTree::ToString(wstringstream & wsout){
+void SamplingCallTree::ToString(wstringstream & wsout){
 	wsout << "Thread Id = " << _threadId << ", Number of stack divisions = " << _rootCallTreeElem.GetChildrenMap()->size() <<  endl ;
 
 	double durationSec = _timer.GetElapsedTimeIn100NanoSeconds()/1e7;
@@ -108,7 +108,7 @@ void StatisticalCallTree::ToString(wstringstream & wsout){
 	_rootCallTreeElem.ToString(wsout);
 }
 
-void StatisticalCallTree::Serialize(SerializationBuffer * buffer){
+void SamplingCallTree::Serialize(SerializationBuffer * buffer){
 	buffer->SerializeProfilingDataTypes(ProfilingDataTypes_Sampling);
 	buffer->SerializeThreadId(_threadId);
 	
@@ -123,19 +123,19 @@ void StatisticalCallTree::Serialize(SerializationBuffer * buffer){
 	SerializeCallTreeElem(&_rootCallTreeElem, buffer);
 }
 
-void StatisticalCallTree::SerializeCallTreeElem(StatisticalCallTreeElem * elem, SerializationBuffer * buffer){
+void SamplingCallTree::SerializeCallTreeElem(SamplingCallTreeElem * elem, SerializationBuffer * buffer){
 	buffer->SerializeFunctionId(elem->FunctionId);
 	buffer->SerializeUINT(elem->StackTopOccurrenceCount);
 	buffer->SerializeUINT(elem->LastProfiledFrameInStackCount);
 	
-	map<FunctionID, shared_ptr<StatisticalCallTreeElem>> * childrenMap =  elem->GetChildrenMap();
+	map<FunctionID, shared_ptr<SamplingCallTreeElem>> * childrenMap =  elem->GetChildrenMap();
 	UINT childrenSize = childrenMap->size();
 	buffer->SerializeUINT(childrenSize);
 
-	map<FunctionID, shared_ptr<StatisticalCallTreeElem>>::iterator it = childrenMap->begin();
+	map<FunctionID, shared_ptr<SamplingCallTreeElem>>::iterator it = childrenMap->begin();
 	
 	for(; it != childrenMap->end(); it++){
-		StatisticalCallTreeElem * childElem = it->second.get();
+		SamplingCallTreeElem * childElem = it->second.get();
 		SerializeCallTreeElem(childElem, buffer);	
 	}
 }
