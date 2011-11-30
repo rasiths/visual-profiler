@@ -7,7 +7,7 @@ using VisualProfilerAccessTests.MetadataTests;
 namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
 {
     [TestFixture]
-    public class TracingCallTreeElemTest
+    public class MockCallTreeElemTest
     {
         #region Setup/Teardown
 
@@ -15,7 +15,7 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
         public void SetUp()
         {
             _memoryStream = _multipleElemBytes.ConvertToMemoryStream();
-            _rootElem = new TracingCallTreeElem();
+            _rootElem = new MockCallTreeElem();
             _rootElem.Deserialize(_memoryStream);
         }
 
@@ -99,7 +99,7 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
                                                      };
 
 
-        private TracingCallTreeElem _rootElem;
+        private MockCallTreeElem _rootElem;
         private MemoryStream _memoryStream;
 
         [Test]
@@ -111,7 +111,7 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
         [Test]
         public void FieldsDeserializationTest()
         {
-            var callTreeElem = new TracingCallTreeElem();
+            var callTreeElem = new MockCallTreeElem();
             MemoryStream memoryStream = _singleElemBytes.ConvertToMemoryStream();
             callTreeElem.Deserialize(memoryStream);
 
@@ -143,13 +143,13 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
         public void TreeDeserializationTest()
         {
             //0x143458:[TestAssembly]TestNamespace.TestClass.TestMessageWith2Arguments(testArgumentA, testArgumentB),Twc=331eafs,Tum=31fcf5s,Tkm=0s,Ec=a,Lc=a
-            TracingCallTreeElem tracingCallTreeElem = _rootElem.Children[0].Children[0].Children[1];
-            Assert.AreEqual(0x143458, tracingCallTreeElem.FunctionId);
-            Assert.AreEqual(0x331eaf, tracingCallTreeElem.WallClockDurationHns);
-            Assert.AreEqual(0x31fcf5, tracingCallTreeElem.UserModeDurationHns);
-            Assert.AreEqual(0, tracingCallTreeElem.KernelModeDurationHns);
-            Assert.AreEqual(0xA, tracingCallTreeElem.EnterCount);
-            Assert.AreEqual(0xA, tracingCallTreeElem.LeaveCount);
+            MockCallTreeElem mockCallTreeElem = _rootElem.Children[0].Children[0].Children[1];
+            Assert.AreEqual(0x143458, mockCallTreeElem.FunctionId);
+            Assert.AreEqual(0x331eaf, mockCallTreeElem.WallClockDurationHns);
+            Assert.AreEqual(0x31fcf5, mockCallTreeElem.UserModeDurationHns);
+            Assert.AreEqual(0, mockCallTreeElem.KernelModeDurationHns);
+            Assert.AreEqual(0xA, mockCallTreeElem.EnterCount);
+            Assert.AreEqual(0xA, mockCallTreeElem.LeaveCount);
         }
     }
 }
