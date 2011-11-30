@@ -8,7 +8,7 @@ using VisualProfilerAccessTests.MetadataTests;
 namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
 {
     [TestFixture]
-    public class TracingCallTreeTest
+    public class MockCallTreeTest
     {
         #region Setup/Teardown
 
@@ -16,8 +16,8 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
         public void SetUp()
         {
             _twoTreesStream = _twoTreesBytes.ConvertToMemoryStream();
-            _callTree1 = TracingCallTree.DeserializeCallTree(_twoTreesStream);
-            _callTree2 = TracingCallTree.DeserializeCallTree(_twoTreesStream);
+            _callTree1 = MockCallTree.DeserializeCallTree(_twoTreesStream);
+            _callTree2 = MockCallTree.DeserializeCallTree(_twoTreesStream);
         }
 
         #endregion
@@ -82,8 +82,8 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
         private UInt32 ExpectedThreadId = 0x4de318;
         private ProfilingDataTypes ExpectedProfilingDataType = (ProfilingDataTypes) 0x34;
         private MemoryStream _twoTreesStream;
-        private TracingCallTree _callTree1;
-        private TracingCallTree _callTree2;
+        private MockCallTree _callTree1;
+        private MockCallTree _callTree2;
 
         [Test]
         public void AllBytesReadFromStreamTest()
@@ -94,7 +94,7 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
         [Test]
         public void DeserializationWithoutCallTreeElemsTest()
         {
-            TracingCallTree callTree = TracingCallTree.DeserializeCallTree(_singleTreeBytes.ConvertToMemoryStream(),
+            MockCallTree callTree = MockCallTree.DeserializeCallTree(_singleTreeBytes.ConvertToMemoryStream(),
                                                                            false);
             Assert.AreEqual(ExpectedThreadId, callTree.ThreadId);
             Assert.AreEqual(ExpectedProfilingDataType, ProfilingDataTypes.Tracing);
