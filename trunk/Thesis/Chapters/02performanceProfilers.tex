@@ -38,23 +38,70 @@ Only information regarding an entire method run are collected. The lower overhea
 
 This level of granularity is the only option for the sampling profilers and most cases the tracing profilers. The instrumentation profilers can be easily converted from the line-by-line to the method granularity.
 
-\section{Selective granularity}
+\subsection{Selective granularity}
 The profiling process can be filtered with combined levels of granularity, where some parts of code are monitored on the line-by-line and others only on the method manners or not at all in order to capture desired statistic with lowest possible overhead and highest possible accuracy.
 
-Different degree of granularity can be applied to all the profiling modes.
+\begin{figure}
+	\centering
+		\includegraphics[scale=.7]{\imagePath 01profilingModesComparisonTable.png}
+		\caption{Profiling modes comparison}
+	\label{fig:01profilingModesComparisonTable}
+\end{figure}
+
 
 \section{Profiling results}
 During the process of profiling various kinds of data can be collected. For some application, it is sufficient to count the method hit count for others is a detailed call stack analysis required. Again, the amount of result information places overhead on the profilee, in this case primary on the memory (caches, pages...) and secondary on the CPU.
 
 \subsection{Time measurement}
-There are several diferent kinds of the program time measurement a profiler can provide. Not every profiling mode can provide every single measurement. As usually, the measurement accuraty is counterweighted with the computational complexity.
+There are several different kinds of the program time measurement a profiler can provide. Not every profiling mode can provide every single measurement. As usually, the measurement accuracy is counterweighted with the computational complexity.
 
 \subsubsection*{Wall time}
-The wall time measurement starts when a thread enters a method and ends when the thread leaves the method. The resulting time does not reflect if the method does useful computation or is in either a wait, a sleep or a join mode.
-
+The wall time measurement starts when a thread enters a method and ends when the thread leaves the method. The resulting ti	me does not reflect if the method does useful computation or is in either a wait, a sleep or a join mode.
 
 \subsubsection*{User and kernel time}
-In comparison with the wall time, the user and kernel time mesurement counts solely time spent exeting a method exclusive the time spent by waiting, sleeping or joining.
+In comparison with the wall time, the user and kernel time measurement counts solely time spent executing a method exclusive the time spent by waiting, sleeping or joining.
 
 Every profiling mode is capable of both the wall time as well as the user and kernel time measurement, either by statistically distributing the program execution time over the method hit counts or by reading CPU registers or system performance counters.
+
+\subsection{Call trees}
+When relations among methods calls allows the profiler to reconstruct a call tree. The call tree reveals hit count of functions and, more importantly, what function calls which function. This insight helps to find hot spots and understand the runtime conditions.
+Additional function parameter analysis is also possible, but in cost of higher CPU and memory overhead. A example of a call tree is shown on the figure \ref{fig:01callGraphRedGate}.
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=.7]{\imagePath 01callGraphRedGate.png}
+		\caption{Red-Gate ANTS Profiler call graph}
+	\label{fig:01callGraphRedGate}
+\end{figure}
+
+Some profilers do not track calls hierarchy and they only record function hit count and duration. It is refered by the term flat call tree.
+
+\section{Available .NET performance profilers}
+On the market, there is many various options in the field of .NET performance profiling. The commertial solotions offer many features and integration with others tools, however, not with Visual Studio in most cases. There are also a few open source alternatives.
+
+Unfortunately, we could not carry out deeper performance and feateru assemment of available profilers, since we do not have required financial and time resources for this challaging and but very interesting undertaking.
+
+\subsection*{Commertial solutions}
+
+\subsection{JetBrains dotTrace}
+dotTrace profiles .NET Framework 1.0 to 4.0, Silverlight 4, or .NET Compact Framework 3.5. It offers partial integration with the Visual Studio and others JetBrains tools. All the profiling modes as presented and the profiling can run remotely.
+
+\href{http://www.jetbrains.org}{www.jetbrains.org}
+
+\subsection{Redgate ANTS Performance Profiler}
+This tool targets similar set of .NET applications. In addition it offers Sql and I/O  profiling, live results, all the profiling modes and time schemas. 
+
+It offers some integration in the Visual Studio and allows to see code directly from the profiling tool. 
+
+\href{http://www.red-gate.com}{www.red-gate.com}
+
+\subsection{EQATEC Profiler}
+There is no doubt that this profiler offers the widest targeting platforms options. It can be used to profiler virtually anything in the ''.NET world''. It uses some kind of interumentation and thus the choise of the profiling mode is restricted, however it is configurable. A binary has to be modified before a profiling session.
+
+There is no integration wiht the Visual Studio whatsowever and it seems that the source code result overview cannot be displayed either.
+
+\href{http://www.eqatec.com}{www.eqatec.com}
+
+\subsection{GlowCode}
+GlowCode is a performance and memory profiler for Windows and .NET programmers who develop applications with C++ or any .NET Framework language. GlowCode helps to detect memory leaks and resource flaws, isolate performance bottlenecks, profile and tune code, trace real-time program execution, ensure code coverage, isolate boxing errors, identify excessive memory usage, and find hyperactive and loitering objects. For native, managed, and mixed code. \cite{Doeaaa} sfdfds \notice{Doeaaa}
 
