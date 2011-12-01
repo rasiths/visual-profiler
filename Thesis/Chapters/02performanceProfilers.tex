@@ -56,7 +56,7 @@ During the process of profiling various kinds of data can be collected. For some
 There are several different kinds of the program time measurement a profiler can provide. Not every profiling mode can provide every single measurement. As usually, the measurement accuracy is counterweighted with the computational complexity.
 
 \subsubsection*{Wall time}
-The wall time measurement starts when a thread enters a method and ends when the thread leaves the method. The resulting ti	me does not reflect if the method does useful computation or is in either a wait, a sleep or a join mode.
+The wall time measurement starts when a thread enters a method and ends when the thread leaves the method. The resulting time does not reflect if the method does useful computation or is in either a wait, a sleep or a join mode.
 
 \subsubsection*{User and kernel time}
 In comparison with the wall time, the user and kernel time measurement counts solely time spent executing a method exclusive the time spent by waiting, sleeping or joining.
@@ -74,34 +74,67 @@ Additional function parameter analysis is also possible, but in cost of higher C
 	\label{fig:01callGraphRedGate}
 \end{figure}
 
-Some profilers do not track calls hierarchy and they only record function hit count and duration. It is refered by the term flat call tree.
+Some profilers do not track calls hierarchy and they only record function hit count and duration. It is referred by the term flat call tree.
 
 \section{Available .NET performance profilers}
-On the market, there is many various options in the field of .NET performance profiling. The commertial solotions offer many features and integration with others tools, however, not with Visual Studio in most cases. There are also a few open source alternatives.
+On the market, there is many various options in the field of .NET performance profiling. The commercial solutions offer many features and integration with others tools, however, not with Visual Studio in most cases. There are also a few open source alternatives.
 
-Unfortunately, we could not carry out deeper performance and feateru assemment of available profilers, since we do not have required financial and time resources for this challaging and but very interesting undertaking.
+Unfortunately, we could not carry out deeper performance and features assessment of available profilers, since we do not have required financial and time resources for this challenging and but very interesting undertaking.
 
-\subsection*{Commertial solutions}
+\subsection*{Commercial solutions}
 
 \subsection{JetBrains dotTrace}
 dotTrace profiles .NET Framework 1.0 to 4.0, Silverlight 4, or .NET Compact Framework 3.5. It offers partial integration with the Visual Studio and others JetBrains tools. All the profiling modes as presented and the profiling can run remotely.
 
-\href{http://www.jetbrains.org}{www.jetbrains.org}
+\textit{\href{http://www.jetbrains.org}{www.jetbrains.org}	}
 
 \subsection{Redgate ANTS Performance Profiler}
-This tool targets similar set of .NET applications. In addition it offers Sql and I/O  profiling, live results, all the profiling modes and time schemas. 
+This tool targets similar set of .NET applications. In addition it offers SQL and I/O  profiling, live results, all the profiling modes and time schemas. 
 
 It offers some integration in the Visual Studio and allows to see code directly from the profiling tool. 
 
-\href{http://www.red-gate.com}{www.red-gate.com}
+\textit{\href{http://www.red-gate.com}{www.red-gate.com}}
 
 \subsection{EQATEC Profiler}
-There is no doubt that this profiler offers the widest targeting platforms options. It can be used to profiler virtually anything in the ''.NET world''. It uses some kind of interumentation and thus the choise of the profiling mode is restricted, however it is configurable. A binary has to be modified before a profiling session.
+There is no doubt that this profiler offers the widest targeting platforms options. It can be used to profiler virtually anything in the ''.NET world''. It uses some kind of instrumentation and thus the choice of the profiling mode is restricted, however it is configurable. A binary has to be modified before a profiling session.
 
-There is no integration wiht the Visual Studio whatsowever and it seems that the source code result overview cannot be displayed either.
+There is no integration with the Visual Studio whatsoever and it seems that the source code result overview cannot be displayed either.
 
-\href{http://www.eqatec.com}{www.eqatec.com}
+\textit{\href{http://www.eqatec.com}{www.eqatec.com}}
 
 \subsection{GlowCode}
-GlowCode is a performance and memory profiler for Windows and .NET programmers who develop applications with C++ or any .NET Framework language. GlowCode helps to detect memory leaks and resource flaws, isolate performance bottlenecks, profile and tune code, trace real-time program execution, ensure code coverage, isolate boxing errors, identify excessive memory usage, and find hyperactive and loitering objects. For native, managed, and mixed code. \cite{Doeaaa} sfdfds \notice{Doeaaa}
+GlowCode is a performance and memory profiler for Windows and .NET programmers who develop applications with C++ or any .NET Framework language. GlowCode helps to detect memory leaks and resource flaws, isolate performance bottlenecks, profile and tune code, trace real-time program execution, ensure code coverage, isolate boxing errors, identify excessive memory usage, and find hyperactive and loitering objects. For native, managed, and mixed code. \cite{01GlowCodeWeb} 
+
+We were unable to find anything about the Visual Studio integration. So we assume that it is not supported.
+
+
+\textit{\href{http://www.glowcode.com/}{www.glowcode.com}}
+
+\subsection{Visual Studio Profiler}
+This tool is integrated to the Visual Studio and supports the native and managed code profiling. It has the sampling and instrumenting profiling modes. It is shipped only with higher editions of the Visual Studio
+
+\subsection{Others}
+There is even more very comparable profiling suites offering very similar functionality as aforementioned solutions as the Telerik JustTrace, the SpeedTrace Pro and maybe even other that we have not discovered.
+
+It is a challenging task to pick the right solution for one's needs with the right licensing options.
+
+\subsection*{Open source solutions}
+The open source choice is not as vast as the commercial, so far offering only two solutions.
+
+\subsection{SlimTune}
+SlimTune is a free profiler that offers advanced features as remote profiling 32-bit and 64-bit profiling, live results. There is very little information available and user has to dive into the source code to find out about its inner mechanisms.
+
+\textit{\href{http://code.google.com/p/slimtune}{code.google.com/p/slimtune}}
+
+\subsection{Prof-It for C\#}
+A unique way of the profiling introduces the Prof-It for C\# profiler. It is a line-by-line instrumentation profiler with its own source viewer allowing import and profiling of Visual Studio projects. It presents results as an overlay over the source code and as a list of methods, blocks and classes. 
+
+Unfortunately, this project does not seem to be actively developed. 
+
+\textit{\href{http://dotnet.jku.at/projects/Prof-It/}{dotnet.jku.at/projects/Prof-It}}
+
+\section*{Summary}
+In this we have look at and explained the sampling, the tracing and the instrumenting profiling modes. Then we focused on the profiling results and their granularity, mainly the call trees and different kinds of time durations. In the end of the chapter a short overview of the current commercial and open-source scene was presented.
+
+ 
 
