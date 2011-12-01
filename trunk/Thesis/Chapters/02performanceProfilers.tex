@@ -1,0 +1,60 @@
+\chapter{Overview of Performance Profilers }
+
+In this chapter we present various characteristics and mechanisms of performance profilers. We will overview some contemporarily used profilers targeting .NET platform.
+
+
+\section{Profiling modes}
+An application can be profiled in several ways that differ in the results' precision, profiling overhead. 
+
+\subsection{Sampling profiling}
+In this mode, the profiler stops periodically every profilee's thread and inspects method frames on its call stacks. The output snapshot is not an exact representation of the runtime conditions rather a statistical approximation, but the profiling overhead is very low and the profilee runs almost in full speed with minimum side effects, such as additional memory allocations, cache faults and context switches.
+
+The profiling overhead does not depend on the number of method called by the profilee as in other modes. The introduced error of the results is equal to half of the sampling period.
+
+The profiler cannot count the number of method calls and the method duration are computed purely based on gathered statistics. 
+
+No source code or binary alternations in required, the runtime ability to stop execution to do a call stack snapshot or alternatively an interrupt instruction can by used.
+
+\subsection{Tracing profiling}
+This way of profiling relies on a runtime environment or some kind of hardware notification when a method is entered and left and leads to accurate results, providing exact count of method calls and their durations, however, with some added overhead. In addition, the overhead increases with the method calls count and slows down the profilee.
+
+As with the sampling profiling, there are no changes to code or binaries required. The profiler has to only register callback methods for the entry/leave notifications with the runtime or the hardware profiling infrastructure.
+
+\subsection{Instrumentation profiling}
+The profilee code or binaries are modified by injection of arbitrary code or instructions in order to collect profiling data. This approach can have similar effects and results as the tracing profiling, but offers a lot more choice of what and how to profile. There are chances of alternation the original profilee behaviour or even introducing bugs.
+
+Instrumentation can be perform on every level of the software live-time (source, compilation, binary, runtime) and can be both manual, performed by a developer, as well as automatic, done by a compiler or a runtime environment.
+
+\section{Granularity of profiling}
+A profiler can measure profiling result on different levels of a program. Not every profiling approach can achieve any granularity due to its limitations. Speed of the profilee is always trade-off between granularity and accuracy. 
+
+\subsection{Line-by-line granularity}
+Line-by-line profiling is the most accurate method and most demanding. Every program statement is measured and analysed. It brings precise result, however, the additional burden can alter the program's behaviour.
+
+Such fine granularity can be achieved only by the instrumentation profiling.
+
+\subsection{Method granularity} 
+Only information regarding an entire method run are collected. The lower overhead can ease the profilee and still provide very informative results.
+
+This level of granularity is the only option for the sampling profilers and most cases the tracing profilers. The instrumentation profilers can be easily converted from the line-by-line to the method granularity.
+
+\section{Selective granularity}
+The profiling process can be filtered with combined levels of granularity, where some parts of code are monitored on the line-by-line and others only on the method manners or not at all in order to capture desired statistic with lowest possible overhead and highest possible accuracy.
+
+Different degree of granularity can be applied to all the profiling modes.
+
+\section{Profiling results}
+During the process of profiling various kinds of data can be collected. For some application, it is sufficient to count the method hit count for others is a detailed call stack analysis required. Again, the amount of result information places overhead on the profilee, in this case primary on the memory (caches, pages...) and secondary on the CPU.
+
+\subsection{Time measurement}
+There are several diferent kinds of the program time measurement a profiler can provide. Not every profiling mode can provide every single measurement. As usually, the measurement accuraty is counterweighted with the computational complexity.
+
+\subsubsection*{Wall time}
+The wall time measurement starts when a thread enters a method and ends when the thread leaves the method. The resulting time does not reflect if the method does useful computation or is in either a wait, a sleep or a join mode.
+
+
+\subsubsection*{User and kernel time}
+In comparison with the wall time, the user and kernel time mesurement counts solely time spent exeting a method exclusive the time spent by waiting, sleeping or joining.
+
+Every profiling mode is capable of both the wall time as well as the user and kernel time measurement, either by statistically distributing the program execution time over the method hit counts or by reading CPU registers or system performance counters.
+
