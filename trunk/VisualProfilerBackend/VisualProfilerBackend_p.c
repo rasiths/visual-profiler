@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 7.00.0555 */
-/* at Thu Nov 24 23:43:36 2011
+/* at Wed Nov 30 20:57:12 2011
  */
 /* Compiler settings for VisualProfilerBackend.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 7.00.0555 
