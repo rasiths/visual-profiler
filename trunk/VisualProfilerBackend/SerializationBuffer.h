@@ -21,6 +21,7 @@
 #define SIZE_OF_UINT sizeof(UINT)
 #define SIZE_OF_BOOL sizeof(bool)
 #define SIZE_OF_ULONGLONG sizeof(ULONGLONG)
+#define SIZE_OF_ULONG64 sizeof(ULONG64)
 #define SIZE_OF_DWORD sizeof(DWORD)
 
 using namespace std;
@@ -105,6 +106,10 @@ public:
 
 	void SerializeULONGLONG(ULONGLONG & ull){
 		CopyToBuffer(&ull, SIZE_OF_ULONGLONG);
+	}
+
+	void SerializeULONG64(ULONG64 & ul64){
+		CopyToBuffer(&ul64, SIZE_OF_ULONG64);
 	}
 
 	void CopyToAnotherBuffer(SerializationBuffer * destinationBuffer){
