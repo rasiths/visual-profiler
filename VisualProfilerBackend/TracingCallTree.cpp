@@ -1,18 +1,17 @@
 #include "StdAfx.h"
 #include "TracingCallTree.h"
 
-TracingCallTree::TracingCallTree(ThreadID threadId):CallTreeBase<TracingCallTree, TracingCallTreeElem>(threadId){
+TracingCallTree::TracingCallTree(ThreadID threadId, ICorProfilerInfo3 * profilerInfo):CallTreeBase<TracingCallTree, TracingCallTreeElem>(threadId, profilerInfo){
 	_pActiveCallTreeElem = & _rootCallTreeElem;	
 }
 
 void TracingCallTree::FunctionEnter(FunctionID functionId){
-
 	TracingCallTreeElem * prevActiveElem = _pActiveCallTreeElem;
 	TracingCallTreeElem * nextActiveElem = _pActiveCallTreeElem->GetChildTreeElem(functionId);
-
-	UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);			
+			
 	_timer.GetElapsedTimeIn100NanoSeconds(&nextActiveElem->LastEnterTimeStampHns);
-	
+	UpdateCycleTime(prevActiveElem, nextActiveElem);	
+
 	nextActiveElem->EnterCount++;
 
 	_pActiveCallTreeElem = nextActiveElem;
@@ -30,35 +29,29 @@ void TracingCallTree::FunctionLeave(){
 	
 	prevActiveElem->LeaveCount++;
 
-	UpdateUserAndKernelMode(prevActiveElem, nextActiveElem);
+	UpdateCycleTime(prevActiveElem, nextActiveElem);
 
 	_pActiveCallTreeElem = nextActiveElem;
 
 	RefreshCallTreeBuffer();
 }
 
-void TracingCallTree::UpdateUserAndKernelMode(TracingCallTreeElem * prevActiveElem, TracingCallTreeElem* nextActiveElem){
-	FILETIME dummy;
-	GetThreadTimes(_OSThreadHandle,&dummy, &dummy, &nextActiveElem->LastEnterKernelModeTimeStamp, &nextActiveElem->LastEnterUserModeTimeStamp);
-	SubtractFILETIMESAndAddToResult( &nextActiveElem->LastEnterKernelModeTimeStamp, &prevActiveElem->LastEnterKernelModeTimeStamp, &prevActiveElem->KernelModeDurationHns);
-	SubtractFILETIMESAndAddToResult( &nextActiveElem->LastEnterUserModeTimeStamp,   &prevActiveElem->LastEnterUserModeTimeStamp, &prevActiveElem->UserModeDurationHns);
+void TracingCallTree::UpdateCycleTime(TracingCallTreeElem * prevActiveElem, TracingCallTreeElem* nextActiveElem){
+	BOOL suc = QueryThreadCycleTime(OsThreadHandle,&nextActiveElem->LastCycleTime);
+	CheckError2(suc);
+	prevActiveElem->CycleTime += nextActiveElem->LastCycleTime - prevActiveElem->LastCycleTime;
 }
 
 TracingCallTreeElem * TracingCallTree::GetActiveCallTreeElem(){
 	return _pActiveCallTreeElem;
 }
 
-void TracingCallTree::SetOSThreadHandle(HANDLE osThreadHandle){
-	_OSThreadHandle = osThreadHandle;
-}
-
-HANDLE TracingCallTree::GetOSThreadHandle(){
-	return _OSThreadHandle;
-}
-
 void TracingCallTree::Serialize(SerializationBuffer * buffer){
 	buffer->SerializeProfilingDataTypes(ProfilingDataTypes_Tracing);
 	buffer->SerializeThreadId(_threadId);
+	UpdateUserAndKernelModeDurations();
+	buffer->SerializeULONGLONG(KernelModeDurationHns);
+	buffer->SerializeULONGLONG(UserModeDurationHns);
 	SerializeCallTreeElem(&_rootCallTreeElem, buffer);
 }
 
@@ -72,12 +65,12 @@ void TracingCallTree::SerializeCallTreeElem(TracingCallTreeElem * elem, Serializ
 		ULONGLONG actualTimeStamp;
 		_timer.GetElapsedTimeIn100NanoSeconds(&actualTimeStamp);
 		ULONGLONG funcitonDuration = actualTimeStamp - elem->LastEnterTimeStampHns + elem->WallClockDurationHns;
-		buffer->SerializeULONGLONG(actualTimeStamp); 
+		buffer->SerializeULONGLONG(funcitonDuration); 
 	}else{
 		buffer->SerializeULONGLONG(elem->WallClockDurationHns);
 	}
-	buffer->SerializeULONGLONG(elem->KernelModeDurationHns);
-	buffer->SerializeULONGLONG(elem->UserModeDurationHns);
+	
+	buffer->SerializeULONGLONG(elem->CycleTime);
 	
 	map<FunctionID, shared_ptr<TracingCallTreeElem>> * pChildrenMap = elem->GetChildrenMap();
 	UINT childrenSize = pChildrenMap->size();

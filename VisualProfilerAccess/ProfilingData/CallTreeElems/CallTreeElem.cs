@@ -42,13 +42,16 @@ namespace VisualProfilerAccess.ProfilingData.CallTreeElems
             }
         }
 
-        public void ConverToString(StringBuilder stringBuilder, string indentation = "", string indentationChars = "   ")
+        public void ConverToString(StringBuilder stringBuilder, Action<StringBuilder, TTreeElem> lineStringModifier , string indentation = "", string indentationChars = "   " )
         {
             if (!IsRootElem())
             {
                 stringBuilder.Append(indentation);
                 ToString(stringBuilder);
-                //stringBuilder.AppendLine();
+                if(lineStringModifier != null)
+                {
+                    lineStringModifier(stringBuilder, (TTreeElem)this);
+                }
             }
 
             int stackDivisionCount = 0;
@@ -60,7 +63,7 @@ namespace VisualProfilerAccess.ProfilingData.CallTreeElems
                     stringBuilder.AppendFormat("-------------- Stack division {0} --------------", stackDivisionCount++);
                 }
                 stringBuilder.AppendLine();
-                childTreeElem.ConverToString(stringBuilder, indentation + indentationChars);
+                childTreeElem.ConverToString(stringBuilder, lineStringModifier, indentation + indentationChars);
             }
         }
     }

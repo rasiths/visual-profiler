@@ -95,10 +95,8 @@ UINT_PTR STDMETHODCALLTYPE CTracingProfiler::FunctionMapper(FunctionID functionI
 }
 
 HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadCreated(ThreadID threadId){
-	_pTracingCallTree = TracingCallTree::AddThread(threadId);
+	_pTracingCallTree = TracingCallTree::AddThread(threadId, pProfilerInfo);
 	_pTracingCallTree->GetTimer()->Start();
-	HANDLE osThreadHandle = GetCurrentThread();
-	_pTracingCallTree->SetOSThreadHandle(osThreadHandle);
 
 	return S_OK;
 }
@@ -127,18 +125,18 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::ThreadAssignedToOSThread(ThreadID ma
 	bool needOSThreadInitialization = _pTracingCallTree == NULL || _pTracingCallTree->GetThreadId() != managedThreadId;
 	if(needOSThreadInitialization){
 		_pTracingCallTree =  TracingCallTree::GetCallTree(managedThreadId);
-		HANDLE osThreadHandle = GetCurrentThread();
-		_pTracingCallTree->SetOSThreadHandle(osThreadHandle);
+		//HANDLE osThreadHandle = GetCurrentThread();
+		//_pTracingCallTree->SetOSThreadHandle(osThreadHandle);
 
 		//update thread kernel and user mode time stamps when a new os thread is assigned to the managed thread 
-		TracingCallTreeElem * pCallTreeElem = _pTracingCallTree->GetActiveCallTreeElem();
+		/*TracingCallTreeElem * pCallTreeElem = _pTracingCallTree->GetActiveCallTreeElem();
 		if(pCallTreeElem != NULL){
 			while(!pCallTreeElem->IsRootElem()){
 				FILETIME dummy;
 				GetThreadTimes(_pTracingCallTree->GetOSThreadHandle(),&dummy, &dummy, &pCallTreeElem->LastEnterKernelModeTimeStamp, &pCallTreeElem->LastEnterUserModeTimeStamp);
 				pCallTreeElem = pCallTreeElem->pParent;
 			}
-		}
+		}*/
 	}
 
 	return S_OK;

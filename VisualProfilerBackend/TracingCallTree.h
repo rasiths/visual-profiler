@@ -8,20 +8,18 @@ using namespace std;
 class TracingCallTree : public CallTreeBase<TracingCallTree, TracingCallTreeElem>
 {
 private:
-	HANDLE _OSThreadHandle;
 	TracingCallTreeElem * _pActiveCallTreeElem;
 
 public:
-	TracingCallTree(ThreadID threadId);
+
+	TracingCallTree(ThreadID threadId, ICorProfilerInfo3 * profilerInfo);
 	void FunctionEnter(FunctionID functionId);
 	void FunctionLeave();
 	TracingCallTreeElem * GetActiveCallTreeElem();
-	void SetOSThreadHandle(HANDLE osThreadHandle);
-	HANDLE GetOSThreadHandle();
 	virtual void Serialize(SerializationBuffer * buffer);
 
 private:
-	void UpdateUserAndKernelMode(TracingCallTreeElem * prevActiveElem, TracingCallTreeElem* nextActiveElem);
+	void UpdateCycleTime(TracingCallTreeElem * prevActiveElem, TracingCallTreeElem* nextActiveElem);
 
 protected:
 	void SerializeCallTreeElem(TracingCallTreeElem * elem, SerializationBuffer * buffer);

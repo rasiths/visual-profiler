@@ -8,7 +8,7 @@
 #include <sstream>
 #include "Utils.h"
 #include "SerializationBuffer.h"
- 
+
 using namespace std;
 
 template<class TCallTree, class TTreeElem>
@@ -16,18 +16,26 @@ class CallTreeBase{
 protected :
 	static map<ThreadID, shared_ptr<TCallTree>> _callTreeMap;
 	static CriticalSection _criticalSection;
-	
+
 	TTreeElem _rootCallTreeElem;
 	ThreadID _threadId;
 	ThreadTimer _timer;
-	
+	ICorProfilerInfo3 * _profilerInfo;
 	bool _refreshCallTreeBuffer;
 	SerializationBuffer _callTreeBuffer;
 	CriticalSection _instanceCriticalSection;
 	
+
 	virtual void SerializeCallTreeElem(TTreeElem * elem, SerializationBuffer * buffer) = 0;
 
 public:
+	FILETIME CreationUserModeTimeStamp;
+	FILETIME CreationKernelModeTimeStamp;
+	ULONGLONG KernelModeDurationHns;
+	ULONGLONG UserModeDurationHns;
+	HANDLE OsThreadHandle;
+	DWORD OsThreadId;
+	
 
 	void RefreshCallTreeBuffer(bool force = false){
 		if(force || _refreshCallTreeBuffer){
@@ -50,7 +58,35 @@ public:
 		_instanceCriticalSection.Leave();
 	}
 
-	CallTreeBase(ThreadID threadId):_threadId(threadId),_refreshCallTreeBuffer(true){};
+	CallTreeBase(ThreadID threadId, ICorProfilerInfo3 * profilerInfo):_threadId(threadId),_refreshCallTreeBuffer(true),OsThreadId(0), OsThreadHandle(INVALID_HANDLE_VALUE), _profilerInfo(profilerInfo){
+		_profilerInfo->GetThreadInfo(threadId, &OsThreadId);
+		SetOsThreadInfo();
+		GetTimer()->Start();
+	};
+
+	void SetOsThreadInfo(){
+		OsThreadHandle = OpenThread(THREAD_QUERY_INFORMATION,false,OsThreadId);
+		if(OsThreadHandle == NULL || OsThreadHandle == INVALID_HANDLE_VALUE){
+			CheckError(false);
+		}
+
+		FILETIME dummy;
+		BOOL success = GetThreadTimes(OsThreadHandle,&dummy, &dummy,&CreationKernelModeTimeStamp, &CreationUserModeTimeStamp);
+		CheckError2(success);
+	}
+
+	void UpdateUserAndKernelModeDurations(){
+		FILETIME dummy;
+		FILETIME currentUserModeTimeStamp;
+		FILETIME currentKernelModeTimeStamp;
+
+		BOOL success = GetThreadTimes(OsThreadHandle,&dummy, &dummy,&currentKernelModeTimeStamp, &currentUserModeTimeStamp);
+		CheckError2(success);
+		UserModeDurationHns = 0;
+		KernelModeDurationHns = 0;
+		SubtractFILETIMESAndAddToResult(&currentUserModeTimeStamp, &CreationUserModeTimeStamp, &UserModeDurationHns);
+		SubtractFILETIMESAndAddToResult(&currentKernelModeTimeStamp, &CreationKernelModeTimeStamp, &KernelModeDurationHns);
+	}
 
 	ThreadID GetThreadId(){
 		return _threadId;
@@ -67,8 +103,8 @@ public:
 
 	virtual void Serialize(SerializationBuffer * buffer) = 0;
 
-	static TCallTree * AddThread(ThreadID threadId){
-		shared_ptr<TCallTree> pCallTree(new TCallTree(threadId));
+	static TCallTree * AddThread(ThreadID threadId, ICorProfilerInfo3 * profilerInfo){
+		shared_ptr<TCallTree> pCallTree(new TCallTree(threadId, profilerInfo));
 		_criticalSection.Enter();
 		{
 			_callTreeMap[threadId] = pCallTree;

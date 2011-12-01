@@ -5,19 +5,9 @@
 
 class SamplingCallTree : public CallTreeBase<SamplingCallTree, SamplingCallTreeElem> {
 public:
-	FILETIME CreationUserModeTimeStamp;
-	FILETIME CreationKernelModeTimeStamp;
-
-	ULONGLONG KernelModeDurationHns;
-	ULONGLONG UserModeDurationHns;
-
-	HANDLE OsThreadHandle;
-	DWORD OsThreadId;
-
-	SamplingCallTree(ThreadID threadId);
-	void ProcessSamples(vector<FunctionID> * functionIdsSnapshot, ICorProfilerInfo3 * pProfilerInfo);
+	SamplingCallTree(ThreadID threadId, ICorProfilerInfo3 * profilerInfo);
+	void ProcessSamples(vector<FunctionID> * functionIdsSnapshot);
 	void SetOsThreadInfo(DWORD osThreadId);
-	void UpdateUserAndKernelModeDurations();
 	virtual void Serialize(SerializationBuffer * buffer);
 	virtual void ToString(wstringstream & wsout);
 

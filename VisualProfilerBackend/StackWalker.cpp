@@ -10,13 +10,9 @@ void StackWalker::RegisterThread(ThreadID threadId){
 		_registeredThreadIds.insert(threadId);
 	}
 	_criticalSection.Leave();
-	SamplingCallTree * callTree = SamplingCallTree::AddThread(threadId);
+	SamplingCallTree * callTree = SamplingCallTree::AddThread(threadId, _pProfilerInfo);
 
-	DWORD osThreadId;
-	_pProfilerInfo->GetThreadInfo(threadId, &osThreadId);
-	callTree->SetOsThreadInfo(osThreadId);
-
-	callTree->GetTimer()->Start();
+	
 }
 
 void StackWalker::DeregisterThread(ThreadID threadId){
@@ -46,7 +42,7 @@ DWORD WINAPI StackWalker::Sample(void * data){
 				hr = pThis->_pProfilerInfo->DoStackSnapshot(threadId,&MakeFrameWalk,0, &functionIdsSnapshot,0,0);
 				if(SUCCEEDED(hr)){
 					SamplingCallTree * pCallTree = SamplingCallTree::GetCallTree(threadId);
-					pCallTree->ProcessSamples(&functionIdsSnapshot, pThis->_pProfilerInfo);
+					pCallTree->ProcessSamples(&functionIdsSnapshot);
 					pCallTree->RefreshCallTreeBuffer();
 				}
 			}

@@ -15,6 +15,10 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
         {
         }
 
+        public virtual void ConvertToString(StringBuilder stringBuilder)
+        {
+        }
+
         public abstract void Deserialize(Stream byteStream, bool deserializeCallTreeElems = true);
     }
 
@@ -48,13 +52,15 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
             return callTree;
         }
 
-        public override string ToString()
+        public string ToString(Action<StringBuilder, TCallTreeElem> lineStringModifier)
         {
             var stringBuilder = new StringBuilder();
             stringBuilder.AppendFormat("Thread Id = {0}, Number of stack divisions = {1}", ThreadId,
                                        RootElem.ChildrenCount);
             stringBuilder.AppendLine();
-            RootElem.ConverToString(stringBuilder);
+            ConvertToString(stringBuilder);
+            stringBuilder.AppendLine();
+            RootElem.ConverToString(stringBuilder, lineStringModifier);
 
             return stringBuilder.ToString();
         }
