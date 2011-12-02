@@ -3,11 +3,11 @@
 In this chapter, we will first briefly review some .NET framework core facilities, mainly CLR, and then explore options to the performance profiling on this platform. 
 
 \section{.NET framework core facilities}
-.NET framework (of just .NET) is a software platform developed by Microsoft for developing and executing software applications. .NET  consist of a runtime environment, which executes the programs, class libraries, interfaces and services. It offers to software developers ready to use solutions for standard programming tasks, so they only have to concentrate on a program logict itself.
+.NET framework (of just .NET) is a software platform developed by Microsoft for developing and executing software applications. .NET  consist of a runtime environment, which executes the programs, class libraries, interfaces and services. It offers to software developers ready to use solutions for standard programming tasks, so they only have to concentrate on a program logic itself.
 
 .NET based applications do not contain machine-level dependent instructions and cannot be, therefore, directly executed by CPUs. Instead of that, they are composed from a human readable ''middle'' code instructions, so called Common Intermediate Language (CIL). In order to execute CIL, it has to be first compiled into processor specific machine-level instructions by the JIT compiler (Just-in-time compiler) that uses processor specific information during the compilation. This mechanism is comparable to Java and its bytecode.
 
-The .NET platform is an implementation of Common Languge Infrastructure standards (CLI) and forms a solid base for development and execution of programs that can be written in any programmming language on any platform. The center elements of .NET are the runtime environment Common Language Runtime (CLR), the Basic Class Library (BCL) and diverse utility programs for management and settings.
+The .NET platform is an implementation of Common Language Infrastructure standards (CLI) and forms a solid base for development and execution of programs that can be written in any programming language on any platform. The center elements of .NET are the runtime environment Common Language Runtime (CLR), the Basic Class Library (BCL) and diverse utility programs for management and settings.
 
 \begin{figure}
 	\centering
@@ -19,13 +19,13 @@ The .NET platform is an implementation of Common Languge Infrastructure standard
 Many programming languages such as C\#, F\#, Visual Basic and others can be translated to the CIL and then run on the CLR. 
 
 
-CLR provides huge amount of services and features. Besides already meantioned ones the JIT compilation also provides assemblies loading, type system, garbage collection and memory management, security system, native code interoperatbility, debugging, performance and profiling interfaces, threading system, managed exception handling, application domains and many others.
+CLR provides huge amount of services and features. Besides already mentioned ones the JIT compilation also provides assemblies loading, type system, garbage collection and memory management, security system, native code interoperability, debugging, performance and profiling interfaces, threading system, managed exception handling, application domains and many others.
 
 \section{Profiling modes in .NET}
-All the profiling modes (sampling, tracing, instrumentation), chapter \ref{01ProfModes}, are feasable in the .NET environment. There is even more ways how to achieve some of them, however, with very different implementation complexity. 
+All the profiling modes (sampling, tracing, instrumentation), chapter \ref{01ProfModes}, are feasible in the .NET environment. There is even more ways how to achieve some of them, however, with very different implementation complexity. 
 
 \subsection{Sampling mode}
-Due to the JIT compilation, real address of a function remains unknown till the point of the JIT compilation of the function, which might not even occure if the function is not on some program's execution path. Therefore, there is not a direct way how to aquire the function and its memory address mapping without digging into the CLR runtime structures. Luckily, the Profiling API answers this problems and let a programmer sample all managed call stacks and read metadate regarding the methods.
+Due to the JIT compilation, real address of a function remains unknown till the point of the JIT compilation of the function, which might not even occur if the function is not on some program's execution path. Therefore, there is not a direct way how to acquire the function and its memory address mapping without digging into the CLR runtime structures. Luckily, the Profiling API answers this problems and let a programmer sample all managed call stacks and read metadate regarding the methods.
 
 \subsection{Tracing profiler}
 As stated in the introduction in the chapter \ref{01ProfModes}, the tracing profiling must be supported by the runtime engine or the targeting hardware. The Profiling API offers a very elegant way to implement this profiling strategy and to trace the CLR activity.
@@ -33,9 +33,9 @@ As stated in the introduction in the chapter \ref{01ProfModes}, the tracing prof
 \subsection{Instrumentation profiling}
 This mode is the most difficult, nevertheless, with the most profiling possibilities. 
 
-The first possiblity how to create a .net instrumeting profiler is by an injection of the profiling source code right into the source code before a compilation from a high level programming language to the CIL. Various feautres of the higher level language have to be taken in the account during this process, e.g. lambda methods and closures in C\#. Obvious limitation is only one target programming language.
+The first possibility how to create a .net instrumenting profiler is by an injection of the profiling source code right into the source code before a compilation from a high level programming language to the CIL. Various features of the higher level language have to be taken in the account during this process, e.g. lambda methods and closures in C\#. Obvious limitation is only one target programming language.
 
-The second possibility is similar to the first and it only goes one level down, to manipulate CIL of already compiled .NET assemblies or modules. This approach targets all every .NET program regardless of the programming language. However, certain problems have to be solved, e.g. the traget assembly signing.
+The second possibility is similar to the first and it only goes one level down, to manipulate CIL of already compiled .NET assemblies or modules. This approach targets all every .NET program regardless of the programming language. However, certain problems have to be solved, e.g. the target assembly signing.
 
 The third possibility is to use the JIT compilation notifications of the profiling API. The original CIL can be modified on before the JIT compilation.
 
@@ -44,11 +44,11 @@ It is apparent how big the role the profiling API in the profiling of .NET appli
 \section{Profiling API}
 This section is based on articles, documentation and examples provided on the Microsoft Developer Network (MSDN) \cite{ProfMSDN}. The provided information is valid for the version of the profiling API that comes with the .NET 4.0. 
 
-Profiling a .NET application is not as straighforward as profiling a conventional application compiled into the machine code. The main reason are aforementioned CLR features that the conventional profiling methods cannot properly identify and thus allow the profiling. The profiling API provides a way how to aquired the profiling data for a managed application with minimum effect on the performance of the CLR and the profiled application. 
+Profiling a .NET application is not as straightforward as profiling a conventional application compiled into the machine code. The main reason are aforementioned CLR features that the conventional profiling methods cannot properly identify and thus allow the profiling. The profiling API provides a way how to acquired the profiling data for a managed application with minimum effect on the performance of the CLR and the profiled application. 
 
-The purporse of the profiling API is not to be only a profiling tool, as its name suggests, but it is a versatily diagnostic tool for the .NET platform that can be used in many program analysis scenarious, e.g. a code coverage utility for unit testing.
+The purpose of the profiling API is not to be only a profiling tool, as its name suggests, but it is a versatile diagnostic tool for the .NET platform that can be used in many program analysis scenarios, e.g. a code coverage utility for unit testing.
 
-To make use of the profiling API, as depicted on the figure \ref{fig:03profilerAppSchema}, a profiler's native code DLL containing profiling custom logic is loaded to the profiled application's process. The profiler DLL implements the \textit{ICorProfilerCallback} interface and creates a in process COM server . The CLR calls methods in that interface to notify profilier of one of many runtime events of the profiled process. The profiler can query the state of the profiled application and the events by calling back into CLR using methods of \textit{ICorProfilerInfo} interface.
+To make use of the profiling API, as depicted on the figure \ref{fig:03profilerAppSchema}, a profiler's native code DLL containing profiling custom logic is loaded to the profiled application's process. The profiler DLL implements the \textit{ICorProfilerCallback} interface and creates a in process COM server . The CLR calls methods in that interface to notify profiler of one of many runtime events of the profiled process. The profiler can query the state of the profiled application and the events by calling back into CLR using methods of \textit{ICorProfilerInfo} interface.
 
 \begin{figure}
 	\centering
@@ -57,9 +57,9 @@ To make use of the profiling API, as depicted on the figure \ref{fig:03profilerA
 	\label{fig:03profilerAppSchema}
 \end{figure}
 
-It is important to keep the profilier DLL as simple as possible. Only the data monitoring part of the profiler should be running in the profiler process. The rest of the profiler, analysis and UI, should happen in an independent process.
+It is important to keep the profiler DLL as simple as possible. Only the data monitoring part of the profiler should be running in the profiler process. The rest of the profiler, analysis and UI, should happen in an independent process.
 
-Unfortunately, the profiler DLL cannot be written in managed .NET code. It actually makes sence. It the interfaces were implemented using managed code, it would be self triggering the CLR notification and would eventualy end up in never ending recursion or a deadlock. For example, imagine that you register a method entered notification handler and you call a managed method within the handler. You would get notified of that.
+Unfortunately, the profiler DLL cannot be written in managed .NET code. It actually makes sense. It the interfaces were implemented using managed code, it would be self triggering the CLR notification and would eventually end up in never ending recursion or a deadlock. For example, imagine that you register a method entered notification handler and you call a managed method within the handler. You would get notified of that.
 
 After the COM implementation of the interfaces is finished, the CLR needs to be aware of the profiling DLL and forced to load it and call its methods. Simply enough, this is accomplished by setting
  environment variables (\textit{COR\_ENABLE\_PROFILING, COR\_PROFILER, COR\_PROFILER\_PATH}). No XML setting, no registry entries. Be careful with that! If you changed the machine wide environmental variables then every .NET process would be profiled. The profiler can even be attached in the runtime.
@@ -69,8 +69,6 @@ The CLR notification can be divided into following groups as listed in \cite{Pro
 
 \begin{enumerate}
 \item CLR startup and shutdown events.
-
-asfsdf
 \item Application domain creation and shutdown events.
 \item Assembly loading and unloading events.
 \item Module loading and unloading events.
@@ -86,11 +84,15 @@ asfsdf
 \item Information about the runtime memory heap and garbage collection activity.
 \end{enumerate}
 
-The implementation of the \textit{ICorProfilerCallback} interface is mandatory to use the profiling API. The developer of the profiler has to implement all methods of the interface and there is 80 of them! Luckly, for the majority of methods, those out of interest, it is simply enough to return S_OK HRESULT. The others have to provide code to handle the events and desired logic.
+The implementation of the \textit{ICorProfilerCallback} interface is mandatory to use the profiling API. The developer of the profiler has to implement all methods of the interface and there is 80 of them! Luckily, for the majority of methods, those out of interest, it is simply enough to return S\_OK HRESULT. The others have to provide code to handle the events and desired logic.
 
 Most of methods of the \textit{ICorProfilerCallback} interface receives additional data in form of input parameters. And some methods come in pairs started-finished (\textit{GarbageCollectionStarted-GarbageCollectionFinished}) or enter-leave (\textit{ExceptionSearchFunctionEnter-ExceptionSearchFunctionLeave}). 
 
-The paremeters are either unsigned int (UINT) Ids or pointers to some CLR structures. E.g. \textit{ThreadCreated} get its threadId parameter of type ThreadID (only \textit{typedef}ed UINT). The Ids are opaque values, but we think they are bare pointers to the memory where the metadate reside since they are always defined as UINT_PTR.
+The parameters are either unsigned int (UINT) Ids or pointers to some CLR structures. E.g. \textit{ThreadCreated} get its threadId parameter of type ThreadID (only \textit{typedef}ed UINT). The Ids are opaque values, but we think they are bare pointers to the memory where the metadate reside since they are always defined as UINT\_PTR.
 
 To get more information such as functions name, defining class, assembly, actually pretty much everything, what is in the metadate, from the Ids, the profiling API offers the \textit{ICorProfilerInfo} interface and the \textit{IMetadataImport} interface and system of metadata Tokens corresponding with the metadata.
 
+The profiling API offer a lot and there is a lot more to write about. However there also some limitation to it. Among others no profiling for unmanaged code and no remote profiling. 
+
+\section{Summary}
+In this chapter, the .NET framework was briefly introduced, we have outlined some .NET profiling strategies for all the profiling modes and introduced the powerful profiling API for profiling managed applications.
