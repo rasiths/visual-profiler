@@ -42,7 +42,7 @@ The third possibility is to use the JIT compilation notifications of the profili
 It is apparent how big the role the profiling API in the profiling of .NET applications plays. It is a great starting point for every profiling mode implementation.
 
 \section{Profiling API}
-This section is based on articles, documentation and examples provided on the Microsoft Developer Network (MSDN) \cite{ProfMSDN}.
+This section is based on articles, documentation and examples provided on the Microsoft Developer Network (MSDN) \cite{ProfMSDN}. The provided information is valid for the version of the profiling API that comes with the .NET 4.0. 
 
 Profiling a .NET application is not as straighforward as profiling a conventional application compiled into the machine code. The main reason are aforementioned CLR features that the conventional profiling methods cannot properly identify and thus allow the profiling. The profiling API provides a way how to aquired the profiling data for a managed application with minimum effect on the performance of the CLR and the profiled application. 
 
@@ -61,4 +61,36 @@ It is important to keep the profilier DLL as simple as possible. Only the data m
 
 Unfortunately, the profiler DLL cannot be written in managed .NET code. It actually makes sence. It the interfaces were implemented using managed code, it would be self triggering the CLR notification and would eventualy end up in never ending recursion or a deadlock. For example, imagine that you register a method entered notification handler and you call a managed method within the handler. You would get notified of that.
 
-After the COM implementation of the interfaces is finished, the CLR needs to be aware of the profiling DLL and forced to load it and call its methods. Simply enough, this is accomplished by setting environment variables. No XML setting, no registry entries. Be careful with that! If you changed the machine wide environmental variables then every .NET process would be profiled. 
+After the COM implementation of the interfaces is finished, the CLR needs to be aware of the profiling DLL and forced to load it and call its methods. Simply enough, this is accomplished by setting
+ environment variables (\textit{COR\_ENABLE\_PROFILING, COR\_PROFILER, COR\_PROFILER\_PATH}). No XML setting, no registry entries. Be careful with that! If you changed the machine wide environmental variables then every .NET process would be profiled. The profiler can even be attached in the runtime.
+
+\subsection{Supported notifications}
+The CLR notification can be divided into following groups as listed in \cite{ProfMSDN}.
+
+\begin{enumerate}
+\item CLR startup and shutdown events.
+
+asfsdf
+\item Application domain creation and shutdown events.
+\item Assembly loading and unloading events.
+\item Module loading and unloading events.
+\item COM vtable creation and destruction events.
+\item Just-in-time (JIT) compilation and code-pitching events.
+\item Class loading and unloading events.
+\item Thread creation and destruction events.
+\item Function entry and exit events.
+\item Exceptions.
+\item Transitions between managed and unmanaged code execution.
+\item Transitions between different runtime contexts.
+\item Information about runtime suspensions.
+\item Information about the runtime memory heap and garbage collection activity.
+\end{enumerate}
+
+The implementation of the \textit{ICorProfilerCallback} interface is mandatory to use the profiling API. The developer of the profiler has to implement all methods of the interface and there is 80 of them! Luckly, for the majority of methods, those out of interest, it is simply enough to return S_OK HRESULT. The others have to provide code to handle the events and desired logic.
+
+Most of methods of the \textit{ICorProfilerCallback} interface receives additional data in form of input parameters. And some methods come in pairs started-finished (\textit{GarbageCollectionStarted-GarbageCollectionFinished}) or enter-leave (\textit{ExceptionSearchFunctionEnter-ExceptionSearchFunctionLeave}). 
+
+The paremeters are either unsigned int (UINT) Ids or pointers to some CLR structures. E.g. \textit{ThreadCreated} get its threadId parameter of type ThreadID (only \textit{typedef}ed UINT). The Ids are opaque values, but we think they are bare pointers to the memory where the metadate reside since they are always defined as UINT_PTR.
+
+To get more information such as functions name, defining class, assembly, actually pretty much everything, what is in the metadate, from the Ids, the profiling API offers the \textit{ICorProfilerInfo} interface and the \textit{IMetadataImport} interface and system of metadata Tokens corresponding with the metadata.
+
