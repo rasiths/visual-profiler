@@ -1,0 +1,33 @@
+\chapter{The Visual Profiler Backend}
+The backend is the part of the profiler resposible for collecting the data from the profiled application and for sending them to the analitic part of the Visual Profiler frontend. There are many requirement for a profiling backend to fulfill, such as speed, mutli-threadinng, correctness, low memory consumption and others. In this chapter, we will introduce the profiling modes we chose to implement and review the inner implementation of the backend and desing decision we had to make.
+
+\section{Choice of the implentation strategy and the profiling modes}
+Based on the analysis of the profiling modes on the .NET platform in the chapter \ref{chapPerProfOnDotNet}. We made a decision to use the profiling API as the base for our own profiler before the implementing everything from scratch. The profiling API offers a 	 matured API with intrinsic support of all .NET features. This helps to avoid many unnecessary implementation problems that could be encountere during an implementation of a .NET profiler entirely from beginning.
+
+In the abstract of the thesis we have committed ourself to create a method granularity profiler supporting two distinct profiling modes for the .NET.
+
+The choice of the sampling profiling mode was straightforward because of its stochastic nature in that it completely differs from the other two modes. 
+
+On the other hand, the difference between the tracing and the intrumentation profiling is not that vast. They both measure exact results and put similar overhead on the profiling. However, the selected method granurality makes them both even more comparable from user's point of view. They both have their implementation pitfall and neither of them would be easier to progam that the other. In the end, we opted for the tracing profiling mode since it does not require any changes to target assemblies.
+
+\section{Software architecture of the backend }
+The backend runs in two process. The first process, written in C++ and called the Visual Profiler Backend, is the actual profiled application with the hosted profiler DLL that is loaded by the CLR and accessed by the COM interface, as described in the chapter \ref{chapPerProfOnDotNet}. The sampling and tracing profiliers are implemented as distinct COM CoClasses and only one of them can run at a time. The CoClasses share the common code base for the profiled data collection and the interprocess communication with the managed code.
+
+The second process is programmed in C\# and called the Visual Profiler Access. It starts the profiled application, written in C++, with the desired profiling mode in a separate process, initialize the interprocess communication for transferring the profiling data and is responsible for their processing so they can be later used by an analystic and UI frontend.
+
+The whole relation is shown on the figure \ref{fig:04softwareArchitecture}.
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 04softwareArchitecture.png}
+		\caption{The backend's architecture}
+	\label{fig:04softwareArchitecture}
+\end{figure}
+
+
+\subsection{The Visual Profiler Backend }
+
+\subsubsection{whatever}
+
+
+
