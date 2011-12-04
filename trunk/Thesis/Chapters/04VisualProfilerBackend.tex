@@ -26,8 +26,35 @@ The whole relation is shown on the figure \ref{fig:04softwareArchitecture}.
 
 
 \subsection{The Visual Profiler Backend }
+In this part are the both chosen profiling mode implemented. It also contains bunch of supporting classes for handling metadata information for methods, classes, modules and assemblies, for caching the profiling intermediate results and for serializing the results and transmitting them over IPC to the Visual Profiler Access. The Active Template Library (ATL) framework from Microsoft is used to simplify programing of the Component Object Model (COM) in C++
 
-\subsubsection{whatever}
+Let us now introduce you the inner structure and rough outline.
 
+\subsubsection{Implentations of the \textit{ICorProfilerCallback3 } interface}
+The \textit{ICorProfilerCallback3} interface is the center point of the profiling API. With its 80 methods it is a little bit unpractical to implement it, mainly because only a handful of the method is usualy made use of. For that reason we created a default class \textit{CorProfilerCallbackBase} as depicted on the figure \ref{fig:04ProfilerCallbacks}. This provides empty implementation of every methods of the interface and derived classes can only override desired methods. This idea makes it easier to have clearly arranged classes, the clean code rules.
 
+\begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 04ProfilerCallbacks.png}
+		\caption{Implentations of the \textit{ICorProfilerCallback3} interface}
+	\label{fig:04ProfilerCallbacks}
+\end{figure}
 
+$$The both classes, the \textit{TracingProfiler} and the \textit{SamplingProfiler}, override the \textit{Initialize}, \textit{ThreadCreated} and \textit{ThreadDestroyed}. This
+$$
+\subsubsection*{The \textit{TracingProfiler} class}
+This class is home for the tracing profiler mode implementation, the figure \ref{fig:04ProfilerCallbacks}. It starts its lifetime by running the IPC with the Visual Profiler Access on a separate thread in the \textit{Constructor()} method. After that, the \textit{Initialize()} method is invoked by the CLR and passed a pointer to the \textit{ICallProfilerInfo3} interface. Here registers the profiler the function ID mapper (more detail later in this subsection), the function enter/leave, the thread created/destroyed and the exception events notifications. At this point is everything set up and the profiled application starts running.
+
+The profiler receives a notification from the CLR whenever a new managed thread is created. The notification executes within the context of the newly created thread. The tracing profiler registers the thread id and associates with it an instance of the \textit{TracingCallTree} class. Such an association is saved into a hash table, represented by C++ \textit{std::map}, under the thread id key. The reference to the \textit{TracingCallTree} object is stored into a thread local storage in order to avoid repetitive search in the hash table by every single enter/leave notification.
+
+The \textit{TracingCallTree} class tracks the method enter and leave notifications for every managed thread simultaneously. This is a demanding task if you take in account the every single call to and return from a profiled method is augmented by overhead of this notification. Our first approach to store the collected profiling information was to push the data into a stack. That was fairly easy to implement and did indeed worked. 
+However not very well. Firstly, it used so much memory that after tens of seconds the application memory working set reached hunderts of mega bytes, secondly it slowed down the application (at that time we did not used the thread storage, so the the corresponding \textit{TracingCallTree} objected had to be found every single time in the hash table). It was clearly unacceptable. We had to come with a better solution since the profiled application was running 45 times slower (according to rough messurements of duration in the profiled application). 
+
+We came up with a solution that is based on the fact that an union of snapshots of thread's call stacka forms a call tree as depicted on the figure \ref{fig:04PrimitiveCallTree}.
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 04PrimitiveCallTree.png}
+		\caption{Union of thread's snapshots forming a call tree. A very simple example: A calls  B, B calls C, C returns to B, B calls D, D returs to B, B return to A }
+	\label{fig:04PrimitiveCallTree}
+\end{figure}
