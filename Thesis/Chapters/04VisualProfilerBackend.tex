@@ -131,15 +131,42 @@ When a managed thread is about to end it execution the CLR calls \textit{ThreadD
 The stack walker is not allowed to perform its stack walks after the profiling session is over. Otherwise an error reading the metadata occurs. In order to avoid this overrides the sampling profiler the \textit{Shutdown} method of the \textit{ICorProfilerCallback} interface. This method is called by the CLR rigth before the end of the profiling session and the sampling profiler block the CLR's thread till the last stack walk is completed. Then the application terminates, the collected data is send out and the IPC finishes together with the profiler.
 
 \subsection{Call tree and call tree element classes}
-The classes of the tracing and the sampling call trees and call tree elements share many features and properties, mainly regarding the initialization, the tree structure, the storing of the collected profiling data and thread syncronization. This led us to create the common abstract classes \textit{CallTreeBase} and \textit{CallTreeElemBase}. This inheritance hierarchy is shown on the figure \ref{fig:04backendStructure}
+The classes of the tracing and the sampling call trees and call tree elements share many features and properties, mainly regarding the initialization, the tree structure, the storing of the collected profiling data and thread syncronization. This led us to create the common abstract classes \textit{CallTreeBase} and \textit{CallTreeElemBase}. The inheritance hierarchy is shown on the figure \ref{fig:04backendStructure}
 
 
 \begin{figure}
 	\centering
-		\includegraphics[scale=0.6,angle=90]{\imagePath 04backendStructure.png}
-		\caption{The hierarchy and relation between the call tree and the call tree element classes used to trace the collected profiling data.}
+		\includegraphics[scale=1.1,angle=90]{\imagePath 04backendStructure.png}
+		\caption{The hierarchy and relation between the call tree and the call tree element classes used to trace the collected profiling data. \underline{Underlined members} are defined as static.}
 	\label{fig:04backendStructure}
 \end{figure}
 
-The both base abstract classes are templated. The template parameter are to be specified by inheriting from the abstract base classes. It might seem a bit strange that the template parameters are the types that will inherit the base class, however, this allows to put the common generic logic that only differs in the tempalted in one place and specify it later by inheriting the base class
+The both base abstract classes are templated. The template parameter are to be specified by inheriting from the abstract base classes, as shown on the code snippet below. It might seem a bit strange that the template parameters are of the types that inherit the base class, however, this allows to put the common generic logic that only differs in the tempalted types in one place and specify the type later by inheriting the base class.
 
+\ \lstset{language=C++,
+frame=none,
+framesep=5pt,basicstyle=\footnotesize,
+  keywordstyle=\ttfamily\color{OliveGreen},
+ identifierstyle=\ttfamily\color{CadetBlue}\bfseries, 
+ commentstyle=\color{Brown},
+ stringstyle=\ttfamily,
+ breaklines=true
+ showstringspaces=true}
+
+\begin{lstlisting} 
+class TracingCallTree : public CallTreeBase<TracingCallTree, TracingCallTreeElem>
+class SamplingCallTree : public CallTreeBase<SamplingCallTree, SamplingCallTreeElem>
+class TracingCallTreeElem: public CallTreeElemBase<TracingCallTreeElem>
+class SamplingCallTreeElem : public CallTreeElemBase<SamplingCallTreeElem>
+\end{lstlisting}
+
+The \textit{CallTreeBase} class defines a static hash table for storing the call trees by their ids, it provides a handful of static synchronized methods to add, get and serialize the content of the static hash table. In addition, it defines instance methods and fields for distinct purposes such as thread time related measurement, the root call tree element pointer, the abstract serialization method and some other auxiliary members.
+
+The \textit{CallTreeElemBase} class is plain data class and holds the function id, a pointer to the parent element and a hash table, C++ \textit{std::map}, to hold pointers to children elements.
+
+The derived classes \textit{TracingCallTree, SamplingCallTree, TracingCallTreeElem, SamplingCallTreeElem} then only define thier special behaviour and data. 
+
+\subsection{Metadate}
+We have refered to the term metadata in the preciding chapter without specifing it. The metadata is information stored in .NET assemblies describing their data types, identity, relations with other assemblies, security permissions, attribues and yet other information.
+
+The ICorProfilingInfo3 and ICorProfilingCallback3 interfaces provide us only opaque identificators for the methods, classes, module, asseblies, parameters and attributes. The way to get the corresponding metadata
