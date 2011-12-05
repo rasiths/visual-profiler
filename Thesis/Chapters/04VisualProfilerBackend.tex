@@ -74,8 +74,15 @@ Let us move on with the profilier's activity. The profiler receives a notificati
 
 And then a managed method in the profiling appliction is about to be entered. But before it is actually entered the CLR gives a chance to the tracing profiler to express its interest in this particular methods. The CLR invokes the FunctionIdMapper method and passes it a function id (type FunctionID) of the method. The profiler caches the method's metadata (the name, the declaring...) obtained by the function id and if the method is from an assembly with enabled profiling (explained later) the profiler express its interest in receiving the enter/leave notifications for the method,  or hooks to it, by setting an output parameter of the FunctionIdMapper to \textit{true} value. The function id mapping occurrs only once for every managed method.
 
-If a hooked managed method is being entered the CLR call the profilier's function-enter handler and passes to it the same function id as to the FunctionIdMapper method. This notification is very performance sensitive (very repetitiv) and therefore the function-enter handler is declared with the naked (\textit{_declspec(naked)}) attribute, the compiler generates code without prolog and epilog co
+If a hooked managed method is being entered the CLR call the profilier's function-enter handler and passes to it the same function id as to the FunctionIdMapper method. This notification is very performance sensitive (very repetitiv) and therefore the function-enter handler is declared with the naked attribute (\textit{\_declspec(naked)}), the compiler generates code without prolog and epilog code. We had to write own prolog/epilog code sequences using inline assembler code to call yet another function that makes a downward transition on the thread's tracing call tree.
 
+When a function is being left the profiler's function-leave handler is called and again receives as an input parameter the function id. The function-leave handler has to be declared with the naked attribute as well. It just calls another function to make a upward transition on the thread's tracing call tree.
+
+If a thread of the profiled application ends its execution without any exception the CLR call the ThreadDestroyed method and lets the tracing profiler to do some book-keeping and close the corresponding tracing call tree.
+
+If an exception occurs on a thread then a search for a \textit{catch} clause begins by walking up a thread's call stack. The CLR the ExceptionSearchFunctionEnter invokes for every searched function on the thread's call stack till it find the matching \textit{catch} clause and calls the ExceptionSearchCatcherFound funtion. The tracing profiler uses this exception handling mechanism to transition upwards the corresponding tracing call tree. If the \textit{catch} were not found the profiled application would crash due to an unhandled exception.
+ 
+After the profiling application exitted, the IPC is ended and the profiling session is over.
 
 
 
