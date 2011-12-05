@@ -1,4 +1,4 @@
-\chapter{The Visual Profiler Backend}
+\chapter{Visual Profiler Backend}
 The backend is the part of the profiler resposible for collecting the data from the profiled application and for sending them to the analitic part of the Visual Profiler frontend. There are many requirement for a profiling backend to fulfill, such as speed, mutli-threadinng, correctness, low memory consumption and others. In this chapter, we will introduce the profiling modes we chose to implement and review the inner implementation of the backend and desing decision we had to make.
 
 \section{Choice of the implentation strategy and the profiling modes}
@@ -24,13 +24,11 @@ The whole relation is shown on the figure \ref{fig:04softwareArchitecture}.
 	\label{fig:04softwareArchitecture}
 \end{figure}
 
-
-\subsection{The Visual Profiler Backend }
-In this part are the both chosen profiling mode implemented. It also contains bunch of supporting classes for handling metadata information for methods, classes, modules and assemblies, for caching the profiling intermediate results and for serializing the results and transmitting them over IPC to the Visual Profiler Access. The Active Template Library (ATL) framework from Microsoft is used to simplify programing of the Component Object Model (COM) in C++
+In the visual profiler backend part are the both chosen profiling mode implemented. It also contains bunch of supporting classes for handling metadata information for methods, classes, modules and assemblies, for caching the profiling intermediate results and for serializing the results and transmitting them over IPC to the Visual Profiler Access. The Active Template Library (ATL) framework from Microsoft is used to simplify programing of the Component Object Model (COM) in C++
 
 Let us now introduce you the inner structure and rough outline.
 
-\subsubsection{Implentations of the \textit{ICorProfilerCallback3 } interface}
+\subsection{Implentations of the \textit{ICorProfilerCallback3 } interface}
 The \textit{ICorProfilerCallback3} interface is the center point of the profiling API. With its 80 methods it is a little bit unpractical to implement it, mainly because only a handful of the method is usualy made use of. For that reason we created a default class \textit{CorProfilerCallbackBase} as depicted on the figure \ref{fig:04ProfilerCallbacks}. This provides empty implementation of every methods of the interface and derived classes can only override desired methods. This idea makes it easier to have clearly arranged classes, the clean code rules.
 
 \begin{figure}
@@ -40,11 +38,13 @@ The \textit{ICorProfilerCallback3} interface is the center point of the profilin
 	\label{fig:04ProfilerCallbacks}
 \end{figure}
 
-$$The both classes, the \textit{TracingProfiler} and the \textit{SamplingProfiler}, override the \textit{Initialize}, \textit{ThreadCreated} and \textit{ThreadDestroyed}. This
-$$
-\subsubsection*{The \textit{TracingProfiler} class}
+\subsection{\textit{TracingProfiler} class}
 This class is home for the tracing profiler mode implementation, the figure \ref{fig:04ProfilerCallbacks}. It starts its lifetime by running the IPC with the Visual Profiler Access on a separate thread in the \textit{Constructor()} method. After that, the \textit{Initialize()} method is invoked by the CLR and passed a pointer to the \textit{ICallProfilerInfo3} interface. Here registers the profiler the function ID mapper (more detail later in this subsection), the function enter/leave, the thread created/destroyed and the exception events notifications. At this point is everything set up and the profiled application starts running.
 
+\begin{center}
+\rule{300pt}{1.5pt}
+\end{center}
+%-------------------------------------------------------------------------------------------
 During the profiling session there is a need to trace the method enter and leave notifications for every managed thread simultaneously. This is a demanding task if you take in account the every single call to and return from a managed method is augmented by overhead of this notifications. 
 
 Our first approach to store the collected profiling information was to push the data, a function ids, into an enter stack and a leave stack. Every managed had its own private enter and leave stacks. All stacks were saved by the corresponding thread ids in a common hash table. During the processin of a funtion enter or leave notification the hash table had to be searched. This created a potential race condition (inserting a new thread to hash table and reading from it at the same time). So the critical section had to be added to access the hash table.
@@ -62,28 +62,7 @@ Subsequently, we realized that an union of snapshots of thread's call stacks for
 \end{figure}
 
 The \textit{TracingCallTree} class was created based on the idea.
-A simplified representation of the TracingCallTree class is depicted on the figure \ref{fig:04TracingCallTreeActiveElem}. Every tree element (class TracingCallTreeElem) contains commulative profiling results such as the number of the enter and leave, time related data and some other auxiliary data. The object of the TracingCallTree class contains an active element pointer and a root pointer. The active element pointer points to an element representing a currently executing function and the root element pointer represents the top most method, e.g. the Main method. 
-
-When a method calls another method, its tree child, the active element pointer only moves to the child and the profiling data is modified. This solution performs very well. Even a huge call tree takes negligible amount of memory and the transition are very quick. 
-
-The other improvement was in using a thread local storage of managed threads for storing a reference to the call trees. Thanks to this the lookup in the call tree hash table can be avoided in thread safe manners with significant speed gain. 
-
-The change from a stack to a call tree and usage of the thread local storage brought together a huge speed and memory performance enhancement. The profiled application runs now 4 times slower, compared to 50 times before, than the without profiling. This slowdown is valid only for the unoptimized build of the profiler (debug settings), the optimized version performs even better. 
-
-Let us move on with the profilier's activity. The profiler receives a notification from the CLR whenever a new managed thread is created - via the method \textit{ThreadCreated}. The notification executes within the context of the newly created thread. The tracing profiler registers the thread id and associates with it an instance of the \textit{TracingCallTree} class. Such an association is saved into a hash table, represented by C++ \textit{std::map}, under the thread id key. The reference to the \textit{TracingCallTree} object is stored into the thread local storage in order to avoid repetitive search in the hash table by every single enter/leave notification.
-
-And then a managed method in the profiling appliction is about to be entered. But before it is actually entered the CLR gives a chance to the tracing profiler to express its interest in this particular methods. The CLR invokes the FunctionIdMapper method and passes it a function id (type FunctionID) of the method. The profiler caches the method's metadata (the name, the declaring...) obtained by the function id and if the method is from an assembly with enabled profiling (explained later) the profiler express its interest in receiving the enter/leave notifications for the method,  or hooks to it, by setting an output parameter of the FunctionIdMapper to \textit{true} value. The function id mapping occurrs only once for every managed method.
-
-If a hooked managed method is being entered the CLR call the profilier's function-enter handler and passes to it the same function id as to the FunctionIdMapper method. This notification is very performance sensitive (very repetitiv) and therefore the function-enter handler is declared with the naked attribute (\textit{\_declspec(naked)}), the compiler generates code without prolog and epilog code. We had to write own prolog/epilog code sequences using inline assembler code to call yet another function that makes a downward transition on the thread's tracing call tree.
-
-When a function is being left the profiler's function-leave handler is called and again receives as an input parameter the function id. The function-leave handler has to be declared with the naked attribute as well. It just calls another function to make a upward transition on the thread's tracing call tree.
-
-If a thread of the profiled application ends its execution without any exception the CLR call the ThreadDestroyed method and lets the tracing profiler to do some book-keeping and close the corresponding tracing call tree.
-
-If an exception occurs on a thread then a search for a \textit{catch} clause begins by walking up a thread's call stack. The CLR the ExceptionSearchFunctionEnter invokes for every searched function on the thread's call stack till it find the matching \textit{catch} clause and calls the ExceptionSearchCatcherFound funtion. The tracing profiler uses this exception handling mechanism to transition upwards the corresponding tracing call tree. If the \textit{catch} were not found the profiled application would crash due to an unhandled exception.
- 
-After the profiling application exitted, the IPC is ended and the profiling session is over.
-
+A simplified representation of the \textit{TracingCallTree} class is depicted on the figure \ref{fig:04TracingCallTreeActiveElem}. Every tree element (class \textit{TracingCallTreeElem}) contains commulative profiling results such as the number of the enter and leave, time related data and some other auxiliary data. The object of the \textit{TracingCallTree} class contains an active element pointer and a root pointer. The active element pointer points to an element representing a currently executing function and the root element pointer represents the top most method, e.g. the Main method. 
 
 
 \begin{figure}
@@ -94,21 +73,73 @@ After the profiling application exitted, the IPC is ended and the profiling sess
 \end{figure}
 
 
+When a method calls another method, its tree child, the active element pointer only moves to the child and the profiling data is modified. This solution performs very well. Even a huge call tree takes negligible amount of memory and the transition are very quick. 
+
+The other improvement was in using a thread local storage of managed threads for storing a reference to the call trees. Thanks to this the lookup in the call tree hash table can be avoided in thread safe manners with significant speed gain. 
+
+The change from a stack to a call tree and usage of the thread local storage brought together a huge speed and memory performance enhancement. The profiled application runs now 4 times slower, compared to 50 times before, than the without profiling. This slowdown is valid only for the unoptimized build of the profiler (debug settings), the optimized version performs even better. 
+
+\begin{center}
+\rule{300pt}{1.5pt}
+\end{center}
+%-------------------------------------------------------------------------------------------
+Let us move on with the profilier's activity. The profiler receives a notification from the CLR whenever a new managed thread is created - via the method \textit{ThreadCreated}. The notification executes within the context of the newly created thread. The tracing profiler registers the thread id and associates with it an instance of the \textit{TracingCallTree} class. Such an association is saved into a hash table, represented by C++ \textit{std::map}, under the thread id key. The reference to the \textit{TracingCallTree} object is stored into the thread local storage in order to avoid repetitive search in the hash table by every single enter/leave notification.
+
+And then a managed method in the profiling appliction is about to be entered. But before it is actually entered the CLR gives a chance to the tracing profiler to express its interest in this particular methods. The CLR invokes the FunctionIdMapper method and passes it a function id (type FunctionID) of the method. The profiler caches the method's metadata (the name, the declaring...) obtained via the function id and if the method is from an assembly with enabled profiling (explained later) the profiler expresses its interest in receiving the enter/leave notifications for the method,  or hooks to it, by setting an output parameter of the FunctionIdMapper to \textit{true} value. The function id mapping occurrs only once for every managed method.
+
+If a hooked managed method is being entered the CLR call the profilier's function-enter handler and passes to it the same function id as to the FunctionIdMapper method. This notification is very performance sensitive (very repetitiv) and therefore the function-enter handler is declared with the naked attribute (\textit{\_declspec(naked)}), the compiler generates code without prolog and epilog code. We had to write own prolog/epilog code sequences using inline assembler code to call yet another function that makes a downward transition on the thread's tracing call tree.
+
+When a function is being left the profiler's function-leave handler is called and again receives as an input parameter the function id. The function-leave handler has to be declared with the naked attribute as well. It just calls another function to make a upward transition on the thread's tracing call tree.
+
+If a thread of the profiled application ends its execution without any exception the CLR call the ThreadDestroyed method and lets the tracing profiler to do some book-keeping and close the corresponding tracing call tree.
+
+If an exception occurs on a thread then a search for a \textit{catch} clause begins by walking up a thread's call stack. The CLR the \textit{ExceptionSearchFunctionEnter} invokes for every searched function on the thread's call stack till it find the matching \textit{catch} clause and calls the \textit{ExceptionSearchCatcherFound} funtion. The tracing profiler uses this exception handling mechanism to transition upwards the corresponding tracing call tree together with the thread's call stack. If the \textit{catch} clause were not found the profiled application would crash due to an unhandled exception.
+ 
+After the profiling application exitted, the IPC send out, in the \textit{Destructor} funtion, the profiling data and is ended and the profiling session is considered to be over.
 
 
+\subsection{\textit{SamplingProfiler} class}
+In this class resides the profiler implementing the sampling profiler mode, shown on the figure \ref{fig:04ProfilerCallbacks}. The sampling profiler starts by connection the IPC communication from its \textit{Constructor} method on a separate thread. The CLR calls after that the \textit{Initialize} method and passed to it a pointer to the \textit{ICallProfilerInfo3} interface. The sampling profiling set the mask to value \textit{COR\_PRF\_MONITOR\_THREADS} a \textit{COR\_PRF\_ENABLE\_STACK\_SNAPSHOT} in order to receive threads related notifications and to enable managed call stack's snapshots. An instance of the \textit{StackWalker} class is also created to carry out the explorarion of the managed threads' stacks. The sampling is being started.
+
+In this moment it it the right time to start the profiled application. When a managed thread is created, it is registered with the stack walker, in \textit{ThreadCreated} notification handler fired by the CLR.
+
+To collect the profiling information uses the sampling profiler for every managed thread an object of the SamplingCallTree class, an alternative of the \textit{TracingCallTree}. Everytime a stack snapshot is created it is added to the sampling call tree of the correspoinding thread, as indicated on the figure \ref{fig:04PrimitiveSamplingCallTree}. 
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 04PrimitiveSamplingCallTree.png}
+		\caption{ Union of a stack snapshot to a thread's sampling call tree. }
+	\label{fig:04PrimitiveSamplingCallTree}
+\end{figure}
+
+The constructor of the \textit{StackWalker} class, the figure \ref{fig:04StackWalker}, accepts as its paramert the sampling period in miliseconds. When the method \textit{StartSampling} is called the stack walker create a new thread and periodically gets the stack snapshots for every managed thread.
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 04StackWalker.png}
+		\caption{ The \textit{StackWalker} class}
+	\label{fig:04StackWalker}
+\end{figure}
 
 
+To get the stack snapshop the stack walker calls for every registered managed thread the \textit{DoStackSnapshot} method of the \textit{ICorProfilingInfo3} interface passing it the manage thread id (type ThreadID) of the thread, whose stack should be explored. It also passes to the \textit{DoStackSnapshot} a pointer to the function \textit{MakeFrameWalk} that is called for every single stack frame on the thread's call stack. Within the \textit{MakeFrameWalk} function, the stack walker records function ids of the encountered stack frames by putting them in a linear collection, C++ \textit{std::vector}. As soon as the last stack frame is explored by the \textit{MakeFrameWalk} function the \textit{DoStackSnapshot} returns. The stack walker adds the just acquired stack snapshot with the sampling call tree, caches the methods' metadata and repetes the same process for another registered thread. 
 
+The CLR suspends the inspected thread during a call to \textit{DoStackSnapshot} function. Therefore the \textit{MakeFrameWalk} function has to be fast to minimize the performace overhead on the profiled application.
 
+When a managed thread is about to end it execution the CLR calls \textit{ThreadDestroyed} notification handler and the thread's id is unregistered from the stack walker.
 
+The stack walker is not allowed to perform its stack walks after the profiling session is over. Otherwise an error reading the metadata occurs. In order to avoid this overrides the sampling profiler the \textit{Shutdown} method of the \textit{ICorProfilerCallback} interface. This method is called by the CLR rigth before the end of the profiling session and the sampling profiler block the CLR's thread till the last stack walk is completed. Then the application terminates, the collected data is send out and the IPC finishes together with the profiler.
 
-
+\subsection{Call tree and call tree element classes}
+The classes of the tracing and the sampling call trees and call tree elements share many features and properties, mainly regarding the initialization, the tree structure, the storing of the collected profiling data and thread syncronization. This led us to create the common abstract classes \textit{CallTreeBase} and \textit{CallTreeElemBase}. This inheritance hierarchy is shown on the figure \ref{fig:04backendStructure}
 
 
 \begin{figure}
 	\centering
 		\includegraphics[scale=0.6,angle=90]{\imagePath 04backendStructure.png}
-		\caption{The hierarchy of the call tree classes used to trace the collected profiling data.}
+		\caption{The hierarchy and relation between the call tree and the call tree element classes used to trace the collected profiling data.}
 	\label{fig:04backendStructure}
 \end{figure}
+
+The both base abstract classes are templated. The template parameter are to be specified by inheriting from the abstract base classes. It might seem a bit strange that the template parameters are the types that will inherit the base class, however, this allows to put the common generic logic that only differs in the tempalted in one place and specify it later by inheriting the base class
 
