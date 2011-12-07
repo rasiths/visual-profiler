@@ -1,4 +1,5 @@
 \chapter{Visual Profiler Backend}
+\label{chap04:chapter}
 The backend is the part of the profiler responsible for collecting the data from the profiled application and for sending them to the analytic part of the Visual Profiler frontend. There are many requirement for a profiling backend to fulfil such as speed, multi-threading, correctness, low memory consumption and others. In this chapter, we will introduce the profiling modes we chose to implement and review the inner implementation of the backend and design decision we had to make.
 
 \section{Choice of the implementation strategy and the profiling modes}
@@ -276,7 +277,7 @@ Thus, we can provide a lightweight and non-intrusive update mechanism with very 
 
  
 \section{Summary}
-We have shown reasons for choosing to implement the tracing and sampling profilers and the software architecture of the visual profiler backend was outlined. We moved afterwards to explore how both profilers were implemented, how the metadata is acquired and stored, what and how is measured and, finally, how the profiling date is send to the frontend.
+In this chapter, we have presented several reasons for the choice to implement the tracing and sampling profilers and the software architecture of the visual profiler backend was outlined. We moved afterwards to explore how both profilers were implemented, how the metadata is acquired and stored, what and how is measured and, finally, how the profiling data is send to the frontend through a named pipe.
 
 
 
