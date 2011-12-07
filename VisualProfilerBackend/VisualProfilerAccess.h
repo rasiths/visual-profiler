@@ -105,7 +105,7 @@ private:
 
 				pThis->CarryOutAction(Actions_SendingProfilingData, &useSnapshot);
 				break;
-			case Commands_FishishProfiling:
+			case Commands_FinishProfiling:
 				break;
 			default:
 				CheckError(false);
@@ -117,9 +117,9 @@ private:
 		return success;
 	}
 
-	void SerializeProfilingData(SerializationBuffer * buffer, bool useSnapshotBefore){
+	void SerializeProfilingData(SerializationBuffer * buffer, bool useSnapshotBeforeFreshResults){
 		SerializationBuffer bufferProfilingData;
-		if(useSnapshotBefore){
+		if(useSnapshotBeforeFreshResults){
 			TCallTree::SerializeAllTreeSnapShots(&bufferProfilingData);
 		}else{
 			TCallTree::SerializeAllTrees(&bufferProfilingData);
@@ -151,7 +151,7 @@ private:
 		DWORD bytesReadCount = -1;
 		BOOL succeeded = ReadFile(_pipeHandle, &command, sizeof(Commands), &bytesReadCount, NULL);
 		if(bytesReadCount == 0)
-			return Commands_FishishProfiling;
+			return Commands_FinishProfiling;
 		CheckError(bytesReadCount == sizeof(Commands));
 		CheckError2(succeeded);
 
