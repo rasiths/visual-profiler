@@ -76,7 +76,7 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::Initialize( IUnknown *pICorProfilerI
 	return S_OK;
 }
 
-UINT_PTR STDMETHODCALLTYPE CTracingProfiler::FunctionMapper(FunctionID functionId, void * clientData, BOOL *pbHookFunction)
+UINT_PTR STDMETHODCALLTYPE CTracingProfiler::FunctionIdMapper(FunctionID functionId, void * clientData, BOOL *pbHookFunction)
 {	 
 	CTracingProfiler * profilerBase = (CTracingProfiler *) clientData;
 

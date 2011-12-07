@@ -3,8 +3,6 @@
 
 class MetadataSerializer
 {
-
-
 	bool IsAlreadySerialized(){
 		return _isAlreadySerialized;
 	}

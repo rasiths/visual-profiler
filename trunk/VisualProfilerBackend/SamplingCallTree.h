@@ -7,7 +7,7 @@ class SamplingCallTree : public CallTreeBase<SamplingCallTree, SamplingCallTreeE
 public:
 	SamplingCallTree(ThreadID threadId, ICorProfilerInfo3 * profilerInfo);
 	void ProcessSamples(vector<FunctionID> * functionIdsSnapshot);
-	void SetOsThreadInfo(DWORD osThreadId);
+	
 	virtual void Serialize(SerializationBuffer * buffer);
 	virtual void ToString(wstringstream & wsout);
 

@@ -15,8 +15,8 @@ namespace VisualProfilerAccess
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
             var processStartInfo = new ProcessStartInfo();
             processStartInfo.FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe";
-
-            if (false)
+            
+            if (true)
             {
 
                 var profilerAccess = new ProfilerAccess<TracingCallTree>(processStartInfo,
@@ -41,7 +41,7 @@ namespace VisualProfilerAccess
             }
         }
 
-        private static void OnUpdateCallback(object sender, ProfilerDataUpdateEventArgs<TracingCallTree> eventArgs)
+        private static void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
         {
             Console.Clear();
             foreach (var callTree in
@@ -66,7 +66,7 @@ namespace VisualProfilerAccess
             }
         }
 
-        private static void OnUpdateCallback2(object sender, ProfilerDataUpdateEventArgs<SamplingCallTree> eventArgs)
+        private static void OnUpdateCallback2(object sender, ProfilingDataUpdateEventArgs<SamplingCallTree> eventArgs)
         {
             Console.Clear();
             foreach (var callTree in

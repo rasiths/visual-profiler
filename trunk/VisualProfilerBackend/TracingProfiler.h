@@ -64,7 +64,7 @@ public:
 	virtual HRESULT STDMETHODCALLTYPE ExceptionSearchFunctionEnter(FunctionID functionId);
 	virtual HRESULT STDMETHODCALLTYPE ExceptionSearchCatcherFound(FunctionID functionId);
 
-	static UINT_PTR STDMETHODCALLTYPE FunctionMapper(FunctionID functionId,void * clientData,  BOOL *pbHookFunction);
+	static UINT_PTR STDMETHODCALLTYPE FunctionIdMapper(FunctionID functionId,void * clientData,  BOOL *pbHookFunction);
 
 private:
 	static void __stdcall FunctionEnterHook(FunctionIDOrClientID functionIDOrClientID);

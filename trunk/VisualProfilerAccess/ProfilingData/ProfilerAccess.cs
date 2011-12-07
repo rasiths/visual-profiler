@@ -20,14 +20,14 @@ namespace VisualProfilerAccess.ProfilingData
         private NamedPipeServerStream _pipeServer;
 
         public ProfilerAccess(ProcessStartInfo profileeProcessStartInfo, ProfilerTypes profilerType,
-                              TimeSpan profilerDataUpdatePeriod,
-                              EventHandler<ProfilerDataUpdateEventArgs<TCallTree>> updateCallback)
+                              TimeSpan profilingDataUpdatePeriod,
+                              EventHandler<ProfilingDataUpdateEventArgs<TCallTree>> updateCallback)
         {
             Contract.Requires(profileeProcessStartInfo != null);
             Contract.Requires(updateCallback != null);
             ProfileeProcessStartInfo = profileeProcessStartInfo;
             ProfilerType = profilerType;
-            ProfilerDataUpdatePeriod = profilerDataUpdatePeriod;
+            ProfilerDataUpdatePeriod = profilingDataUpdatePeriod;
             UpdateCallback = updateCallback;
         }
 
@@ -47,7 +47,7 @@ namespace VisualProfilerAccess.ProfilingData
         public TimeSpan ProfilerDataUpdatePeriod { get; set; }
 
         public Process ProfileeProcess { get; set; }
-        public EventHandler<ProfilerDataUpdateEventArgs<TCallTree>> UpdateCallback { get; private set; }
+        public EventHandler<ProfilingDataUpdateEventArgs<TCallTree>> UpdateCallback { get; private set; }
 
         private void InitNamePipe()
         {
@@ -85,7 +85,7 @@ namespace VisualProfilerAccess.ProfilingData
             while (!cancellationToken.IsCancellationRequested)
             {
                 Actions receivedAction = _pipeServer.DeserializeActions();
-                var eventArgs = new ProfilerDataUpdateEventArgs<TCallTree>();
+                var eventArgs = new ProfilingDataUpdateEventArgs<TCallTree>();
                 eventArgs.Action = receivedAction;
                 eventArgs.ProfilerAccess = this;
                 eventArgs.ProfilerType = ProfilerType;
@@ -129,20 +129,7 @@ namespace VisualProfilerAccess.ProfilingData
             }
         }
 
-        public void StartProfiler()
-        {
-            InitNamePipe();
-            StartSendingCommandsToProfilee();
-            StartProfileeProcess();
-        }
-
-        public void Wait()
-        {
-            _commandSenderTask.Wait();
-            _actionReceiverTask.Wait();
-        }
-
-        public void SendCommandsToProfilee(object state)
+        private void SendCommandsToProfilee(object state)
         {
             CancellationToken cancellationToken = _cancellationTokenSource.Token;
             _pipeServer.WaitForConnection();
@@ -163,6 +150,19 @@ namespace VisualProfilerAccess.ProfilingData
 
                 Thread.Sleep(ProfilerDataUpdatePeriod);
             }
+        }
+
+        public void StartProfiler()
+        {
+            InitNamePipe();
+            StartSendingCommandsToProfilee();
+            StartProfileeProcess();
+        }
+
+        public void Wait()
+        {
+            _commandSenderTask.Wait();
+            _actionReceiverTask.Wait();
         }
     }
 }

@@ -24,18 +24,24 @@ protected :
 	bool _refreshCallTreeBuffer;
 	SerializationBuffer _callTreeBuffer;
 	CriticalSection _instanceCriticalSection;
-	
+	HANDLE _osThreadHandle;
+	DWORD _osThreadId;
+	FILETIME CreationUserModeTimeStamp;
+	FILETIME CreationKernelModeTimeStamp;
 
 	virtual void SerializeCallTreeElem(TTreeElem * elem, SerializationBuffer * buffer) = 0;
 
 public:
-	FILETIME CreationUserModeTimeStamp;
-	FILETIME CreationKernelModeTimeStamp;
+
 	ULONGLONG KernelModeDurationHns;
 	ULONGLONG UserModeDurationHns;
-	HANDLE OsThreadHandle;
-	DWORD OsThreadId;
 	
+		
+	CallTreeBase(ThreadID threadId, ICorProfilerInfo3 * profilerInfo):_threadId(threadId),_refreshCallTreeBuffer(true),_osThreadId(0), _osThreadHandle(INVALID_HANDLE_VALUE), _profilerInfo(profilerInfo){
+		_profilerInfo->GetThreadInfo(threadId, &_osThreadId);
+		SetOsThreadInfo();
+		GetTimer()->Start();
+	};
 
 	void RefreshCallTreeBuffer(bool force = false){
 		if(force || _refreshCallTreeBuffer){
@@ -57,30 +63,13 @@ public:
 		}
 		_instanceCriticalSection.Leave();
 	}
-
-	CallTreeBase(ThreadID threadId, ICorProfilerInfo3 * profilerInfo):_threadId(threadId),_refreshCallTreeBuffer(true),OsThreadId(0), OsThreadHandle(INVALID_HANDLE_VALUE), _profilerInfo(profilerInfo){
-		_profilerInfo->GetThreadInfo(threadId, &OsThreadId);
-		SetOsThreadInfo();
-		GetTimer()->Start();
-	};
-
-	void SetOsThreadInfo(){
-		OsThreadHandle = OpenThread(THREAD_QUERY_INFORMATION,false,OsThreadId);
-		if(OsThreadHandle == NULL || OsThreadHandle == INVALID_HANDLE_VALUE){
-			CheckError(false);
-		}
-
-		FILETIME dummy;
-		BOOL success = GetThreadTimes(OsThreadHandle,&dummy, &dummy,&CreationKernelModeTimeStamp, &CreationUserModeTimeStamp);
-		CheckError2(success);
-	}
-
+	
 	void UpdateUserAndKernelModeDurations(){
 		FILETIME dummy;
 		FILETIME currentUserModeTimeStamp;
 		FILETIME currentKernelModeTimeStamp;
 
-		BOOL success = GetThreadTimes(OsThreadHandle,&dummy, &dummy,&currentKernelModeTimeStamp, &currentUserModeTimeStamp);
+		BOOL success = GetThreadTimes(_osThreadHandle,&dummy, &dummy,&currentKernelModeTimeStamp, &currentUserModeTimeStamp);
 		CheckError2(success);
 		UserModeDurationHns = 0;
 		KernelModeDurationHns = 0;
@@ -149,6 +138,18 @@ public:
 			}
 		}
 		_criticalSection.Leave();
+	}
+
+private:
+	void SetOsThreadInfo(){
+		_osThreadHandle = OpenThread(THREAD_QUERY_INFORMATION,false,_osThreadId);
+		if(_osThreadHandle == NULL || _osThreadHandle == INVALID_HANDLE_VALUE){
+			CheckError(false);
+		}
+
+		FILETIME dummy;
+		BOOL success = GetThreadTimes(_osThreadHandle,&dummy, &dummy,&CreationKernelModeTimeStamp, &CreationUserModeTimeStamp);
+		CheckError2(success);
 	}
 
 };

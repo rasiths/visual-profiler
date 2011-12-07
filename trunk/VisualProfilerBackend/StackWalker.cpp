@@ -11,8 +11,6 @@ void StackWalker::RegisterThread(ThreadID threadId){
 	}
 	_criticalSection.Leave();
 	SamplingCallTree * callTree = SamplingCallTree::AddThread(threadId, _pProfilerInfo);
-
-	
 }
 
 void StackWalker::DeregisterThread(ThreadID threadId){
