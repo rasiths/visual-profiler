@@ -1,0 +1,78 @@
+\chapter{Visual Profiler Access}
+The Visual Profiler Access is a bridge between the unmanaged and the manage worlds of the profiler. Its main role is to initiate the bidirectional inter-process communications (IPC), to start the profiled process and to prepare the received data to be passed further.
+
+\section{Metadata, call trees and call tree elements}
+The data structure in the Visual Profiler Access closely resembles the data structure of the Visual Profiler Backend, described in the chapter \ref{chap04:chapter}. For the matter of completeness we include the metadata, call trees and call tree elements inheritance hierarchy respectively on the figures \ref{fig:05Metadata} and \ref{fig:05accessStructure}
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 05Metadata.png}
+		\caption{The metadata inheritance hierarchy closely resembles its counterpart from the chapter \ref{chap04:chapter}.}
+	\label{fig:05Metadata}
+\end{figure}
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 05accessStructure.png}
+		\caption{The call tree and call tree element inheritance hierarchy closely resembles their counterparts from the chapter \ref{chap04:chapter}.}
+	\label{fig:05accessStructure}
+\end{figure}
+
+The metadata derived classes use static caches for every implementation of the generic base \textit{MetadataBase} class. The cache is the \textit{System.Collections.Generic.Dictionary<uint, TMetadata>} class. The key to the dictionary is the metadata id. The metadata is added the cache as they come from the backend. 
+
+The call trees and their call tree elements are not cached, however, they are matched with they corresponding cached metadata during the deserialization.
+
+\section{Deserialization}
+The profiling data comes from the named pipe in form of a byte stream. We added a handful of extension methods to the stream, the \textit{System.IO.Stream} class, to deserialize the basic types, as depicted on the figure \ref{fig:05DeserializeActions}. The the base classes of the call tree and the call tree elements classes define an abstract method for deserialization. This method has to be overridden in inherited classes and there belong the deserialization logic that copies the logic of the serialization in the backend.
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 05DeserializeActions.png}
+		\caption{The DeserializationExtensions class to add extension methods to the \textit{System.IO.Stream} class for deserialization of the basic types. }
+	\label{fig:05DeserializeActions}
+\end{figure}
+
+\section{Visual profiler access API}
+The entry point to the profiler is the \textit{ProfilerAccess\textless TCallTree \textgreater} class, the figure \ref{fig:05ProfilerAccess}. To use the construct of it you have to:
+\begin{enumerate}
+
+\item specify the TCallTree generic parameter, the type of a call tree that will be used to store profiling data,
+
+\item provide an instance of the System.Diagnostics.ProcessStartInfo class that specify the executable of the profiled application,
+
+\item pass one value of the \textit{ProfilerTypes} enum that represents what profiler to use in the backend,
+
+\item supply the the update period for the result fetching and
+
+\item pass a reference to the \textit{EventHandler\textless ProfilingDataUpdateEventArgs\textless TCallTree\textgreater\textgreater} delegate, that is called back when a profiling metadata update is successfully carried out.
+ 
+\end{enumerate}
+\begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 05ProfilerAccess.png}
+		\caption{The \textit{ProfilerAccess\textless TCallTree \textgreater} class and the from the \textit{System.EventArgs} derived \textit{ProfilingDataUpdateEventArgs} class. }
+	\label{fig:05ProfilerAccess}
+\end{figure}
+
+When the \textit{StartProfiler} method is called a bidirectional named pipe with asynchronous writing/reading is created. After that, two separate threads are spawned, the first, the command thread, send commands to the backend and the second, the action thread, listens for action from the backend. The actions and commands are as follows:
+
+\textbf{Actions:}
+\begin{itemize}	
+\item	SendingProfilingData - the bytes of the profiling data are being sent to the frontend
+\item	ProfilingFinished - the profiled application exits
+\item   Error - an unexpected situation
+\end{itemize}
+
+\textbf{Commands:}
+\begin{itemize}	
+\item	SendProfilingData - the request to send profiling data
+\end{itemize}
+
+Both the action and the command are only counterpart to the actions and commands in the backend.
+
+The command thread sends with in the constructor specified period the \underline{SendProfilingData} command to the backend. The action thread listens for the actions. When the \textit{SendingProfilingData} action is received the action thread deserialize the containing profiling data and pass them as the event argument to the specified callback delegate and executes it on a separate thread pool thread. This process repeats itself until the profiling application exits.
+
+The \textit{ProfilerAccess} class offers the \textit{Wait} method that block a calling thread till the profiling is completed. This can be used to prevent a main application thread to exit prematurely
+
+\section{Summary}
+In this chapter, we have looked at the the \textit{ProfilerAccess\textless TCallTree \textgreater} class and highlighted the most important parts of it. The class is more or less a wrapper for the unmanaged functionality of the Visual profiler backend.
