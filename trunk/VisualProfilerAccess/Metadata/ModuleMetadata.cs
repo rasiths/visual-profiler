@@ -5,6 +5,7 @@ namespace VisualProfilerAccess.Metadata
 {
     public class ModuleMetadata : MetadataBase<ModuleMetadata>
     {
+        public string File { get; set; }
         public AssemblyMetadata Assembly { get; set; }
 
         public override MetadataTypes MetadataType
@@ -15,6 +16,7 @@ namespace VisualProfilerAccess.Metadata
         protected override void Deserialize(Stream byteStream)
         {
             Contract.Ensures(Assembly != null);
+            File = byteStream.DeserializeString();
             uint assemblyId = byteStream.DeserializeUint32();
             Assembly = AssemblyMetadata.Cache[assemblyId];
         }

@@ -41,7 +41,7 @@ namespace VisualProfilerAccess.Metadata
             }
             parameterString = parameterString.TrimEnd(", ".ToCharArray());
 
-            string str = string.Format("[{0}]{1}.{2}({3})", Class.Module.Assembly.Name, Class, Name, parameterString);
+            string str = string.Format("[{0}]{1}.{2}({3}) - {4}", Class.Module.Assembly.Name, Class, Name, parameterString, Class.Module.File);
             return str;
         }
     }

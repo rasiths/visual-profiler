@@ -48,6 +48,9 @@ public:
 	void FinalRelease()
 	{
 		_profilerAccess.FinishProfiling();
+		SerializationBuffer b;
+		ModuleMetadata::SerializeMetadata(&b);
+		
 	}
 
 	virtual HRESULT STDMETHODCALLTYPE Shutdown(){

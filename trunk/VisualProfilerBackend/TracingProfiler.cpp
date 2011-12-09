@@ -68,7 +68,7 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::Initialize( IUnknown *pICorProfilerI
 	FunctionEnter3* enterFunction = &FunctionEnter3Naked;
 	FunctionLeave3* leaveFunction = &FunctionLeave3Naked;
 	FunctionTailcall3* tailcallFuntion = &FunctionTailcall3Naked;
-	this->pProfilerInfo->SetFunctionIDMapper2(&FunctionMapper, this);
+	this->pProfilerInfo->SetFunctionIDMapper2(&FunctionIdMapper, this);
 	this->pProfilerInfo->SetEnterLeaveFunctionHooks3(enterFunction, leaveFunction , tailcallFuntion);
 
 	tracingProfiler = this;
