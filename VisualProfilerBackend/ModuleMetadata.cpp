@@ -29,7 +29,9 @@ void ModuleMetadata::Serialize(SerializationBuffer * buffer){
 	buffer->SerializeMetadataTypes(MetadataTypes_ModuleMedatada);
 	buffer->SerializeMetadataId(ModuleId);
 	buffer->SerializeMdToken(ModuleMdToken);
-	//buffer->SerializeWString(FileName);
+	/*SerializationBuffer b;
+	b.SerializeWString(FileName);*/
+	buffer->SerializeWString(FileName);
 	buffer->SerializeMetadataId(pAssemblyMetadata->AssemblyId);
 }
 

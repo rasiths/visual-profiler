@@ -1,16 +1,59 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using System.Threading;
+using Microsoft.Cci;
 using VisualProfilerAccess.ProfilingData;
 using VisualProfilerAccess.ProfilingData.CallTreeElems;
 using VisualProfilerAccess.ProfilingData.CallTrees;
 
 namespace VisualProfilerAccess
 {
+    class Program2
+    {
+        static void Main(string[] args)
+        {
+
+
+            PdbReader pdbReader = new PdbReader(@"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe");
+            IModule module = pdbReader.Module;
+
+            foreach (var namedTypeDefinition in module.GetAllTypes())
+            {
+                PropertyInfo propertyInfo2 = namedTypeDefinition.GetType().GetProperty("TokenValue", BindingFlags.NonPublic | BindingFlags.Instance);
+                uint value2 = (uint)propertyInfo2.GetValue(namedTypeDefinition, null);
+
+                foreach (var methodDefinition in namedTypeDefinition.Methods)
+                {
+                    Console.WriteLine(methodDefinition.Name);
+
+                    PropertyInfo propertyInfo = methodDefinition.GetType().GetProperty("TokenValue", BindingFlags.NonPublic | BindingFlags.Instance);
+                    uint value = (uint)propertyInfo.GetValue(methodDefinition, null);
+                    foreach (var location in methodDefinition.Locations)
+                    {
+                        foreach (var primarySourceLocation in pdbReader.GetAllPrimarySourceLocationsFor(location))
+                        {
+
+                            if (primarySourceLocation != null)
+                            {
+                                Console.WriteLine("line {0}, {1}:{2}", primarySourceLocation.StartLine,
+                                                  primarySourceLocation.StartColumn, primarySourceLocation.EndColumn);
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
     internal class Program
     {
-        private static void Main(string[] args)
+
+
+        private static void Main2(string[] args)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
             var processStartInfo = new ProcessStartInfo();

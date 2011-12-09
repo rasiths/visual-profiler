@@ -4,7 +4,7 @@
 #include <corprof.h>
 #include <string>
 #include "MetadataBase.h"
-#define VISUAL_PROFILER_TARGET_ATTR L"SandBox.ProfileMeAttribute"
+#define VISUAL_PROFILER_TARGET_ATTR L"VisualProfiler.ProfilingEnabledAttribute"
 
 class AssemblyMetadata : public MetadataBase<AssemblyID, AssemblyMetadata>
 {
