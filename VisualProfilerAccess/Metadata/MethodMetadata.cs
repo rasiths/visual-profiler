@@ -5,19 +5,8 @@ namespace VisualProfilerAccess.Metadata
 {
     public class MethodMetadata : MetadataBase<MethodMetadata>
     {
-        public string Name { get; set; }
-        public string[] Parameters { get; set; }
-        public ClassMetadata Class { get; set; }
-
-        public override MetadataTypes MetadataType
+        public MethodMetadata(Stream byteStream) : base(byteStream)
         {
-            get { return MetadataTypes.MethodMedatada; }
-        }
-
-        protected override void Deserialize(Stream byteStream)
-        {
-            Contract.Ensures(Class != null);
-
             Name = byteStream.DeserializeString();
 
             uint paramCount = byteStream.DeserializeUint32();
@@ -28,10 +17,24 @@ namespace VisualProfilerAccess.Metadata
                 Parameters[i] = param;
             }
 
-            uint classId = byteStream.DeserializeUint32();
-            Class = ClassMetadata.Cache[classId];
+            ClassId = byteStream.DeserializeUint32();
+   
         }
 
+        public string Name { get; private set; }
+        public string[] Parameters { get; private set; }
+        public uint ClassId { get; private set; }
+
+        public ClassMetadata Class
+        {
+            get { return ClassMetadata.Cache[ClassId]; }
+        }
+
+        public override MetadataTypes MetadataType
+        {
+            get { return MetadataTypes.MethodMedatada; }
+        }
+        
         public override string ToString()
         {
             string parameterString = string.Empty;

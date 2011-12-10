@@ -11,45 +11,15 @@ namespace VisualProfilerAccessTests.MetadataTests
         [SetUp]
         public void SetUp()
         {
-            AssemblyMetadata.Cache.Clear();
-            ModuleMetadata.Cache.Clear();
-            ClassMetadata.Cache.Clear();
-            ModuleMetadata.Cache.Clear();
-            _assemblyMetadata = AssemblyMetadata.DeserializeAndCacheMetadata(_assemblyBytes.ConvertToMemoryStream());
-            _moduleMetadata = ModuleMetadata.DeserializeAndCacheMetadata(_moduleBytes.ConvertToMemoryStream());
-            _classMetadata = ClassMetadata.DeserializeAndCacheMetadata(_classBytes.ConvertToMemoryStream());
+         
+            _classMetadata = new ClassMetadata(_classBytes.ConvertToMemoryStream());
 
-            _methodMetadata1 = MethodMetadata.DeserializeAndCacheMetadata(_method1Bytes.ConvertToMemoryStream(), false);
-            _methodMetadata2 = MethodMetadata.DeserializeAndCacheMetadata(_method2Bytes.ConvertToMemoryStream(), false);
-            _methodMetadata3 = MethodMetadata.DeserializeAndCacheMetadata(_method3Bytes.ConvertToMemoryStream(), false);
+            _methodMetadata1 = new MethodMetadata(_method1Bytes.ConvertToMemoryStream());
+            _methodMetadata2 = new MethodMetadata(_method2Bytes.ConvertToMemoryStream());
+            _methodMetadata3 = new MethodMetadata(_method3Bytes.ConvertToMemoryStream());
         }
 
         #endregion
-
-        private readonly byte[] _assemblyBytes = {
-                                                     0x00, 0x3A, 0x37, 0x00, 0x01, 0x00, 0x00, 0x20, 0x18, 0x00, 0x00,
-                                                     0x00, 0x54, 0x00,
-                                                     0x65, 0x00, 0x73, 0x00, 0x74, 0x00, 0x41, 0x00, 0x73, 0x00, 0x73,
-                                                     0x00, 0x65, 0x00,
-                                                     0x6D, 0x00, 0x62, 0x00, 0x6C, 0x00, 0x79, 0x00, 0x01
-                                                 };
-
-        private readonly byte[] _moduleBytes = {
-                                                   0x9C, 0x2E, 0x21, 0x00, 0x01, 0x00, 0x00, 0x06,
-                                                   0x80, 0x00, 0x00, 0x00, 0x44, 0x00, 0x3a, 0x00, 0x5c, 0x00, 0x48,
-                                                   0x00, 0x6f, 0x00, 0x6e, 0x00, 0x7a, 0x00, 0x69, 0x00, 0x6b, 0x00,
-                                                   0x5c, 0x00, 0x44, 0x00, 0x65, 0x00, 0x73, 0x00, 0x6b, 0x00, 0x74,
-                                                   0x00, 0x6f, 0x00, 0x70, 0x00, 0x5c, 0x00, 0x4d, 0x00, 0x61, 0x00,
-                                                   0x6e, 0x00, 0x64, 0x00, 0x65, 0x00, 0x6c, 0x00, 0x62, 0x00, 0x72,
-                                                   0x00, 0x6f, 0x00, 0x74, 0x00, 0x5c, 0x00, 0x4d, 0x00, 0x61, 0x00,
-                                                   0x6e, 0x00, 0x64, 0x00, 0x65, 0x00, 0x6c, 0x00, 0x62, 0x00, 0x72,
-                                                   0x00, 0x6f, 0x00, 0x74, 0x00, 0x5c, 0x00, 0x62, 0x00, 0x69, 0x00,
-                                                   0x6e, 0x00, 0x5c, 0x00, 0x44, 0x00, 0x65, 0x00, 0x62, 0x00, 0x75,
-                                                   0x00, 0x67, 0x00, 0x5c, 0x00, 0x4d, 0x00, 0x61, 0x00, 0x6e, 0x00,
-                                                   0x64, 0x00, 0x65, 0x00, 0x6c, 0x00, 0x62, 0x00, 0x72, 0x00, 0x6f,
-                                                   0x00, 0x74, 0x00, 0x2e, 0x00, 0x65, 0x00, 0x78, 0x00, 0x65, 0x00,
-                                                   0x00, 0x3A, 0x37,0x00
-                                               };
 
         private readonly byte[] _classBytes = {
                                                   0x6C, 0x34, 0x21, 0x00, 0x02, 0x00, 0x00, 0x02, 0x2E, 0x00, 0x00, 0x00
@@ -105,9 +75,7 @@ namespace VisualProfilerAccessTests.MetadataTests
                                                     0x21, 0x00
                                                 };
 
-        private AssemblyMetadata _assemblyMetadata;
-        private ModuleMetadata _moduleMetadata;
-        private ClassMetadata _classMetadata;
+       private ClassMetadata _classMetadata;
         private MethodMetadata _methodMetadata1;
         private MethodMetadata _methodMetadata2;
         private MethodMetadata _methodMetadata3;
@@ -169,26 +137,34 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void ParentIdTest()
         {
+            ClassMetadata.Cache.Clear();
+            _classMetadata.AddToStaticCache();
+
+            Assert.AreEqual(_classMetadata.Id, _methodMetadata1.ClassId);
             Assert.IsTrue(ReferenceEquals(_classMetadata, _methodMetadata1.Class),
                           "Method1's parent module does not match.");
+
+            Assert.AreEqual(_classMetadata.Id, _methodMetadata2.ClassId);
             Assert.IsTrue(ReferenceEquals(_classMetadata, _methodMetadata2.Class),
                           "Method2's parent module does not match.");
+
+            Assert.AreEqual(_classMetadata.Id, _methodMetadata3.ClassId);
             Assert.IsTrue(ReferenceEquals(_classMetadata, _methodMetadata3.Class),
                           "Method3's parent module does not match.");
         }
 
         [Test]
-        public void StaticDeserializeAndCachingTest()
+        public void StaticCachingTest()
         {
-            MethodMetadata.DeserializeAndCacheMetadata(_method1Bytes.ConvertToMemoryStream());
-            MethodMetadata.DeserializeAndCacheMetadata(_method2Bytes.ConvertToMemoryStream());
-            MethodMetadata.DeserializeAndCacheMetadata(_method3Bytes.ConvertToMemoryStream());
-            MethodMetadata methodMetadata1 = MethodMetadata.Cache[ExpectedId1];
-            MethodMetadata methodMetadata2 = MethodMetadata.Cache[ExpectedId2];
-            MethodMetadata methodMetadata3 = MethodMetadata.Cache[ExpectedId3];
-            Assert.IsNotNull(methodMetadata1, "Data was not inserted into the cache.");
-            Assert.IsNotNull(methodMetadata2, "Data was not inserted into the cache.");
-            Assert.IsNotNull(methodMetadata3, "Data was not inserted into the cache.");
+            _methodMetadata1.AddToStaticCache();
+            _methodMetadata2.AddToStaticCache();
+            _methodMetadata3.AddToStaticCache();
+            MethodMetadata methodMetadata1FromCache = MethodMetadata.Cache[ExpectedId1];
+            MethodMetadata methodMetadata2FromCache = MethodMetadata.Cache[ExpectedId2];
+            MethodMetadata methodMetadata3FromCache = MethodMetadata.Cache[ExpectedId3];
+            Assert.IsNotNull(methodMetadata1FromCache, "Data was not inserted into the cache.");
+            Assert.IsNotNull(methodMetadata2FromCache, "Data was not inserted into the cache.");
+            Assert.IsNotNull(methodMetadata3FromCache, "Data was not inserted into the cache.");
         }
     }
 }

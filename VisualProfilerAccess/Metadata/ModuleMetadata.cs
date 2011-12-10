@@ -6,26 +6,26 @@ namespace VisualProfilerAccess.Metadata
 {
     public class ModuleMetadata : MetadataBase<ModuleMetadata>
     {
-        public string FilePath { get; set; }
-        public AssemblyMetadata Assembly { get; set; }
-        public IModule Module { get; set; }
+        public ModuleMetadata(Stream byteStream) : base(byteStream)
+        {
+            FilePath = byteStream.DeserializeString();
+            AssemblyId = byteStream.DeserializeUint32();
+        }
+
+        public string FilePath { get; private set; }
+        public uint AssemblyId { get; private set; }
+
+        public AssemblyMetadata Assembly
+        {
+            get { return AssemblyMetadata.Cache[AssemblyId]; }
+        }
+
+        private IModule CciModule { get; set; }
 
         public override MetadataTypes MetadataType
         {
             get { return MetadataTypes.ModuleMedatada; }
         }
-
-        protected override void Deserialize(Stream byteStream)
-        {
-            Contract.Ensures(Assembly != null);
-            FilePath = byteStream.DeserializeString();
-            uint assemblyId = byteStream.DeserializeUint32();
-            Assembly = AssemblyMetadata.Cache[assemblyId];
-        }
-
-        protected override void Initialize()
-        {
-            
-        }
+        
     }
 }

@@ -13,8 +13,8 @@ namespace VisualProfilerAccessTests.MetadataTests
         {
             AssemblyMetadata.Cache.Clear();
             ModuleMetadata.Cache.Clear();
-            _assemblyMetadata = AssemblyMetadata.DeserializeAndCacheMetadata(_assemblyBytes.ConvertToMemoryStream());
-            _moduleMetadata = ModuleMetadata.DeserializeAndCacheMetadata(_moduleBytes.ConvertToMemoryStream(), false);
+            _assemblyMetadata = new AssemblyMetadata(_assemblyBytes.ConvertToMemoryStream());
+            _moduleMetadata = new ModuleMetadata(_moduleBytes.ConvertToMemoryStream());
         }
 
         #endregion
@@ -65,16 +65,20 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void ParentIdTest()
         {
+            AssemblyMetadata.Cache.Clear();
+            _assemblyMetadata.AddToStaticCache();
             Assert.IsTrue(ReferenceEquals(_assemblyMetadata, _moduleMetadata.Assembly),
                           "Module's parent assembly does not match.");
         }
 
         [Test]
-        public void StaticDeserializeAndCachingTest()
+        public void StaticCachingTest()
         {
-            ModuleMetadata.DeserializeAndCacheMetadata(_moduleBytes.ConvertToMemoryStream());
-            ModuleMetadata moduleMetadata = ModuleMetadata.Cache[ExpectedId];
-            Assert.IsNotNull(moduleMetadata, "Data was not inserted into the cache.");
+            ModuleMetadata.Cache.Clear();
+            _moduleMetadata.AddToStaticCache();
+            ModuleMetadata moduleMetadataFromCach = ModuleMetadata.Cache[ExpectedId];
+            Assert.IsNotNull(moduleMetadataFromCach, "Data was not inserted into the cache.");
+            Assert.AreEqual(ExpectedId, moduleMetadataFromCach.Id);
         }
 
         [Test]
