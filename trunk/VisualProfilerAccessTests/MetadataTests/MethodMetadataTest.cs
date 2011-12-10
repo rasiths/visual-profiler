@@ -15,13 +15,13 @@ namespace VisualProfilerAccessTests.MetadataTests
             ModuleMetadata.Cache.Clear();
             ClassMetadata.Cache.Clear();
             ModuleMetadata.Cache.Clear();
-            _assemblyMetadata = AssemblyMetadata.DeserializeMetadata(_assemblyBytes.ConvertToMemoryStream());
-            _moduleMetadata = ModuleMetadata.DeserializeMetadata(_moduleBytes.ConvertToMemoryStream());
-            _classMetadata = ClassMetadata.DeserializeMetadata(_classBytes.ConvertToMemoryStream());
+            _assemblyMetadata = AssemblyMetadata.DeserializeAndCacheMetadata(_assemblyBytes.ConvertToMemoryStream());
+            _moduleMetadata = ModuleMetadata.DeserializeAndCacheMetadata(_moduleBytes.ConvertToMemoryStream());
+            _classMetadata = ClassMetadata.DeserializeAndCacheMetadata(_classBytes.ConvertToMemoryStream());
 
-            _methodMetadata1 = MethodMetadata.DeserializeMetadata(_method1Bytes.ConvertToMemoryStream(), false);
-            _methodMetadata2 = MethodMetadata.DeserializeMetadata(_method2Bytes.ConvertToMemoryStream(), false);
-            _methodMetadata3 = MethodMetadata.DeserializeMetadata(_method3Bytes.ConvertToMemoryStream(), false);
+            _methodMetadata1 = MethodMetadata.DeserializeAndCacheMetadata(_method1Bytes.ConvertToMemoryStream(), false);
+            _methodMetadata2 = MethodMetadata.DeserializeAndCacheMetadata(_method2Bytes.ConvertToMemoryStream(), false);
+            _methodMetadata3 = MethodMetadata.DeserializeAndCacheMetadata(_method3Bytes.ConvertToMemoryStream(), false);
         }
 
         #endregion
@@ -180,9 +180,9 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void StaticDeserializeAndCachingTest()
         {
-            MethodMetadata.DeserializeMetadata(_method1Bytes.ConvertToMemoryStream());
-            MethodMetadata.DeserializeMetadata(_method2Bytes.ConvertToMemoryStream());
-            MethodMetadata.DeserializeMetadata(_method3Bytes.ConvertToMemoryStream());
+            MethodMetadata.DeserializeAndCacheMetadata(_method1Bytes.ConvertToMemoryStream());
+            MethodMetadata.DeserializeAndCacheMetadata(_method2Bytes.ConvertToMemoryStream());
+            MethodMetadata.DeserializeAndCacheMetadata(_method3Bytes.ConvertToMemoryStream());
             MethodMetadata methodMetadata1 = MethodMetadata.Cache[ExpectedId1];
             MethodMetadata methodMetadata2 = MethodMetadata.Cache[ExpectedId2];
             MethodMetadata methodMetadata3 = MethodMetadata.Cache[ExpectedId3];

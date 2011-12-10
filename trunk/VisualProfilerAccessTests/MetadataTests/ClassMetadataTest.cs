@@ -14,9 +14,9 @@ namespace VisualProfilerAccessTests.MetadataTests
             AssemblyMetadata.Cache.Clear();
             ModuleMetadata.Cache.Clear();
             ClassMetadata.Cache.Clear();
-            _assemblyMetadata = AssemblyMetadata.DeserializeMetadata(_assemblyBytes.ConvertToMemoryStream());
-            _moduleMetadata = ModuleMetadata.DeserializeMetadata(_moduleBytes.ConvertToMemoryStream());
-            _classMetadata = ClassMetadata.DeserializeMetadata(_classBytes.ConvertToMemoryStream());
+            _assemblyMetadata = AssemblyMetadata.DeserializeAndCacheMetadata(_assemblyBytes.ConvertToMemoryStream());
+            _moduleMetadata = ModuleMetadata.DeserializeAndCacheMetadata(_moduleBytes.ConvertToMemoryStream());
+            _classMetadata = ClassMetadata.DeserializeAndCacheMetadata(_classBytes.ConvertToMemoryStream());
         }
 
         #endregion
@@ -107,7 +107,7 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void StaticDeserializeAndCachingTest()
         {
-            ClassMetadata.DeserializeMetadata(_classBytes.ConvertToMemoryStream());
+            ClassMetadata.DeserializeAndCacheMetadata(_classBytes.ConvertToMemoryStream());
             ClassMetadata classMetadata = ClassMetadata.Cache[ExpectedId];
             Assert.IsNotNull(classMetadata, "Data was not inserted into the cache.");
         }
