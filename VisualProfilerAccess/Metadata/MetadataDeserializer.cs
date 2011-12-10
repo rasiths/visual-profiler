@@ -18,16 +18,16 @@ namespace VisualProfilerAccess.Metadata
                 switch (metadataType)
                 {
                     case MetadataTypes.AssemblyMetadata:
-                        result = AssemblyMetadata.DeserializeMetadata(byteStream);
+                        result = AssemblyMetadata.DeserializeAndCacheMetadata(byteStream);
                         break;
                     case MetadataTypes.ModuleMedatada:
-                        result = ModuleMetadata.DeserializeMetadata(byteStream);
+                        result = ModuleMetadata.DeserializeAndCacheMetadata(byteStream);
                         break;
                     case MetadataTypes.ClassMedatada:
-                        result = ClassMetadata.DeserializeMetadata(byteStream);
+                        result = ClassMetadata.DeserializeAndCacheMetadata(byteStream);
                         break;
                     case MetadataTypes.MethodMedatada:
-                        result = MethodMetadata.DeserializeMetadata(byteStream);
+                        result = MethodMetadata.DeserializeAndCacheMetadata(byteStream);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

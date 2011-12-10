@@ -11,6 +11,7 @@ namespace VisualProfilerAccess.Metadata
 
         public abstract MetadataTypes MetadataType { get; }
         protected abstract void Deserialize(Stream byteStream);
+        protected virtual void Initialize() { }
     }
 
     public abstract class MetadataBase<TMetadata> : MetadataBase where TMetadata : MetadataBase<TMetadata>, new()
@@ -23,7 +24,7 @@ namespace VisualProfilerAccess.Metadata
             set { _cache = value; }
         }
 
-        public static TMetadata DeserializeMetadata(Stream byteStream, bool addToCache = true)
+        public static TMetadata DeserializeAndCacheMetadata(Stream byteStream, bool addToCache = true)
         {
             Contract.Requires(byteStream != null);
             var metadata = new TMetadata();
@@ -31,6 +32,7 @@ namespace VisualProfilerAccess.Metadata
             metadata.Id = byteStream.DeserializeUint32();
             metadata.MdToken = byteStream.DeserializeUint32();
             metadata.Deserialize(byteStream);
+            metadata.Initialize();
 
             if (addToCache)
             {

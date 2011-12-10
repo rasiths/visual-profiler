@@ -13,8 +13,8 @@ namespace VisualProfilerAccessTests.MetadataTests
         {
             AssemblyMetadata.Cache.Clear();
             ModuleMetadata.Cache.Clear();
-            _assemblyMetadata = AssemblyMetadata.DeserializeMetadata(_assemblyBytes.ConvertToMemoryStream());
-            _moduleMetadata = ModuleMetadata.DeserializeMetadata(_moduleBytes.ConvertToMemoryStream(), false);
+            _assemblyMetadata = AssemblyMetadata.DeserializeAndCacheMetadata(_assemblyBytes.ConvertToMemoryStream());
+            _moduleMetadata = ModuleMetadata.DeserializeAndCacheMetadata(_moduleBytes.ConvertToMemoryStream(), false);
         }
 
         #endregion
@@ -72,7 +72,7 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void StaticDeserializeAndCachingTest()
         {
-            ModuleMetadata.DeserializeMetadata(_moduleBytes.ConvertToMemoryStream());
+            ModuleMetadata.DeserializeAndCacheMetadata(_moduleBytes.ConvertToMemoryStream());
             ModuleMetadata moduleMetadata = ModuleMetadata.Cache[ExpectedId];
             Assert.IsNotNull(moduleMetadata, "Data was not inserted into the cache.");
         }
@@ -81,7 +81,7 @@ namespace VisualProfilerAccessTests.MetadataTests
         public void FileTest()
         {
             
-            Assert.AreEqual(ExpectedFile, _moduleMetadata.File);
+            Assert.AreEqual(ExpectedFile, _moduleMetadata.FilePath);
         }
     }
 }
