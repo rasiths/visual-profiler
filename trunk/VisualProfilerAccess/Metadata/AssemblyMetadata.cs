@@ -4,6 +4,12 @@ namespace VisualProfilerAccess.Metadata
 {
     public class AssemblyMetadata : MetadataBase<AssemblyMetadata>
     {
+        public AssemblyMetadata(Stream byteStream) : base(byteStream)
+        {
+            Name = byteStream.DeserializeString();
+            IsProfilingEnabled = byteStream.DeserializeBool();
+        }
+
         public string Name { get; set; }
         public bool IsProfilingEnabled { get; set; }
 
@@ -12,10 +18,6 @@ namespace VisualProfilerAccess.Metadata
             get { return MetadataTypes.AssemblyMetadata; }
         }
 
-        protected override void Deserialize(Stream byteStream)
-        {
-            Name = byteStream.DeserializeString();
-            IsProfilingEnabled = byteStream.DeserializeBool();
-        }
+      
     }
 }

@@ -11,23 +11,22 @@ namespace VisualProfilerAccessTests.MetadataTests
         [SetUp]
         public void SetUp()
         {
-            AssemblyMetadata.Cache.Clear();
-            ModuleMetadata.Cache.Clear();
-            ClassMetadata.Cache.Clear();
-            _assemblyMetadata = AssemblyMetadata.DeserializeAndCacheMetadata(_assemblyBytes.ConvertToMemoryStream());
-            _moduleMetadata = ModuleMetadata.DeserializeAndCacheMetadata(_moduleBytes.ConvertToMemoryStream());
-            _classMetadata = ClassMetadata.DeserializeAndCacheMetadata(_classBytes.ConvertToMemoryStream());
+            //AssemblyMetadata.Cache.Clear();
+       
+            //_assemblyMetadata = new AssemblyMetadata(_assemblyBytes.ConvertToMemoryStream());
+            _moduleMetadata = new ModuleMetadata(_moduleBytes.ConvertToMemoryStream());
+            _classMetadata = new ClassMetadata(_classBytes.ConvertToMemoryStream());
         }
 
         #endregion
 
-        private readonly byte[] _assemblyBytes = {
-                                                     0x00, 0x3A, 0x37, 0x00, 0x01, 0x00, 0x00, 0x20, 0x18, 0x00, 0x00,
-                                                     0x00, 0x54, 0x00,
-                                                     0x65, 0x00, 0x73, 0x00, 0x74, 0x00, 0x41, 0x00, 0x73, 0x00, 0x73,
-                                                     0x00, 0x65, 0x00,
-                                                     0x6D, 0x00, 0x62, 0x00, 0x6C, 0x00, 0x79, 0x00, 0x01
-                                                 };
+        //private readonly byte[] _assemblyBytes = {
+        //                                             0x00, 0x3A, 0x37, 0x00, 0x01, 0x00, 0x00, 0x20, 0x18, 0x00, 0x00,
+        //                                             0x00, 0x54, 0x00,
+        //                                             0x65, 0x00, 0x73, 0x00, 0x74, 0x00, 0x41, 0x00, 0x73, 0x00, 0x73,
+        //                                             0x00, 0x65, 0x00,
+        //                                             0x6D, 0x00, 0x62, 0x00, 0x6C, 0x00, 0x79, 0x00, 0x01
+        //                                         };
 
         private readonly byte[] _moduleBytes = {
                                                    0x9C, 0x2E, 0x21, 0x00, 0x01, 0x00, 0x00, 0x06,
@@ -59,7 +58,7 @@ namespace VisualProfilerAccessTests.MetadataTests
                                                   0x73, 0x00, 0x00, 0x9C, 0x2E, 0x21, 0x00
                                               };
 
-        private AssemblyMetadata _assemblyMetadata;
+        //private AssemblyMetadata _assemblyMetadata;
         private ModuleMetadata _moduleMetadata;
         private ClassMetadata _classMetadata;
 
@@ -100,16 +99,20 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void ParentIdTest()
         {
+            ModuleMetadata.Cache.Clear();
+            _moduleMetadata.AddToStaticCache();
+            Assert.AreEqual(_moduleMetadata.Id, _classMetadata.ModuleId);
             Assert.IsTrue(ReferenceEquals(_moduleMetadata, _classMetadata.Module),
                           "Class' parent module does not match.");
         }
 
         [Test]
-        public void StaticDeserializeAndCachingTest()
+        public void StaticCachingTest()
         {
-            ClassMetadata.DeserializeAndCacheMetadata(_classBytes.ConvertToMemoryStream());
-            ClassMetadata classMetadata = ClassMetadata.Cache[ExpectedId];
-            Assert.IsNotNull(classMetadata, "Data was not inserted into the cache.");
+            ClassMetadata.Cache.Clear();
+            _classMetadata.AddToStaticCache();
+            ClassMetadata classMetadataFromCache = ClassMetadata.Cache[ExpectedId];
+            Assert.IsNotNull(classMetadataFromCache, "Data was not inserted into the cache.");
         }
     }
 }
