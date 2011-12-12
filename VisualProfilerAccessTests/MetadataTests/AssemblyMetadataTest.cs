@@ -12,7 +12,7 @@ namespace VisualProfilerAccessTests.MetadataTests
     {
         #region Setup/Teardown
 
-        [SetUp]
+        [TestFixtureSetUp]
         public void SetUp()
         {
             _assemblyMetadata = new AssemblyMetadata(_rawBytes.ConvertToMemoryStream());
