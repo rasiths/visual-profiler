@@ -20,8 +20,6 @@ namespace VisualProfilerAccess.Metadata
             get { return AssemblyMetadata.Cache[AssemblyId]; }
         }
 
-        private IModule CciModule { get; set; }
-
         public override MetadataTypes MetadataType
         {
             get { return MetadataTypes.ModuleMedatada; }

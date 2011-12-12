@@ -8,7 +8,7 @@ namespace VisualProfilerAccessTests.MetadataTests
     {
         #region Setup/Teardown
 
-        [SetUp]
+        [TestFixtureSetUp]
         public void SetUp()
         {
             AssemblyMetadata.Cache.Clear();

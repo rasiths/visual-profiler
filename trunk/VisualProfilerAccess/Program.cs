@@ -16,6 +16,7 @@ namespace VisualProfilerAccess
         {
 
 
+     
             PdbReader pdbReader = new PdbReader(@"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe");
             IModule module = pdbReader.Module;
 
@@ -23,7 +24,7 @@ namespace VisualProfilerAccess
             {
                 PropertyInfo propertyInfo2 = namedTypeDefinition.GetType().GetProperty("TokenValue", BindingFlags.NonPublic | BindingFlags.Instance);
                 uint value2 = (uint)propertyInfo2.GetValue(namedTypeDefinition, null);
-
+                
                 foreach (var methodDefinition in namedTypeDefinition.Methods)
                 {
                     Console.WriteLine(methodDefinition.Name);

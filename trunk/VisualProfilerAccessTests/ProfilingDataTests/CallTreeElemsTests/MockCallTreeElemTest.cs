@@ -11,7 +11,7 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
     {
         #region Setup/Teardown
 
-        [SetUp]
+        [TestFixtureSetUp]
         public void SetUp()
         {
             _memoryStream = _multipleElemBytes.ConvertToMemoryStream();

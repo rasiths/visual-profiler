@@ -2,6 +2,8 @@
 using NUnit.Framework;
 using VisualProfilerAccess;
 using VisualProfilerAccess.Metadata;
+using VisualProfilerAccessTests.SourceLocationTests;
+using System.Linq;
 
 namespace VisualProfilerAccessTests.MetadataTests
 {
@@ -10,7 +12,7 @@ namespace VisualProfilerAccessTests.MetadataTests
     {
         #region Setup/Teardown
 
-        [SetUp]
+        [TestFixtureSetUp]
         public void SetUp()
         {
             AssemblyMetadata.Cache.Clear();
@@ -18,6 +20,7 @@ namespace VisualProfilerAccessTests.MetadataTests
             ClassMetadata.Cache.Clear();
             ModuleMetadata.Cache.Clear();
             _memoryStream = _metadataBytes.ConvertToMemoryStream();
+            MetadataDeserializer.SourceLocatorFactory = new SrcLocatorMockupFkt();
             MetadataDeserializer.DeserializeAllMetadataAndCacheIt(_memoryStream);
         }
 
@@ -123,6 +126,16 @@ namespace VisualProfilerAccessTests.MetadataTests
         }
 
         [Test]
+        public void MethodSourceLocationTest()
+        {
+            var methodMetadata = MethodMetadata.Cache.First().Value;
+            var sourceFilePath = methodMetadata.GetSourceFilePath();
+            Assert.AreEqual(@"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe.cs", sourceFilePath);
+            var sourceLocations = methodMetadata.GetSourceLocations();
+            Assert.AreEqual(3, sourceLocations.Count());
+        }
+
+        [Test]
         public void ModuleCacheTest()
         {
             Assert.AreEqual(1, ModuleMetadata.Cache.Count);
@@ -134,7 +147,7 @@ namespace VisualProfilerAccessTests.MetadataTests
     {
         #region Setup/Teardown
 
-        [SetUp]
+        [TestFixtureSetUp]
         public void SetUp()
         {
             AssemblyMetadata.Cache.Clear();

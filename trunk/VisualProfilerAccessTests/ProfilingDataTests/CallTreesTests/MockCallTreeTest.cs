@@ -12,7 +12,7 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
     {
         #region Setup/Teardown
 
-        [SetUp]
+        [TestFixtureSetUp]
         public void SetUp()
         {
             _twoTreesStream = _twoTreesBytes.ConvertToMemoryStream();

@@ -1,11 +1,20 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using System.IO;
+using VisualProfilerAccess.SourceLocation;
 
 namespace VisualProfilerAccess.Metadata
 {
     public static class MetadataDeserializer
     {
+        private static ISourceLocatorFactory _sourceLocatorFactory = new SourceLocatorFactory();
+
+        public static ISourceLocatorFactory SourceLocatorFactory
+        {
+            get { return _sourceLocatorFactory; }
+            set { _sourceLocatorFactory = value; }
+        }
+
         public static void DeserializeAllMetadataAndCacheIt(Stream byteStream)
         {
             long initialStreamPostion = byteStream.Position;
@@ -31,6 +40,7 @@ namespace VisualProfilerAccess.Metadata
                         break;
                     case MetadataTypes.MethodMedatada:
                         MethodMetadata methodMetadata = new MethodMetadata(byteStream);
+                        methodMetadata.SourceLocatorFactory = _sourceLocatorFactory;
                         result = methodMetadata;
                         break;
                     default:
