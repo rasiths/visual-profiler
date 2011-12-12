@@ -11,22 +11,13 @@ namespace VisualProfilerAccessTests.MetadataTests
         [TestFixtureSetUp]
         public void SetUp()
         {
-            //AssemblyMetadata.Cache.Clear();
-       
-            //_assemblyMetadata = new AssemblyMetadata(_assemblyBytes.ConvertToMemoryStream());
             _moduleMetadata = new ModuleMetadata(_moduleBytes.ConvertToMemoryStream());
             _classMetadata = new ClassMetadata(_classBytes.ConvertToMemoryStream());
         }
 
         #endregion
 
-        //private readonly byte[] _assemblyBytes = {
-        //                                             0x00, 0x3A, 0x37, 0x00, 0x01, 0x00, 0x00, 0x20, 0x18, 0x00, 0x00,
-        //                                             0x00, 0x54, 0x00,
-        //                                             0x65, 0x00, 0x73, 0x00, 0x74, 0x00, 0x41, 0x00, 0x73, 0x00, 0x73,
-        //                                             0x00, 0x65, 0x00,
-        //                                             0x6D, 0x00, 0x62, 0x00, 0x6C, 0x00, 0x79, 0x00, 0x01
-        //                                         };
+   
 
         private readonly byte[] _moduleBytes = {
                                                    0x9C, 0x2E, 0x21, 0x00, 0x01, 0x00, 0x00, 0x06,

@@ -15,7 +15,7 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
             get { return ProfilingDataTypes.Tracing; }
         }
 
-        public override void DeserializeFields(Stream byteStream)
+        protected override void DeserializeFields(Stream byteStream)
         {
             KernelModeDurationHns = byteStream.DeserializeUInt64();
             UserModeDurationHns = byteStream.DeserializeUInt64();

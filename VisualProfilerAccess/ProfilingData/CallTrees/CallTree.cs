@@ -11,7 +11,7 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
         public UInt32 ThreadId { get; set; }
         public abstract ProfilingDataTypes ProfilingDataType { get; }
 
-        public virtual void DeserializeFields(Stream byteStream)
+        protected virtual void DeserializeFields(Stream byteStream)
         {
         }
 
@@ -28,7 +28,7 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
     {
         public TCallTreeElem RootElem { get; set; }
 
-        public override void Deserialize(Stream byteStream, bool deserializeCallTreeElems = true)
+        public sealed override void Deserialize(Stream byteStream, bool deserializeCallTreeElems = true)
         {
             var profilingDataType = (ProfilingDataTypes) byteStream.DeserializeUint32();
             Contract.Assume(ProfilingDataType == profilingDataType,
@@ -43,13 +43,6 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
                 callTreeElem.Deserialize(byteStream, true);
                 RootElem = callTreeElem;
             }
-        }
-
-        public static TCallTree DeserializeCallTree(Stream byteStream, bool deserializeCallTreeElems = true)
-        {
-            var callTree = new TCallTree();
-            callTree.Deserialize(byteStream, deserializeCallTreeElems);
-            return callTree;
         }
 
         public string ToString(Action<StringBuilder, TCallTreeElem> lineStringModifier)

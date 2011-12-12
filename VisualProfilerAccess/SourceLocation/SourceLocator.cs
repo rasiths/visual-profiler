@@ -23,7 +23,6 @@ namespace VisualProfilerAccess.SourceLocation
         private void PopulateSourceLocations()
         {
             IModule module = PdbReader.Module;
-            IDisposable disposable = module as IDisposable;
             foreach (var namedTypeDefinition in module.GetAllTypes())
             {
                 foreach (var methodDefinition in namedTypeDefinition.Methods)

@@ -24,7 +24,7 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
             stringBuilder.AppendFormat("Twc={2}s, Tum={0}s, Tkm={1}s", userModeSec, kernelModeSec, wallClockDuration);
         }
 
-        public override void DeserializeFields(Stream byteStream)
+        protected override void DeserializeFields(Stream byteStream)
         {
             WallClockDurationHns = byteStream.DeserializeUInt64();
             KernelModeDurationHns = byteStream.DeserializeUInt64();
