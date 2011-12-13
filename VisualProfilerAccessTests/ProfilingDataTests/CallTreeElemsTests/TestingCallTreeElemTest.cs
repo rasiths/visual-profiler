@@ -1,13 +1,15 @@
 ﻿using System;
 using System.IO;
+using Moq;
 using NUnit.Framework;
+using VisualProfilerAccess.Metadata;
 using VisualProfilerAccess.ProfilingData.CallTreeElems;
 using VisualProfilerAccessTests.MetadataTests;
 
 namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
 {
     [TestFixture]
-    public class MockCallTreeElemTest
+    public class TestingCallTreeElemTest
     {
         #region Setup/Teardown
 
@@ -15,8 +17,12 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
         public void SetUp()
         {
             _memoryStream = _multipleElemBytes.ConvertToMemoryStream();
-            _rootElem = new MockCallTreeElem();
-            _rootElem.Deserialize(_memoryStream);
+            _mockCallTreeElemFactory = new TestingCallTreeElemFactory();
+
+            _mockMetadataCache = new Mock<MetadataCache<MethodMetadata>> ();
+            _mockMetadataCache.SetupAllProperties();
+
+            _rootElem = new TestingCallTreeElem(_memoryStream, _mockCallTreeElemFactory, _mockMetadataCache.Object);
         }
 
         #endregion
@@ -37,6 +43,7 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
         private UInt64 ExpectedKernelModeDurationHns;
         private UInt64 ExpectedUserModeDurationHns = 0x72423;
         private UInt32 ExpectedChildrenCount = 3;
+        private ICallTreeElemFactory<TestingCallTreeElem> _mockCallTreeElemFactory;
 
 
         /* TestData represented by _multipleElemBytes
@@ -99,8 +106,9 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
                                                      };
 
 
-        private MockCallTreeElem _rootElem;
+        private TestingCallTreeElem _rootElem;
         private MemoryStream _memoryStream;
+        private Mock<MetadataCache<MethodMetadata>> _mockMetadataCache;
 
         [Test]
         public void AllBytesReadFromStreamTest()
@@ -111,9 +119,8 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
         [Test]
         public void FieldsDeserializationTest()
         {
-            var callTreeElem = new MockCallTreeElem();
             MemoryStream memoryStream = _singleElemBytes.ConvertToMemoryStream();
-            callTreeElem.Deserialize(memoryStream);
+            var callTreeElem = new TestingCallTreeElem(memoryStream, _mockCallTreeElemFactory, _mockMetadataCache.Object);
 
             Assert.AreEqual(ExpectedFunctionId, callTreeElem.FunctionId);
             Assert.AreEqual(ExpectedEnterCount, callTreeElem.EnterCount);
@@ -143,13 +150,13 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
         public void TreeDeserializationTest()
         {
             //0x143458:[TestAssembly]TestNamespace.TestClass.TestMessageWith2Arguments(testArgumentA, testArgumentB),Twc=331eafs,Tum=31fcf5s,Tkm=0s,Ec=a,Lc=a
-            MockCallTreeElem mockCallTreeElem = _rootElem.Children[0].Children[0].Children[1];
-            Assert.AreEqual(0x143458, mockCallTreeElem.FunctionId);
-            Assert.AreEqual(0x331eaf, mockCallTreeElem.WallClockDurationHns);
-            Assert.AreEqual(0x31fcf5, mockCallTreeElem.UserModeDurationHns);
-            Assert.AreEqual(0, mockCallTreeElem.KernelModeDurationHns);
-            Assert.AreEqual(0xA, mockCallTreeElem.EnterCount);
-            Assert.AreEqual(0xA, mockCallTreeElem.LeaveCount);
+            TestingCallTreeElem testingCallTreeElem = _rootElem.Children[0].Children[0].Children[1];
+            Assert.AreEqual(0x143458, testingCallTreeElem.FunctionId);
+            Assert.AreEqual(0x331eaf, testingCallTreeElem.WallClockDurationHns);
+            Assert.AreEqual(0x31fcf5, testingCallTreeElem.UserModeDurationHns);
+            Assert.AreEqual(0, testingCallTreeElem.KernelModeDurationHns);
+            Assert.AreEqual(0xA, testingCallTreeElem.EnterCount);
+            Assert.AreEqual(0xA, testingCallTreeElem.LeaveCount);
         }
     }
 }

@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Moq">
+      <HintPath>..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.framework.dll</HintPath>
     </Reference>
@@ -51,17 +54,37 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MetadataTests\AssemblyMetadataTest.cs" />
-    <Compile Include="MetadataTests\ClassMetadataTest.cs" />
     <Compile Include="DeserializationExtensionsTests.cs" />
+    <Compile Include="MetadataTests\AssemblyMetadataTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MetadataTests\ClassMetadataTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MetadataTests\Extensions.cs" />
-    <Compile Include="MetadataTests\MetadataDeserializerTest.cs" />
-    <Compile Include="MetadataTests\MethodMetadataTest.cs" />
+    <Compile Include="MetadataTests\MetadataDeserializerEmptyStreamTest.cs" />
+    <Compile Include="MetadataTests\MetadataDeserializerTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MetadataTests\MethodMetadataTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MetadataTests\ModuleMetadataTest.cs" />
-    <Compile Include="ProfilingDataTests\CallTreeElemsTests\MockCallTreeElem.cs" />
-    <Compile Include="ProfilingDataTests\CallTreesTests\MockCallTree.cs" />
-    <Compile Include="ProfilingDataTests\CallTreesTests\MockCallTreeTest.cs" />
-    <Compile Include="ProfilingDataTests\CallTreeElemsTests\MockCallTreeElemTest.cs" />
+    <Compile Include="ProfilingDataTests\CallTreeElemsTests\TestingCallTreeElem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ProfilingDataTests\CallTreeElemsTests\TestingCallTreeElemFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ProfilingDataTests\CallTreeElemsTests\TestingCallTreeElemTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ProfilingDataTests\CallTreesTests\TestingCallTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ProfilingDataTests\CallTreesTests\TestingCallTreeTest.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SourceLocationTests\SourceLocatorTest.cs" />
     <Compile Include="SourceLocationTests\SrcLocatorMockup.cs" />
