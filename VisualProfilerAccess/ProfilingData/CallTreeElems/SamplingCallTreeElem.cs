@@ -7,6 +7,14 @@ namespace VisualProfilerAccess.ProfilingData.CallTreeElems
 {
     public class SamplingCallTreeElem : CallTreeElem<SamplingCallTreeElem>
     {
+        public SamplingCallTreeElem(
+            Stream byteStream,
+            ICallTreeElemFactory<SamplingCallTreeElem> callTreeElemFactory,
+            MetadataCache<MethodMetadata> methodCache)
+            : base(byteStream, callTreeElemFactory, methodCache)
+        {
+        }
+
         public UInt32 StackTopOccurrenceCount { get; set; }
         public UInt32 LastProfiledFrameInStackCount { get; set; }
 
@@ -18,9 +26,8 @@ namespace VisualProfilerAccess.ProfilingData.CallTreeElems
 
         protected override void ToString(StringBuilder stringBuilder)
         {
-            MethodMetadata methodMetadata = MethodMetadata.Cache[FunctionId];
             stringBuilder.AppendFormat("{0}, TopFrameCount={1}, LastProfiledFrameCount={2}",
-                                       methodMetadata, StackTopOccurrenceCount,
+                                       MethodMetadata, StackTopOccurrenceCount,
                                        LastProfiledFrameInStackCount);
         }
     }

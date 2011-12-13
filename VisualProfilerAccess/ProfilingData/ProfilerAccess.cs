@@ -1,34 +1,39 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
-using VisualProfilerAccess.Metadata;
+using Ninject;
+using Ninject.Parameters;
+using VisualProfilerAccess.ProfilingData.CallTreeElems;
 using VisualProfilerAccess.ProfilingData.CallTrees;
 
 namespace VisualProfilerAccess.ProfilingData
 {
-    public class ProfilerAccess<TCallTree> where TCallTree : CallTree, new()
+    public class ProfilerAccess<TCallTree> where TCallTree : CallTree
     {
+        private readonly ProfilerCommunicator<TCallTree> _profilerCommunicator;
         private const string NamePipeName = "VisualProfilerAccessPipe";
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private Task _actionReceiverTask;
         private Task _commandSenderTask;
         private NamedPipeServerStream _pipeServer;
 
-        public ProfilerAccess(ProcessStartInfo profileeProcessStartInfo, ProfilerTypes profilerType,
-                              TimeSpan profilingDataUpdatePeriod,
-                              EventHandler<ProfilingDataUpdateEventArgs<TCallTree>> updateCallback)
+        public ProfilerAccess(
+            ProcessStartInfo profileeProcessStartInfo,
+            ProfilerTypes profilerType,
+            TimeSpan profilingDataUpdatePeriod,
+            ProfilerCommunicator<TCallTree> profilerCommunicator)
         {
             Contract.Requires(profileeProcessStartInfo != null);
-            Contract.Requires(updateCallback != null);
-            ProfileeProcessStartInfo = profileeProcessStartInfo;
+            Contract.Requires(profilerCommunicator != null);
+
+            _profilerCommunicator = profilerCommunicator;
             ProfilerType = profilerType;
+            ProfileeProcessStartInfo = profileeProcessStartInfo;
             ProfilerDataUpdatePeriod = profilingDataUpdatePeriod;
-            UpdateCallback = updateCallback;
         }
 
         private Guid ProfilerCClassGuid
@@ -45,9 +50,8 @@ namespace VisualProfilerAccess.ProfilingData
         public ProcessStartInfo ProfileeProcessStartInfo { get; private set; }
         public ProfilerTypes ProfilerType { get; private set; }
         public TimeSpan ProfilerDataUpdatePeriod { get; set; }
-
         public Process ProfileeProcess { get; set; }
-        public EventHandler<ProfilingDataUpdateEventArgs<TCallTree>> UpdateCallback { get; private set; }
+
 
         private void InitNamePipe()
         {
@@ -57,14 +61,14 @@ namespace VisualProfilerAccess.ProfilingData
 
         private void StartReceiveActionsFromProfilee()
         {
-            _actionReceiverTask = new Task(ReceiveActionsFromProfilee, _cancellationTokenSource,
+            _actionReceiverTask = new Task(InboundMessageLoop, _cancellationTokenSource,
                                            TaskCreationOptions.LongRunning);
             _actionReceiverTask.Start();
         }
 
         private void StartSendingCommandsToProfilee()
         {
-            _commandSenderTask = new Task(SendCommandsToProfilee, _cancellationTokenSource.Token,
+            _commandSenderTask = new Task(OutboundMessageLoop, _cancellationTokenSource.Token,
                                           TaskCreationOptions.LongRunning);
             _commandSenderTask.Start();
         }
@@ -79,75 +83,36 @@ namespace VisualProfilerAccess.ProfilingData
             ProfileeProcess = Process.Start(ProfileeProcessStartInfo);
         }
 
-        private void ReceiveActionsFromProfilee(object state)
+        private void InboundMessageLoop(object state)
         {
             CancellationToken cancellationToken = _cancellationTokenSource.Token;
             while (!cancellationToken.IsCancellationRequested)
             {
-                Actions receivedAction = _pipeServer.DeserializeActions();
-                var eventArgs = new ProfilingDataUpdateEventArgs<TCallTree>();
-                eventArgs.Action = receivedAction;
-                eventArgs.ProfilerAccess = this;
-                eventArgs.ProfilerType = ProfilerType;
-                eventArgs.ProfilingDataType = ProfilingDataTypes.Nothing;
-
-                switch (receivedAction)
+                bool finishLoop;
+                _profilerCommunicator.ReceiveActionFromProfilee(_pipeServer, out finishLoop);
+                if (finishLoop)
                 {
-                    case Actions.SendingProfilingData:
-                        var streamLengthBytes = new byte[sizeof(UInt32)];
-                        _pipeServer.Read(streamLengthBytes, 0, streamLengthBytes.Length);
-
-                        uint streamLength = BitConverter.ToUInt32(streamLengthBytes, 0);
-                        var profilingDataBytes = new byte[streamLength];
-                        _pipeServer.Read(profilingDataBytes, 0, profilingDataBytes.Length);
-
-                        var profilingDataStream = new MemoryStream(profilingDataBytes);
-                        MetadataDeserializer.DeserializeAllMetadataAndCacheIt(profilingDataStream);
-
-                        var callTrees = new List<TCallTree>();
-                        while (profilingDataStream.Position < profilingDataStream.Length)
-                        {
-                            var callTree = new TCallTree();
-                            callTree.Deserialize(profilingDataStream);
-                            callTrees.Add(callTree);
-                        }
-                        eventArgs.CallTrees = callTrees;
-                        break;
-
-                    case Actions.ProfilingFinished:
-                        eventArgs.CallTrees = null;
-                        _cancellationTokenSource.Cancel();
-                        return;
-
-                    default:
-                        eventArgs.Action = Actions.Error;
-                        eventArgs.CallTrees = null;
-                        _cancellationTokenSource.Cancel();
-                        return;
+                    _cancellationTokenSource.Cancel();
                 }
-                ThreadPool.QueueUserWorkItem(notUsed => UpdateCallback(this, eventArgs));
             }
         }
 
-        private void SendCommandsToProfilee(object state)
+        private void OutboundMessageLoop(object state)
         {
             CancellationToken cancellationToken = _cancellationTokenSource.Token;
             _pipeServer.WaitForConnection();
             StartReceiveActionsFromProfilee();
             while (!cancellationToken.IsCancellationRequested)
             {
-                byte[] commandBytes = BitConverter.GetBytes((UInt32)Commands.SendProfilingData);
-
                 try
                 {
-                    _pipeServer.Write(commandBytes, 0, commandBytes.Length);
+                    _profilerCommunicator.SendCommandToProfilee(_pipeServer);
                 }
                 catch (IOException)
                 {
                     bool problemOccurredBeforeCancalation = !cancellationToken.IsCancellationRequested;
                     if (problemOccurredBeforeCancalation) throw;
                 }
-
                 Thread.Sleep(ProfilerDataUpdatePeriod);
             }
         }

@@ -5,17 +5,29 @@ using VisualProfilerAccess.SourceLocation;
 
 namespace VisualProfilerAccess.Metadata
 {
-    public static class MetadataDeserializer
+    public class MetadataDeserializer
     {
-        private static ISourceLocatorFactory _sourceLocatorFactory = new SourceLocatorFactory();
+        private readonly MetadataCache<MethodMetadata> _methodCache;
+        private readonly MetadataCache<ClassMetadata> _classCache;
+        private readonly MetadataCache<ModuleMetadata> _moduleCache;
+        private readonly MetadataCache<AssemblyMetadata> _assemblyCache;
+        private readonly ISourceLocatorFactory _sourceLocatorFactory = new SourceLocatorFactory();
 
-        public static ISourceLocatorFactory SourceLocatorFactory
+        public MetadataDeserializer(
+            MetadataCache<MethodMetadata> methodCache,
+            MetadataCache<ClassMetadata> classCache,
+            MetadataCache<ModuleMetadata> moduleCache,
+            MetadataCache<AssemblyMetadata> assemblyCache,
+            ISourceLocatorFactory sourceLocatorFactory)
         {
-            get { return _sourceLocatorFactory; }
-            set { _sourceLocatorFactory = value; }
+            _methodCache = methodCache;
+            _classCache = classCache;
+            _moduleCache = moduleCache;
+            _assemblyCache = assemblyCache;
+            _sourceLocatorFactory = sourceLocatorFactory;
         }
 
-        public static void DeserializeAllMetadataAndCacheIt(Stream byteStream)
+        public void DeserializeAllMetadataAndCacheIt(Stream byteStream)
         {
             long initialStreamPostion = byteStream.Position;
             uint metadataByteCount = byteStream.DeserializeUint32();
@@ -28,28 +40,31 @@ namespace VisualProfilerAccess.Metadata
                 {
                     case MetadataTypes.AssemblyMetadata:
                         AssemblyMetadata assemblyMetadata = new AssemblyMetadata(byteStream);
+                        _assemblyCache.Add(assemblyMetadata);
                         result = assemblyMetadata;
                         break;
                     case MetadataTypes.ModuleMedatada:
-                        ModuleMetadata moduleMetadata = new ModuleMetadata(byteStream);
+                        ModuleMetadata moduleMetadata = new ModuleMetadata(byteStream,_assemblyCache);
+                        _moduleCache.Add(moduleMetadata);
                         result = moduleMetadata;
                         break;
                     case MetadataTypes.ClassMedatada:
-                        ClassMetadata classMetadata = new ClassMetadata(byteStream);
+                        ClassMetadata classMetadata = new ClassMetadata(byteStream, _moduleCache);
+                        _classCache.Add(classMetadata);
                         result = classMetadata;
                         break;
                     case MetadataTypes.MethodMedatada:
-                        MethodMetadata methodMetadata = new MethodMetadata(byteStream);
-                        methodMetadata.SourceLocatorFactory = _sourceLocatorFactory;
+                        MethodMetadata methodMetadata = new MethodMetadata(byteStream, _classCache, _sourceLocatorFactory);
+                        _methodCache.Add(methodMetadata);
                         result = methodMetadata;
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
 
-                result.AddToStaticCache();
-
                 Contract.Assume(result != null);
+                Contract.Assume(result.Id != 0);
+                Contract.Assume(result.MdToken != 0);
                 Contract.Assume(metadataType == result.MetadataType);
             }
         }

@@ -1,19 +1,23 @@
 using System;
 using System.IO;
 using System.Text;
+using VisualProfilerAccess.Metadata;
 
 namespace VisualProfilerAccess.ProfilingData.CallTreeElems
 {
+    
+
     public abstract class CallTreeElem
     {
         public UInt32 FunctionId { get; set; }
         public UInt32 ChildrenCount { get; set; }
+        public CallTreeElem ParentElem { get; set; }
 
         protected abstract void DeserializeFields(Stream byteStream);
 
         public bool IsRootElem()
         {
-            bool isRootElem = FunctionId == 0;
+            bool isRootElem = FunctionId == 0 && ParentElem == null;
             return isRootElem;
         }
 
@@ -21,25 +25,40 @@ namespace VisualProfilerAccess.ProfilingData.CallTreeElems
     }
 
     public abstract class CallTreeElem<TTreeElem> : CallTreeElem
-        where TTreeElem : CallTreeElem<TTreeElem>, new()
+        where TTreeElem : CallTreeElem<TTreeElem>
     {
+        private readonly MetadataCache<MethodMetadata> _methodCache;
         public TTreeElem[] Children { get; set; }
+        public MethodMetadata MethodMetadata { get; set; }
+        public new TTreeElem ParentElem
+        {
+            get { return (TTreeElem) base.ParentElem; }
+            set { base.ParentElem = value; }
+        }
 
-        public void Deserialize(Stream byteStream, bool deserializeChildren = true)
+        protected CallTreeElem(Stream byteStream, ICallTreeElemFactory<TTreeElem> callTreeElemFactory, MetadataCache<MethodMetadata> methodCache )
+        {
+            _methodCache = methodCache;
+            Deserialize(byteStream, callTreeElemFactory);
+            if (!IsRootElem())
+            {
+                MethodMetadata = methodCache[FunctionId];
+            }
+        }
+
+        protected void Deserialize(Stream byteStream, ICallTreeElemFactory<TTreeElem> callTreeElemFactory)
         {
             FunctionId = byteStream.DeserializeUint32();
             DeserializeFields(byteStream);
             ChildrenCount = byteStream.DeserializeUint32();
-            if (deserializeChildren)
-            {
+           
                 Children = new TTreeElem[ChildrenCount];
                 for (int i = 0; i < ChildrenCount; i++)
                 {
-                    var treeElem = new TTreeElem();
+                    TTreeElem treeElem = callTreeElemFactory.GetCallTreeElem(byteStream, _methodCache);
+                    treeElem.ParentElem = (TTreeElem) this;
                     Children[i] = treeElem;
-                    treeElem.Deserialize(byteStream, true);
                 }
-            }
         }
 
         public void ConverToString(StringBuilder stringBuilder, Action<StringBuilder, TTreeElem> lineStringModifier , string indentation = "", string indentationChars = "   " )
