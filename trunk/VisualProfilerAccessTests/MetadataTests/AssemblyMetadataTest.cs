@@ -63,15 +63,5 @@ namespace VisualProfilerAccessTests.MetadataTests
         {
             Assert.AreEqual(ExpectedName, _assemblyMetadata.Name, "Assembly name does not match.");
         }
-
-        [Test]
-        public void StaticCachingTest()
-        {
-            
-            AssemblyMetadata.Cache.Clear();
-            _assemblyMetadata.AddToStaticCache();
-            AssemblyMetadata assemblyMetadataFromCache = AssemblyMetadata.Cache[ExpectedId];
-            Assert.IsNotNull(assemblyMetadataFromCache, "Data was not inserted into the cache.");
-        }
     }
 }

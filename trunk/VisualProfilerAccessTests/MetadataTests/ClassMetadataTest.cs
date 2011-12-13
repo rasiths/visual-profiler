@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Moq;
+using NUnit.Framework;
 using VisualProfilerAccess.Metadata;
 
 namespace VisualProfilerAccessTests.MetadataTests
@@ -11,17 +12,22 @@ namespace VisualProfilerAccessTests.MetadataTests
         [TestFixtureSetUp]
         public void SetUp()
         {
-            _moduleMetadata = new ModuleMetadata(_moduleBytes.ConvertToMemoryStream());
-            _classMetadata = new ClassMetadata(_classBytes.ConvertToMemoryStream());
+            var mockAssemblyCache = new Mock<MetadataCache<AssemblyMetadata>>(MockBehavior.Strict);
+            mockAssemblyCache.Setup(cache => cache[It.IsAny<uint>()]).Returns(()=>null);
+            _moduleMetadata = new ModuleMetadata(_moduleBytes.ConvertToMemoryStream(), mockAssemblyCache.Object);
+
+            _mockModuleCache = new Mock<MetadataCache<ModuleMetadata>>(MockBehavior.Strict);
+            _mockModuleCache.Setup(cache => cache[It.IsAny<uint>()]).Returns(() => _moduleMetadata).Verifiable();
+
+            _classMetadata = new ClassMetadata(_classBytes.ConvertToMemoryStream(), _mockModuleCache.Object);
+
+            _mockModuleCache.Verify();
         }
 
         #endregion
 
-   
-
         private readonly byte[] _moduleBytes = {
                                                    0x9C, 0x2E, 0x21, 0x00, 0x01, 0x00, 0x00, 0x06,
-
                                                    0x80, 0x00, 0x00, 0x00, 0x44, 0x00, 0x3a, 0x00, 0x5c, 0x00, 0x48,
                                                    0x00, 0x6f, 0x00, 0x6e, 0x00, 0x7a, 0x00, 0x69, 0x00, 0x6b, 0x00,
                                                    0x5c, 0x00, 0x44, 0x00, 0x65, 0x00, 0x73, 0x00, 0x6b, 0x00, 0x74,
@@ -52,6 +58,7 @@ namespace VisualProfilerAccessTests.MetadataTests
         //private AssemblyMetadata _assemblyMetadata;
         private ModuleMetadata _moduleMetadata;
         private ClassMetadata _classMetadata;
+        private Mock<MetadataCache<ModuleMetadata>> _mockModuleCache;
 
         private const uint ExpectedId = 0x0021346c;
         private const uint ExpectedMdToken = 0x02000002;
@@ -90,20 +97,9 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void ParentIdTest()
         {
-            ModuleMetadata.Cache.Clear();
-            _moduleMetadata.AddToStaticCache();
             Assert.AreEqual(_moduleMetadata.Id, _classMetadata.ModuleId);
             Assert.IsTrue(ReferenceEquals(_moduleMetadata, _classMetadata.Module),
                           "Class' parent module does not match.");
-        }
-
-        [Test]
-        public void StaticCachingTest()
-        {
-            ClassMetadata.Cache.Clear();
-            _classMetadata.AddToStaticCache();
-            ClassMetadata classMetadataFromCache = ClassMetadata.Cache[ExpectedId];
-            Assert.IsNotNull(classMetadataFromCache, "Data was not inserted into the cache.");
         }
     }
 }

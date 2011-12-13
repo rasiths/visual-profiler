@@ -1,26 +1,18 @@
 ﻿using System;
 using System.IO;
+using Moq;
 using NUnit.Framework;
+using VisualProfilerAccess.Metadata;
 using VisualProfilerAccess.ProfilingData;
-using VisualProfilerAccess.ProfilingData.CallTrees;
 using VisualProfilerAccessTests.MetadataTests;
+using VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests;
 
 namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
 {
     [TestFixture]
-    public class MockCallTreeTest
+    public class TestingCallTreeTest
     {
         #region Setup/Teardown
-
-        [TestFixtureSetUp]
-        public void SetUp()
-        {
-            _twoTreesStream = _twoTreesBytes.ConvertToMemoryStream();
-            _callTree1 = new MockCallTree();
-            _callTree1.Deserialize(_twoTreesStream);
-            _callTree2 = new MockCallTree(); 
-            _callTree2.Deserialize(_twoTreesStream);
-        }
 
         #endregion
 
@@ -80,12 +72,25 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
                                                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
                                                  };
 
+        [TestFixtureSetUp]
+        public void SetUp()
+        {
+            _twoTreesStream = _twoTreesBytes.ConvertToMemoryStream();
+            _mockMetadataCache = new Mock<MetadataCache<MethodMetadata>>();
+            _mockMetadataCache.SetupAllProperties();
+            _mockCallTreeElemFactory = new TestingCallTreeElemFactory();
+            _callTree1 = new TestingCallTree(_twoTreesStream, _mockCallTreeElemFactory, _mockMetadataCache.Object);
+            _callTree2 = new TestingCallTree(_twoTreesStream, _mockCallTreeElemFactory, _mockMetadataCache.Object);
+        }
 
-        private UInt32 ExpectedThreadId = 0x4de318;
-        private ProfilingDataTypes ExpectedProfilingDataType = (ProfilingDataTypes) 0x34;
+
+        private const UInt32 ExpectedThreadId = 0x4de318;
+        private const ProfilingDataTypes ExpectedProfilingDataType = (ProfilingDataTypes) 0x34;
         private MemoryStream _twoTreesStream;
-        private MockCallTree _callTree1;
-        private MockCallTree _callTree2;
+        private TestingCallTree _callTree1;
+        private TestingCallTree _callTree2;
+        private TestingCallTreeElemFactory _mockCallTreeElemFactory;
+        private Mock<MetadataCache<MethodMetadata>> _mockMetadataCache;
 
         [Test]
         public void AllBytesReadFromStreamTest()
@@ -96,9 +101,7 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
         [Test]
         public void DeserializationWithoutCallTreeElemsTest()
         {
-            MockCallTree callTree = new MockCallTree();
-            callTree.Deserialize(_singleTreeBytes.ConvertToMemoryStream(),
-                                                                           false);
+            TestingCallTree callTree = new TestingCallTree(_singleTreeBytes.ConvertToMemoryStream(), _mockCallTreeElemFactory, _mockMetadataCache.Object);
             Assert.AreEqual(ExpectedThreadId, callTree.ThreadId);
             Assert.AreEqual(ExpectedProfilingDataType, ProfilingDataTypes.Tracing);
             Assert.AreEqual(ExpectedProfilingDataType, callTree.ProfilingDataType);

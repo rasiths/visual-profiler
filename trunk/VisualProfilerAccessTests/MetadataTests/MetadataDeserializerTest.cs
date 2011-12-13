@@ -1,7 +1,8 @@
 ﻿using System.IO;
+using Moq;
 using NUnit.Framework;
-using VisualProfilerAccess;
 using VisualProfilerAccess.Metadata;
+using VisualProfilerAccess.SourceLocation;
 using VisualProfilerAccessTests.SourceLocationTests;
 using System.Linq;
 
@@ -15,13 +16,21 @@ namespace VisualProfilerAccessTests.MetadataTests
         [TestFixtureSetUp]
         public void SetUp()
         {
-            AssemblyMetadata.Cache.Clear();
-            ModuleMetadata.Cache.Clear();
-            ClassMetadata.Cache.Clear();
-            ModuleMetadata.Cache.Clear();
             _memoryStream = _metadataBytes.ConvertToMemoryStream();
-            MetadataDeserializer.SourceLocatorFactory = new SrcLocatorMockupFkt();
-            MetadataDeserializer.DeserializeAllMetadataAndCacheIt(_memoryStream);
+            _methodCache = new MetadataCache<MethodMetadata>();
+            _classCache = new MetadataCache<ClassMetadata>();
+            _moduleCache = new MetadataCache<ModuleMetadata>();
+            _assemblyCache = new MetadataCache<AssemblyMetadata>();
+
+
+            var mockSourceLocatorFaktory = new Mock<ISourceLocatorFactory>(MockBehavior.Strict);
+            var metadataDeserializer = new MetadataDeserializer(
+               _methodCache,
+               _classCache,
+               _moduleCache,
+               _assemblyCache,
+                mockSourceLocatorFaktory.Object);
+            metadataDeserializer.DeserializeAllMetadataAndCacheIt(_memoryStream);
         }
 
         #endregion
@@ -100,6 +109,10 @@ namespace VisualProfilerAccessTests.MetadataTests
                                                  };
 
         private MemoryStream _memoryStream;
+        private MetadataCache<MethodMetadata> _methodCache;
+        private MetadataCache<ClassMetadata> _classCache;
+        private MetadataCache<ModuleMetadata> _moduleCache;
+        private MetadataCache<AssemblyMetadata> _assemblyCache;
 
         [Test]
         public void AllDataReadToEndTest()
@@ -110,79 +123,25 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void AssemblyCacheTest()
         {
-            Assert.AreEqual(1, AssemblyMetadata.Cache.Count);
-        }
-
-        [Test]
-        public void ClassCacheTest()
-        {
-            Assert.AreEqual(1, ClassMetadata.Cache.Count);
-        }
-
-        [Test]
-        public void MethodCacheTest()
-        {
-            Assert.AreEqual(3, MethodMetadata.Cache.Count);
-        }
-
-        [Test]
-        public void MethodSourceLocationTest()
-        {
-            var methodMetadata = MethodMetadata.Cache.First().Value;
-            var sourceFilePath = methodMetadata.GetSourceFilePath();
-            Assert.AreEqual(@"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe.cs", sourceFilePath);
-            var sourceLocations = methodMetadata.GetSourceLocations();
-            Assert.AreEqual(3, sourceLocations.Count());
+            Assert.AreEqual(1, _assemblyCache.Cache.Count);
         }
 
         [Test]
         public void ModuleCacheTest()
         {
-            Assert.AreEqual(1, ModuleMetadata.Cache.Count);
-        }
-    }
-
-    [TestFixture]
-    public class MetadataDeserializerTest2
-    {
-        #region Setup/Teardown
-
-        [TestFixtureSetUp]
-        public void SetUp()
-        {
-            AssemblyMetadata.Cache.Clear();
-            ModuleMetadata.Cache.Clear();
-            ClassMetadata.Cache.Clear();
-            MethodMetadata.Cache.Clear();
-        }
-
-        #endregion
-
-        private readonly byte[] _empty = {0x00, 0x00, 0x00, 0x00};
-        private readonly byte[] _emptyWithOffset = {0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00};
-
-        [Test]
-        public void EmptyDataTest()
-        {
-            MetadataDeserializer.DeserializeAllMetadataAndCacheIt(_empty.ConvertToMemoryStream());
-
-            Assert.AreEqual(0, AssemblyMetadata.Cache.Count);
-            Assert.AreEqual(0, ModuleMetadata.Cache.Count);
-            Assert.AreEqual(0, ClassMetadata.Cache.Count);
-            Assert.AreEqual(0, MethodMetadata.Cache.Count);
+            Assert.AreEqual(1, _moduleCache.Cache.Count);
         }
 
         [Test]
-        public void EmptyDataWithOffsetInStreamTest()
+        public void ClassCacheTest()
         {
-            MemoryStream memoryStream = _emptyWithOffset.ConvertToMemoryStream();
-            uint dummy = memoryStream.DeserializeUint32();
-            MetadataDeserializer.DeserializeAllMetadataAndCacheIt(memoryStream);
+            Assert.AreEqual(1, _classCache.Cache.Count);
+        }
 
-            Assert.AreEqual(0, AssemblyMetadata.Cache.Count);
-            Assert.AreEqual(0, ModuleMetadata.Cache.Count);
-            Assert.AreEqual(0, ClassMetadata.Cache.Count);
-            Assert.AreEqual(0, MethodMetadata.Cache.Count);
+        [Test]
+        public void MethodCacheTest()
+        {
+            Assert.AreEqual(3, _methodCache.Cache.Count);
         }
     }
 }
