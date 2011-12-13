@@ -2,6 +2,8 @@ using System;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text;
+using Ninject;
+using VisualProfilerAccess.Metadata;
 using VisualProfilerAccess.ProfilingData.CallTreeElems;
 
 namespace VisualProfilerAccess.ProfilingData.CallTrees
@@ -18,31 +20,35 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
         public virtual void ConvertToString(StringBuilder stringBuilder)
         {
         }
-
-        public abstract void Deserialize(Stream byteStream, bool deserializeCallTreeElems = true);
     }
 
     public abstract class CallTree<TCallTree, TCallTreeElem> : CallTree
-        where TCallTree : CallTree<TCallTree, TCallTreeElem>, new()
-        where TCallTreeElem : CallTreeElem<TCallTreeElem>, new()
+        where TCallTree : CallTree<TCallTree, TCallTreeElem>
+        where TCallTreeElem : CallTreeElem<TCallTreeElem>
     {
         public TCallTreeElem RootElem { get; set; }
 
-        public sealed override void Deserialize(Stream byteStream, bool deserializeCallTreeElems = true)
+        private readonly MetadataCache<MethodMetadata> _methodCache;
+
+        protected CallTree(Stream byteStream, ICallTreeElemFactory<TCallTreeElem> callTreeElemFactory, MetadataCache<MethodMetadata> methodCache)
         {
-            var profilingDataType = (ProfilingDataTypes) byteStream.DeserializeUint32();
+            _methodCache = methodCache;
+            Deserialize(byteStream, callTreeElemFactory);
+        }
+
+        protected void Deserialize(Stream byteStream, ICallTreeElemFactory<TCallTreeElem> callTreeElemFactory)
+        {
+            var profilingDataType = (ProfilingDataTypes)byteStream.DeserializeUint32();
             Contract.Assume(ProfilingDataType == profilingDataType,
                             "The profiling data type derived from stream does not match the type's one.");
 
             ThreadId = byteStream.DeserializeUint32();
             DeserializeFields(byteStream);
 
-            if (deserializeCallTreeElems)
-            {
-                var callTreeElem = new TCallTreeElem();
-                callTreeElem.Deserialize(byteStream, true);
-                RootElem = callTreeElem;
-            }
+            var callTreeElem = callTreeElemFactory.GetCallTreeElem(byteStream, _methodCache);
+            callTreeElem.ParentElem = null;
+            RootElem = callTreeElem;
+
         }
 
         public string ToString(Action<StringBuilder, TCallTreeElem> lineStringModifier)

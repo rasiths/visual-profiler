@@ -69,6 +69,9 @@
     <Reference Include="Microsoft.Cci.SourceModel">
       <HintPath>..\_CommonLib\Microsoft.Cci.SourceModel.dll</HintPath>
     </Reference>
+    <Reference Include="Ninject">
+      <HintPath>..\packages\Ninject.2.2.1.4\lib\net40-Client\Ninject.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -78,7 +81,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Metadata\MetadataCache.cs" />
     <Compile Include="ProfilingData\Actions.cs" />
+    <Compile Include="ProfilingData\CallTreeElems\ICallTreeElemFactory.cs" />
+    <Compile Include="ProfilingData\CallTrees\ICallTreeFactory.cs" />
     <Compile Include="ProfilingData\Commands.cs" />
     <Compile Include="Metadata\AssemblyMetadata.cs" />
     <Compile Include="Metadata\ClassMetadata.cs" />
@@ -89,6 +95,7 @@
     <Compile Include="Metadata\MethodMetadata.cs" />
     <Compile Include="Metadata\ModuleMetadata.cs" />
     <Compile Include="ProfilingData\ProfilerAccess.cs" />
+    <Compile Include="ProfilingData\ProfilerCommunicator.cs" />
     <Compile Include="ProfilingData\ProfilingDataUpdateEventArgs.cs" />
     <Compile Include="ProfilingData\ProfilerTypes.cs" />
     <Compile Include="ProfilingData\CallTrees\CallTree.cs" />
@@ -106,6 +113,9 @@
     <Compile Include="SourceLocation\ISourceLocatorFactory.cs" />
     <Compile Include="SourceLocation\SourceLocator.cs" />
     <Compile Include="SourceLocation\SourceLocatorFactory.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

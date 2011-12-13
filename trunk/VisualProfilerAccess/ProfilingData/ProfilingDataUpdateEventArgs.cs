@@ -11,9 +11,8 @@ namespace VisualProfilerAccess.ProfilingData
         public Actions Action { get; set; }
     }
 
-    public class ProfilingDataUpdateEventArgs<TCallTree> : ProfilingDataUpdateEventArgs where TCallTree : CallTree, new()
+    public class ProfilingDataUpdateEventArgs<TCallTree> : ProfilingDataUpdateEventArgs where TCallTree : CallTree
     {
         public IEnumerable<TCallTree> CallTrees { get; set; }
-        public ProfilerAccess<TCallTree> ProfilerAccess { get; set; }
     }
 }

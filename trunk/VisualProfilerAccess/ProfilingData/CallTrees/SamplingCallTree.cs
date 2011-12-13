@@ -1,12 +1,17 @@
 using System;
 using System.IO;
 using System.Text;
+using VisualProfilerAccess.Metadata;
 using VisualProfilerAccess.ProfilingData.CallTreeElems;
 
 namespace VisualProfilerAccess.ProfilingData.CallTrees
 {
     public class SamplingCallTree : CallTree<SamplingCallTree, SamplingCallTreeElem>
     {
+        public SamplingCallTree(Stream byteStream, ICallTreeElemFactory<SamplingCallTreeElem> callTreeElemFactory, MetadataCache<MethodMetadata> methodCache) : base(byteStream, callTreeElemFactory, methodCache)
+        {
+        }
+
         public UInt64 WallClockDurationHns { get; set; }
         public UInt64 KernelModeDurationHns { get; set; }
         public UInt64 UserModeDurationHns { get; set; }

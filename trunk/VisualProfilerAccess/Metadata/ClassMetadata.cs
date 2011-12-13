@@ -5,16 +5,18 @@ namespace VisualProfilerAccess.Metadata
 {
     public class ClassMetadata : MetadataBase<ClassMetadata>
     {
-        public ClassMetadata(Stream byteStream) : base(byteStream)
+        public ClassMetadata(Stream byteStream,  MetadataCache<ModuleMetadata> moduleCache) : base(byteStream)
         {
+            Contract.Ensures(moduleCache != null);
             Name = byteStream.DeserializeString();
             IsGeneric = byteStream.DeserializeBool();
             ModuleId = byteStream.DeserializeUint32();
+            Module = moduleCache[ModuleId];
         }
 
         public string Name { get; private set; }
         public bool IsGeneric { get; private set; }
-        public ModuleMetadata Module { get { return ModuleMetadata.Cache[ModuleId];}  }
+        public ModuleMetadata Module { get; set; }
         public uint ModuleId { get; private set; }
 
         public override MetadataTypes MetadataType
