@@ -105,6 +105,9 @@
     <Compile Include="ProfilingData\CallTreeElems\SamplingCallTreeElem.cs" />
     <Compile Include="ProfilingData\CallTrees\TracingCallTree.cs" />
     <Compile Include="ProfilingData\CallTreeElems\TracingCallTreeElem.cs" />
+    <Compile Include="ProfilingData\SamplingProfilerAccess.cs" />
+    <Compile Include="ProfilingData\TracingProfilerAccess.cs" />
+    <Compile Include="ProfilingData\VisualProfilerModule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SourceLocation\CciMethodLine.cs" />
