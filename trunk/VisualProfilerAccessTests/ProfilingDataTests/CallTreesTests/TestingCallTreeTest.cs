@@ -116,5 +116,13 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
             Assert.IsNotNull(_callTree2.RootElem);
             Assert.AreEqual(0, _callTree2.RootElem.ChildrenCount);
         }
+
+        [Test]
+        public void TreeElemParentTest()
+        {
+            var child = _callTree1.RootElem.Children[0].Children[0];
+            var parent = _callTree1.RootElem.Children[0];
+            Assert.IsTrue(ReferenceEquals(parent, child.ParentElem));
+        }
     }
 }
