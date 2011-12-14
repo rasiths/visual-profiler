@@ -1,20 +1,17 @@
 ﻿using System;
 using System.CodeDom.Compiler;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using NUnit.Framework;
 using VisualProfilerAccess.SourceLocation;
-using System.Linq;
 
 namespace VisualProfilerAccessTests.SourceLocationTests
 {
     [TestFixture]
     public class SourceLocatorTest
     {
-        
         private SourceLocatorFactory _sourceLocatorFactory;
         private MethodInfo _methodMethodInfo;
         private MethodInfo _methodWithCommentsMethodInfo;
@@ -27,11 +24,8 @@ namespace VisualProfilerAccessTests.SourceLocationTests
         private string _tempSourceFile;
         private string _tempPdbFile;
 
-
-        #region test code
-
         private const string Code =
-@"using System;
+            @"using System;
 
 namespace VisualProfilerAccessTests.SourceLocationTests
 {
@@ -78,15 +72,14 @@ namespace VisualProfilerAccessTests.SourceLocationTests
     }
 }";
 
-        #endregion
         private void CompileTestCode()
         {
-            var assemblyFileName = Path.GetTempFileName();
+            string assemblyFileName = Path.GetTempFileName();
             _tempAssemblyFile = assemblyFileName + ".dll";
             _tempSourceFile = assemblyFileName + ".cs";
             _tempPdbFile = assemblyFileName + ".pdb";
 
-            CompilerParameters parameters = new CompilerParameters();
+            var parameters = new CompilerParameters();
             CodeDomProvider codeProvider = CodeDomProvider.CreateProvider("CSharp");
             File.WriteAllText(_tempSourceFile, Code);
             parameters.GenerateExecutable = false;
@@ -98,16 +91,19 @@ namespace VisualProfilerAccessTests.SourceLocationTests
 
         private void LoadMethodInfos()
         {
-            var assembly = Assembly.ReflectionOnlyLoadFrom(_tempAssemblyFile);
+            Assembly assembly = Assembly.ReflectionOnlyLoadFrom(_tempAssemblyFile);
 
-            var dummyClassType = assembly.GetType("VisualProfilerAccessTests.SourceLocationTests.SourceLocationDummyTestClass");
+            Type dummyClassType =
+                assembly.GetType("VisualProfilerAccessTests.SourceLocationTests.SourceLocationDummyTestClass");
 
             _methodMethodInfo = dummyClassType.GetMethod("Method");
             _methodWithCommentsMethodInfo = dummyClassType.GetMethod("MethodWithComments");
             _methodWithLambdaMethodInfo = dummyClassType.GetMethod("MethodWithLambda");
 
-            _lambdaMethod = dummyClassType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(
-                mi => mi.Name.StartsWith("<")).Single();
+            _lambdaMethod =
+                dummyClassType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).
+                    Where(
+                        mi => mi.Name.StartsWith("<")).Single();
         }
 
         [TestFixtureSetUp]
@@ -115,7 +111,7 @@ namespace VisualProfilerAccessTests.SourceLocationTests
         {
             CompileTestCode();
             LoadMethodInfos();
-            
+
             _sourceLocatorFactory = new SourceLocatorFactory();
             _iSourceLocatorFactory = _sourceLocatorFactory;
             _iSourceLocator = _iSourceLocatorFactory.GetSourceLocator(_tempAssemblyFile);
@@ -138,63 +134,9 @@ namespace VisualProfilerAccessTests.SourceLocationTests
             Assert.IsNotNull(_iSourceLocator);
         }
 
-        [Test]
-        public void SourceLocatorGetMethodLinesOrdinaryMethodTest()
-        {
-            var methodLines = _iSourceLocator.GetMethodLines((uint)_methodMethodInfo.MetadataToken).ToArray();
-            Assert.AreEqual(6, methodLines.Length);
-            AssertMethodLine(8, 9, 162, 8, 10, 163, methodLines[0]);
-            AssertMethodLine(9, 13, 177, 9, 27, 191, methodLines[1]);
-            AssertMethodLine(10, 13, 205, 10, 34, 226, methodLines[2]);
-            AssertMethodLine(11, 13, 240, 11, 32, 259, methodLines[3]);
-            AssertMethodLine(12, 13, 273, 12, 48, 308, methodLines[4]);
-            AssertMethodLine(13, 9, 318, 13, 10, 319, methodLines[5]);
-        }
-
-        [Test]
-        public void SourceLocatorGetMethodLinesMethodWithCommentsTest()
-        {
-            var methodLines = _iSourceLocator.GetMethodLines((uint)_methodWithCommentsMethodInfo.MetadataToken).ToArray();
-            Assert.AreEqual(6, methodLines.Length);
-            AssertMethodLine(16, 9, 373, 16, 10, 374, methodLines[0]);
-            AssertMethodLine(17, 13, 388, 17, 27, 402, methodLines[1]);
-            AssertMethodLine(18, 13, 416, 18, 27, 430, methodLines[2]);
-            AssertMethodLine(22, 13, 502, 22, 27, 516, methodLines[3]);
-            AssertMethodLine(23, 13, 530, 23, 27, 544, methodLines[4]);
-            AssertMethodLine(24, 9, 554, 24, 10, 555, methodLines[5]);
-        }
-
-        [Test]
-        public void SourceLocatorGetMethodLinesMethodWithLambdaTest()
-        {
-            var methodLines = _iSourceLocator.GetMethodLines((uint)_methodWithLambdaMethodInfo.MetadataToken).ToArray();
-            AssertMethodLine(30, 13, 678, 35, 15, 847, methodLines[3]);
-
-            Assert.AreEqual(7, methodLines.Length);
-
-        }
-
-        [Test]
-        public void SourceLocatorGetMethodLinesLambdaMethodTest()
-        {
-            var methodLines = _iSourceLocator.GetMethodLines((uint)_lambdaMethod.MetadataToken).ToArray();
-            Assert.AreEqual(5, methodLines.Length);
-        }
-
-        [Test]
-        public void SourceFilePathTest()
-        {
-            var sourceFilePath = _iSourceLocator.GetSourceFilePath((uint)_methodMethodInfo.MetadataToken);
-            Assert.AreEqual(_tempSourceFile.ToLower(), sourceFilePath.ToLower());
-            sourceFilePath = _iSourceLocator.GetSourceFilePath((uint)_methodWithCommentsMethodInfo.MetadataToken);
-            Assert.AreEqual(_tempSourceFile.ToLower(), sourceFilePath.ToLower());
-            sourceFilePath = _iSourceLocator.GetSourceFilePath((uint)_methodWithLambdaMethodInfo.MetadataToken);
-            Assert.AreEqual(_tempSourceFile.ToLower(), sourceFilePath.ToLower());
-            sourceFilePath = _iSourceLocator.GetSourceFilePath((uint)_lambdaMethod.MetadataToken);
-            Assert.AreEqual(_tempSourceFile.ToLower(), sourceFilePath.ToLower());
-        }
-
-        private void AssertMethodLine(int expectedStartLine, int expectedStartColumn, int expectedStartIndex, int expectedEndLine, int expectedEndColumn, int expectedEndIndex, IMethodLine actualLine)
+        private void AssertMethodLine(int expectedStartLine, int expectedStartColumn, int expectedStartIndex,
+                                      int expectedEndLine, int expectedEndColumn, int expectedEndIndex,
+                                      IMethodLine actualLine)
         {
             Assert.AreEqual(expectedStartLine, actualLine.StartLine);
             Assert.AreEqual(expectedStartColumn, actualLine.StartColumn);
@@ -209,11 +151,11 @@ namespace VisualProfilerAccessTests.SourceLocationTests
         }
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        static extern bool MoveFileEx(string lpExistingFileName, string lpNewFileName,
-           MoveFileFlags dwFlags);
+        private static extern bool MoveFileEx(string lpExistingFileName, string lpNewFileName,
+                                              MoveFileFlags dwFlags);
 
         [Flags]
-        enum MoveFileFlags
+        private enum MoveFileFlags
         {
             MOVEFILE_REPLACE_EXISTING = 0x00000001,
             MOVEFILE_COPY_ALLOWED = 0x00000002,
@@ -221,6 +163,63 @@ namespace VisualProfilerAccessTests.SourceLocationTests
             MOVEFILE_WRITE_THROUGH = 0x00000008,
             MOVEFILE_CREATE_HARDLINK = 0x00000010,
             MOVEFILE_FAIL_IF_NOT_TRACKABLE = 0x00000020
+        }
+
+        [Test]
+        public void SourceFilePathTest()
+        {
+            string sourceFilePath = _iSourceLocator.GetSourceFilePath((uint) _methodMethodInfo.MetadataToken);
+            Assert.AreEqual(_tempSourceFile.ToLower(), sourceFilePath.ToLower());
+            sourceFilePath = _iSourceLocator.GetSourceFilePath((uint) _methodWithCommentsMethodInfo.MetadataToken);
+            Assert.AreEqual(_tempSourceFile.ToLower(), sourceFilePath.ToLower());
+            sourceFilePath = _iSourceLocator.GetSourceFilePath((uint) _methodWithLambdaMethodInfo.MetadataToken);
+            Assert.AreEqual(_tempSourceFile.ToLower(), sourceFilePath.ToLower());
+            sourceFilePath = _iSourceLocator.GetSourceFilePath((uint) _lambdaMethod.MetadataToken);
+            Assert.AreEqual(_tempSourceFile.ToLower(), sourceFilePath.ToLower());
+        }
+
+        [Test]
+        public void SourceLocatorGetMethodLinesLambdaMethodTest()
+        {
+            IMethodLine[] methodLines = _iSourceLocator.GetMethodLines((uint) _lambdaMethod.MetadataToken).ToArray();
+            Assert.AreEqual(5, methodLines.Length);
+        }
+
+        [Test]
+        public void SourceLocatorGetMethodLinesMethodWithCommentsTest()
+        {
+            IMethodLine[] methodLines =
+                _iSourceLocator.GetMethodLines((uint) _methodWithCommentsMethodInfo.MetadataToken).ToArray();
+            Assert.AreEqual(6, methodLines.Length);
+            AssertMethodLine(16, 9, 373, 16, 10, 374, methodLines[0]);
+            AssertMethodLine(17, 13, 388, 17, 27, 402, methodLines[1]);
+            AssertMethodLine(18, 13, 416, 18, 27, 430, methodLines[2]);
+            AssertMethodLine(22, 13, 502, 22, 27, 516, methodLines[3]);
+            AssertMethodLine(23, 13, 530, 23, 27, 544, methodLines[4]);
+            AssertMethodLine(24, 9, 554, 24, 10, 555, methodLines[5]);
+        }
+
+        [Test]
+        public void SourceLocatorGetMethodLinesMethodWithLambdaTest()
+        {
+            IMethodLine[] methodLines =
+                _iSourceLocator.GetMethodLines((uint) _methodWithLambdaMethodInfo.MetadataToken).ToArray();
+            AssertMethodLine(30, 13, 678, 35, 15, 847, methodLines[3]);
+
+            Assert.AreEqual(7, methodLines.Length);
+        }
+
+        [Test]
+        public void SourceLocatorGetMethodLinesOrdinaryMethodTest()
+        {
+            IMethodLine[] methodLines = _iSourceLocator.GetMethodLines((uint) _methodMethodInfo.MetadataToken).ToArray();
+            Assert.AreEqual(6, methodLines.Length);
+            AssertMethodLine(8, 9, 162, 8, 10, 163, methodLines[0]);
+            AssertMethodLine(9, 13, 177, 9, 27, 191, methodLines[1]);
+            AssertMethodLine(10, 13, 205, 10, 34, 226, methodLines[2]);
+            AssertMethodLine(11, 13, 240, 11, 32, 259, methodLines[3]);
+            AssertMethodLine(12, 13, 273, 12, 48, 308, methodLines[4]);
+            AssertMethodLine(13, 9, 318, 13, 10, 319, methodLines[5]);
         }
     }
 }

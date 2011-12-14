@@ -9,7 +9,9 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
 {
     public class TestingCallTreeElem : CallTreeElem<TestingCallTreeElem>
     {
-        public TestingCallTreeElem(Stream byteStream, ICallTreeElemFactory<TestingCallTreeElem> callTreeElemFactory, MetadataCache<MethodMetadata> methodCache) : base(byteStream, callTreeElemFactory, methodCache)
+        public TestingCallTreeElem(Stream byteStream, ICallTreeElemFactory<TestingCallTreeElem> callTreeElemFactory,
+                                   MetadataCache<MethodMetadata> methodCache)
+            : base(byteStream, callTreeElemFactory, methodCache)
         {
         }
 

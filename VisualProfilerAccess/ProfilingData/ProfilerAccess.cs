@@ -11,9 +11,9 @@ namespace VisualProfilerAccess.ProfilingData
 {
     public class ProfilerAccess<TCallTree> where TCallTree : CallTree
     {
-        private readonly ProfilerCommunicator<TCallTree> _profilerCommunicator;
         private const string NamePipeName = "VisualProfilerAccessPipe";
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly ProfilerCommunicator<TCallTree> _profilerCommunicator;
         private Task _actionReceiverTask;
         private Task _commandSenderTask;
         private NamedPipeServerStream _pipeServer;
@@ -38,7 +38,7 @@ namespace VisualProfilerAccess.ProfilingData
             get
             {
                 string profilerGuidString = string.Format("{{19840906-C001-0000-000C-00000000000{0}}}",
-                                                          (int)ProfilerType);
+                                                          (int) ProfilerType);
                 var profilerGuid = new Guid(profilerGuidString);
                 return profilerGuid;
             }
@@ -74,7 +74,8 @@ namespace VisualProfilerAccess.ProfilingData
         {
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_ENABLE_PROFILING", "1");
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER", ProfilerCClassGuid.ToString("B"));
-            ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER_PATH", @"D:\Honzik\Desktop\visual-profiler\Debug\VisualProfilerBackend.dll");
+            ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER_PATH",
+                                                              @"D:\Honzik\Desktop\visual-profiler\Debug\VisualProfilerBackend.dll");
             ProfileeProcessStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", NamePipeName);
             ProfileeProcessStartInfo.UseShellExecute = false;
             ProfileeProcess = Process.Start(ProfileeProcessStartInfo);

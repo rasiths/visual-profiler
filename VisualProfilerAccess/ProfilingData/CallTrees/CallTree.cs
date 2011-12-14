@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text;
-using Ninject;
 using VisualProfilerAccess.Metadata;
 using VisualProfilerAccess.ProfilingData.CallTreeElems;
 
@@ -26,29 +25,29 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
         where TCallTree : CallTree<TCallTree, TCallTreeElem>
         where TCallTreeElem : CallTreeElem<TCallTreeElem>
     {
-        public TCallTreeElem RootElem { get; set; }
-
         private readonly MetadataCache<MethodMetadata> _methodCache;
 
-        protected CallTree(Stream byteStream, ICallTreeElemFactory<TCallTreeElem> callTreeElemFactory, MetadataCache<MethodMetadata> methodCache)
+        protected CallTree(Stream byteStream, ICallTreeElemFactory<TCallTreeElem> callTreeElemFactory,
+                           MetadataCache<MethodMetadata> methodCache)
         {
             _methodCache = methodCache;
             Deserialize(byteStream, callTreeElemFactory);
         }
 
+        public TCallTreeElem RootElem { get; set; }
+
         protected void Deserialize(Stream byteStream, ICallTreeElemFactory<TCallTreeElem> callTreeElemFactory)
         {
-            var profilingDataType = (ProfilingDataTypes)byteStream.DeserializeUint32();
+            var profilingDataType = (ProfilingDataTypes) byteStream.DeserializeUint32();
             Contract.Assume(ProfilingDataType == profilingDataType,
                             "The profiling data type derived from stream does not match the type's one.");
 
             ThreadId = byteStream.DeserializeUint32();
             DeserializeFields(byteStream);
 
-            var callTreeElem = callTreeElemFactory.GetCallTreeElem(byteStream, _methodCache);
+            TCallTreeElem callTreeElem = callTreeElemFactory.GetCallTreeElem(byteStream, _methodCache);
             callTreeElem.ParentElem = null;
             RootElem = callTreeElem;
-
         }
 
         public string ToString(Action<StringBuilder, TCallTreeElem> lineStringModifier)

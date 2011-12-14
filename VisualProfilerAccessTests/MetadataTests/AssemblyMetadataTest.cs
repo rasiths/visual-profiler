@@ -10,15 +10,11 @@ namespace VisualProfilerAccessTests.MetadataTests
     [TestFixture]
     public class AssemblyMetadataTest
     {
-        #region Setup/Teardown
-
         [TestFixtureSetUp]
         public void SetUp()
         {
             _assemblyMetadata = new AssemblyMetadata(_rawBytes.ConvertToMemoryStream());
         }
-
-        #endregion
 
         private readonly byte[] _rawBytes = {
                                                 0x00, 0x3A, 0x37, 0x00, 0x01, 0x00, 0x00, 0x20, 0x18, 0x00, 0x00, 0x00,

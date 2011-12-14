@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using VisualProfilerAccess.Metadata;
 
@@ -32,9 +31,9 @@ namespace VisualProfilerAccess.ProfilingData.CallTreeElems
 
         protected override void ToString(StringBuilder stringBuilder)
         {
-            double durationSec = WallClockDurationHns / 1e7;
+            double durationSec = WallClockDurationHns/1e7;
 
-            double cycleTime = CycleTime / 1e6;
+            double cycleTime = CycleTime/1e6;
             stringBuilder.AppendFormat("{0}, Twc={1}s, CycleTime={2}K, Ec={3}, Lc={4}", MethodMetadata,
                                        durationSec, cycleTime, EnterCount, LeaveCount);
         }

@@ -13,8 +13,8 @@ namespace VisualProfilerAccess.ProfilingData
         private readonly ICallTreeFactory<TCallTree> _callTreeFactory;
         private readonly MetadataDeserializer _metadataDeserializer;
         private readonly MetadataCache<MethodMetadata> _methodCache;
-        private readonly EventHandler<ProfilingDataUpdateEventArgs<TCallTree>> _updateCallback;
         private readonly ProfilerTypes _profilerType;
+        private readonly EventHandler<ProfilingDataUpdateEventArgs<TCallTree>> _updateCallback;
 
         public ProfilerCommunicator(
             ProfilerTypes profilerType,
@@ -46,7 +46,7 @@ namespace VisualProfilerAccess.ProfilingData
             switch (receivedAction)
             {
                 case Actions.SendingProfilingData:
-                    var streamLengthBytes = new byte[sizeof(UInt32)];
+                    var streamLengthBytes = new byte[sizeof (UInt32)];
                     byteStream.Read(streamLengthBytes, 0, streamLengthBytes.Length);
 
                     uint streamLength = BitConverter.ToUInt32(streamLengthBytes, 0);
@@ -60,7 +60,7 @@ namespace VisualProfilerAccess.ProfilingData
                     var callTrees = new List<TCallTree>();
                     while (profilingDataStream.Position < profilingDataStream.Length)
                     {
-                        var callTree = _callTreeFactory.GetCallTree(profilingDataStream, _methodCache);
+                        TCallTree callTree = _callTreeFactory.GetCallTree(profilingDataStream, _methodCache);
                         callTrees.Add(callTree);
                     }
                     eventArgs.CallTrees = callTrees;
@@ -73,7 +73,6 @@ namespace VisualProfilerAccess.ProfilingData
                 default:
                     finishProfiling = true;
                     return;
-                    
             }
             ThreadPool.QueueUserWorkItem(notUsed => _updateCallback(this, eventArgs));
             finishProfiling = false;
@@ -81,9 +80,8 @@ namespace VisualProfilerAccess.ProfilingData
 
         public void SendCommandToProfilee(Stream byteStream, Commands commandToSend)
         {
-            byte[] commandBytes = BitConverter.GetBytes((UInt32)commandToSend);
+            byte[] commandBytes = BitConverter.GetBytes((UInt32) commandToSend);
             byteStream.Write(commandBytes, 0, commandBytes.Length);
-
         }
     }
 }

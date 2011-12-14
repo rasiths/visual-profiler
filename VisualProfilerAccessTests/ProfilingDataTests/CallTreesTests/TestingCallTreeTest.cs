@@ -12,10 +12,6 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
     [TestFixture]
     public class TestingCallTreeTest
     {
-        #region Setup/Teardown
-
-        #endregion
-
         private readonly byte[] _singleTreeBytes = {0x34, 0x00, 0x00, 0x00, 0x18, 0xE3, 0x4D, 0x00, 0x00};
 
         private readonly byte[] _twoTreesBytes = {
@@ -101,7 +97,8 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
         [Test]
         public void DeserializationWithoutCallTreeElemsTest()
         {
-            TestingCallTree callTree = new TestingCallTree(_singleTreeBytes.ConvertToMemoryStream(), _mockCallTreeElemFactory, _mockMetadataCache.Object);
+            var callTree = new TestingCallTree(_singleTreeBytes.ConvertToMemoryStream(), _mockCallTreeElemFactory,
+                                               _mockMetadataCache.Object);
             Assert.AreEqual(ExpectedThreadId, callTree.ThreadId);
             Assert.AreEqual(ExpectedProfilingDataType, ProfilingDataTypes.Tracing);
             Assert.AreEqual(ExpectedProfilingDataType, callTree.ProfilingDataType);

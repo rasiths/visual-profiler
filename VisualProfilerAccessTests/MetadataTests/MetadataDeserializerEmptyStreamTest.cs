@@ -10,8 +10,6 @@ namespace VisualProfilerAccessTests.MetadataTests
     [TestFixture]
     public class MetadataDeserializerEmptyStreamTest
     {
-        #region Setup/Teardown
-
         [TestFixtureSetUp]
         public void SetUp()
         {
@@ -21,13 +19,10 @@ namespace VisualProfilerAccessTests.MetadataTests
             _assemblyCache = new MetadataCache<AssemblyMetadata>();
             var mockSourceLocatorFaktory = new Mock<ISourceLocatorFactory>(MockBehavior.Strict);
             _srcLocatorMockupFkt = mockSourceLocatorFaktory.Object;
-
         }
 
-        #endregion
-
-        private readonly byte[] _empty = { 0x00, 0x00, 0x00, 0x00 };
-        private readonly byte[] _emptyWithOffset = { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 };
+        private readonly byte[] _empty = {0x00, 0x00, 0x00, 0x00};
+        private readonly byte[] _emptyWithOffset = {0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00};
         private MetadataCache<MethodMetadata> _methodCache;
         private MetadataCache<ClassMetadata> _classCache;
         private MetadataCache<ModuleMetadata> _moduleCache;
@@ -37,7 +32,6 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void EmptyDataTest()
         {
-
             var metadataDeserializer = new MetadataDeserializer(
                 _methodCache,
                 _classCache,
@@ -46,10 +40,10 @@ namespace VisualProfilerAccessTests.MetadataTests
                 _srcLocatorMockupFkt);
             metadataDeserializer.DeserializeAllMetadataAndCacheIt(_empty.ConvertToMemoryStream());
 
-            Assert.AreEqual(0,_methodCache.Cache.Count);
-            Assert.AreEqual(0,_classCache.Cache.Count);
-            Assert.AreEqual(0,_moduleCache.Cache.Count);
-            Assert.AreEqual(0,_assemblyCache.Cache.Count);
+            Assert.AreEqual(0, _methodCache.Cache.Count);
+            Assert.AreEqual(0, _classCache.Cache.Count);
+            Assert.AreEqual(0, _moduleCache.Cache.Count);
+            Assert.AreEqual(0, _assemblyCache.Cache.Count);
         }
 
         [Test]

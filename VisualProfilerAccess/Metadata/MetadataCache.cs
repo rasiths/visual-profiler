@@ -14,14 +14,8 @@ namespace VisualProfilerAccess.Metadata
 
         public virtual TMetadata this[uint metadataId]
         {
-            get
-            {
-                return _cache[metadataId];
-            }
-            set
-            {
-                _cache[metadataId] = value;
-            }
+            get { return _cache[metadataId]; }
+            set { _cache[metadataId] = value; }
         }
 
         public virtual void Add(TMetadata metadata)

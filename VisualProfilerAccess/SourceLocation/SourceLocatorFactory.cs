@@ -7,11 +7,13 @@ namespace VisualProfilerAccess.SourceLocation
     {
         public static readonly Dictionary<string, SourceLocator> Cache = new Dictionary<string, SourceLocator>();
 
+        #region ISourceLocatorFactory Members
+
         public ISourceLocator GetSourceLocator(string modulePath)
         {
-            SourceLocator sourceLocator ;
+            SourceLocator sourceLocator;
             bool found = Cache.TryGetValue(modulePath, out sourceLocator);
-            if(!found)
+            if (!found)
             {
                 Cache[modulePath] = sourceLocator = new SourceLocator(modulePath);
             }
@@ -21,8 +23,10 @@ namespace VisualProfilerAccess.SourceLocation
 
         public ISourceLocator GetSourceLocator(MethodMetadata methodMd)
         {
-            var sourceLocator = GetSourceLocator(methodMd.Class.Module.FilePath);
+            ISourceLocator sourceLocator = GetSourceLocator(methodMd.Class.Module.FilePath);
             return sourceLocator;
         }
+
+        #endregion
     }
 }

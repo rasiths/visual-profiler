@@ -7,10 +7,10 @@ namespace VisualProfilerAccess.Metadata
 {
     public class MetadataDeserializer
     {
-        private readonly MetadataCache<MethodMetadata> _methodCache;
-        private readonly MetadataCache<ClassMetadata> _classCache;
-        private readonly MetadataCache<ModuleMetadata> _moduleCache;
         private readonly MetadataCache<AssemblyMetadata> _assemblyCache;
+        private readonly MetadataCache<ClassMetadata> _classCache;
+        private readonly MetadataCache<MethodMetadata> _methodCache;
+        private readonly MetadataCache<ModuleMetadata> _moduleCache;
         private readonly ISourceLocatorFactory _sourceLocatorFactory;
 
         public MetadataDeserializer(
@@ -39,22 +39,22 @@ namespace VisualProfilerAccess.Metadata
                 switch (metadataType)
                 {
                     case MetadataTypes.AssemblyMetadata:
-                        AssemblyMetadata assemblyMetadata = new AssemblyMetadata(byteStream);
+                        var assemblyMetadata = new AssemblyMetadata(byteStream);
                         _assemblyCache.Add(assemblyMetadata);
                         result = assemblyMetadata;
                         break;
                     case MetadataTypes.ModuleMedatada:
-                        ModuleMetadata moduleMetadata = new ModuleMetadata(byteStream,_assemblyCache);
+                        var moduleMetadata = new ModuleMetadata(byteStream, _assemblyCache);
                         _moduleCache.Add(moduleMetadata);
                         result = moduleMetadata;
                         break;
                     case MetadataTypes.ClassMedatada:
-                        ClassMetadata classMetadata = new ClassMetadata(byteStream, _moduleCache);
+                        var classMetadata = new ClassMetadata(byteStream, _moduleCache);
                         _classCache.Add(classMetadata);
                         result = classMetadata;
                         break;
                     case MetadataTypes.MethodMedatada:
-                        MethodMetadata methodMetadata = new MethodMetadata(byteStream, _classCache, _sourceLocatorFactory);
+                        var methodMetadata = new MethodMetadata(byteStream, _classCache, _sourceLocatorFactory);
                         _methodCache.Add(methodMetadata);
                         result = methodMetadata;
                         break;

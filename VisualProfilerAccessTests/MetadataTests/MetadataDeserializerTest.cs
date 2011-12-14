@@ -3,16 +3,12 @@ using Moq;
 using NUnit.Framework;
 using VisualProfilerAccess.Metadata;
 using VisualProfilerAccess.SourceLocation;
-using VisualProfilerAccessTests.SourceLocationTests;
-using System.Linq;
 
 namespace VisualProfilerAccessTests.MetadataTests
 {
     [TestFixture]
     public class MetadataDeserializerTest
     {
-        #region Setup/Teardown
-
         [TestFixtureSetUp]
         public void SetUp()
         {
@@ -25,15 +21,13 @@ namespace VisualProfilerAccessTests.MetadataTests
 
             var mockSourceLocatorFaktory = new Mock<ISourceLocatorFactory>(MockBehavior.Strict);
             var metadataDeserializer = new MetadataDeserializer(
-               _methodCache,
-               _classCache,
-               _moduleCache,
-               _assemblyCache,
+                _methodCache,
+                _classCache,
+                _moduleCache,
+                _assemblyCache,
                 mockSourceLocatorFaktory.Object);
             metadataDeserializer.DeserializeAllMetadataAndCacheIt(_memoryStream);
         }
-
-        #endregion
 
         private readonly byte[] _metadataBytes = {
                                                      0x5C, 0x01, 0x00, 0x00, 0x0B, 0x00, 0x00, 0x00, 0x68, 0x3A, 0x7F,
@@ -45,7 +39,6 @@ namespace VisualProfilerAccessTests.MetadataTests
                                                      0x00, 0x6C, 0x00, 0x79, 0x00, 0x01, 0x0C, 0x00, 0x00, 0x00, 0x9C,
                                                      0x2E, 0x15,
                                                      0x00, 0x01, 0x00, 0x00, 0x06,
-
                                                      0x80, 0x00, 0x00, 0x00, 0x44, 0x00, 0x3a, 0x00, 0x5c, 0x00, 0x48,
                                                      0x00, 0x6f, 0x00, 0x6e, 0x00, 0x7a, 0x00, 0x69, 0x00, 0x6b, 0x00,
                                                      0x5c, 0x00, 0x44, 0x00, 0x65, 0x00, 0x73, 0x00, 0x6b, 0x00, 0x74,
@@ -127,12 +120,6 @@ namespace VisualProfilerAccessTests.MetadataTests
         }
 
         [Test]
-        public void ModuleCacheTest()
-        {
-            Assert.AreEqual(1, _moduleCache.Cache.Count);
-        }
-
-        [Test]
         public void ClassCacheTest()
         {
             Assert.AreEqual(1, _classCache.Cache.Count);
@@ -142,6 +129,12 @@ namespace VisualProfilerAccessTests.MetadataTests
         public void MethodCacheTest()
         {
             Assert.AreEqual(3, _methodCache.Cache.Count);
+        }
+
+        [Test]
+        public void ModuleCacheTest()
+        {
+            Assert.AreEqual(1, _moduleCache.Cache.Count);
         }
     }
 }

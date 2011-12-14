@@ -2,7 +2,6 @@
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
-using Microsoft.Cci;
 using VisualProfilerAccess.SourceLocation;
 
 namespace VisualProfilerAccess.Metadata
@@ -11,15 +10,16 @@ namespace VisualProfilerAccess.Metadata
     {
         private readonly ISourceLocatorFactory _sourceLocatorFactory;
 
-        public MethodMetadata(Stream byteStream, MetadataCache<ClassMetadata> classCache, ISourceLocatorFactory sourceLocatorFactory)
+        public MethodMetadata(Stream byteStream, MetadataCache<ClassMetadata> classCache,
+                              ISourceLocatorFactory sourceLocatorFactory)
             : base(byteStream)
         {
             Contract.Ensures(classCache != null);
             Contract.Ensures(sourceLocatorFactory != null);
             _sourceLocatorFactory = sourceLocatorFactory;
-            
+
             Name = byteStream.DeserializeString();
-            
+
             uint paramCount = byteStream.DeserializeUint32();
             Parameters = new string[paramCount];
             for (int i = 0; i < paramCount; i++)
@@ -42,26 +42,29 @@ namespace VisualProfilerAccess.Metadata
         {
             get { return MetadataTypes.MethodMedatada; }
         }
-        
+
         public override string ToString()
         {
-            string parametersString = Parameters.Aggregate(string.Empty, (current, parameter) => current + (parameter + ", "));
+            string parametersString = Parameters.Aggregate(string.Empty,
+                                                           (current, parameter) => current + (parameter + ", "));
             parametersString = parametersString.TrimEnd(", ".ToCharArray());
-            string str = string.Format("[{0}]{1}.{2}({3}) in {4}:{5}:{6}", Class.Module.Assembly.Name, Class, Name, parametersString, GetSourceFilePath(), GetSourceLocations().First().StartLine, GetSourceLocations().Last().StartLine );
+            string str = string.Format("[{0}]{1}.{2}({3}) in {4}:{5}:{6}", Class.Module.Assembly.Name, Class, Name,
+                                       parametersString, GetSourceFilePath(), GetSourceLocations().First().StartLine,
+                                       GetSourceLocations().Last().StartLine);
             return str;
         }
 
         public string GetSourceFilePath()
         {
-            var sourceLocator = _sourceLocatorFactory.GetSourceLocator(this);
-            var sourceFilePath = sourceLocator.GetSourceFilePath(MdToken);
+            ISourceLocator sourceLocator = _sourceLocatorFactory.GetSourceLocator(this);
+            string sourceFilePath = sourceLocator.GetSourceFilePath(MdToken);
             return sourceFilePath;
         }
-    
+
         public IEnumerable<IMethodLine> GetSourceLocations()
         {
-            var sourceLocator = _sourceLocatorFactory.GetSourceLocator(this);
-            var methodLines = sourceLocator.GetMethodLines(MdToken);
+            ISourceLocator sourceLocator = _sourceLocatorFactory.GetSourceLocator(this);
+            IEnumerable<IMethodLine> methodLines = sourceLocator.GetMethodLines(MdToken);
             return methodLines;
         }
     }

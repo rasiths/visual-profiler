@@ -1,15 +1,17 @@
-using System.Diagnostics.Contracts;
 using Microsoft.Cci;
 
 namespace VisualProfilerAccess.SourceLocation
 {
-    class CciMethodLine : IMethodLine
+    internal class CciMethodLine : IMethodLine
     {
-        public IPrimarySourceLocation SourceLocation { get; set; }
         public CciMethodLine(IPrimarySourceLocation sourceLocation)
         {
             SourceLocation = sourceLocation;
         }
+
+        public IPrimarySourceLocation SourceLocation { get; set; }
+
+        #region IMethodLine Members
 
         public int StartLine
         {
@@ -40,5 +42,7 @@ namespace VisualProfilerAccess.SourceLocation
         {
             get { return SourceLocation.EndIndex; }
         }
+
+        #endregion
     }
 }

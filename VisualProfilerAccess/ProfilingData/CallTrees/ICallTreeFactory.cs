@@ -9,23 +9,31 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
         TCallTree GetCallTree(Stream byteStream, MetadataCache<MethodMetadata> methodCache);
     }
 
-    class TracingCallTreeFactory : ICallTreeFactory<TracingCallTree>
+    internal class TracingCallTreeFactory : ICallTreeFactory<TracingCallTree>
     {
+        #region ICallTreeFactory<TracingCallTree> Members
+
         public TracingCallTree GetCallTree(Stream byteStream, MetadataCache<MethodMetadata> methodCache)
         {
-            TracingCallTreeElemFactory tracingCallTreeElemFactory = new TracingCallTreeElemFactory();
-            TracingCallTree tracingCallTree = new TracingCallTree(byteStream, tracingCallTreeElemFactory, methodCache);
+            var tracingCallTreeElemFactory = new TracingCallTreeElemFactory();
+            var tracingCallTree = new TracingCallTree(byteStream, tracingCallTreeElemFactory, methodCache);
             return tracingCallTree;
         }
+
+        #endregion
     }
 
-    class SamplingCallTreeFactory : ICallTreeFactory<SamplingCallTree>
+    internal class SamplingCallTreeFactory : ICallTreeFactory<SamplingCallTree>
     {
+        #region ICallTreeFactory<SamplingCallTree> Members
+
         public SamplingCallTree GetCallTree(Stream byteStream, MetadataCache<MethodMetadata> methodCache)
         {
-            SamplingCallTreeElemFactory samplingCallTreeElemFactory = new SamplingCallTreeElemFactory();
-            SamplingCallTree samplingCallTree = new SamplingCallTree(byteStream, samplingCallTreeElemFactory, methodCache);
+            var samplingCallTreeElemFactory = new SamplingCallTreeElemFactory();
+            var samplingCallTree = new SamplingCallTree(byteStream, samplingCallTreeElemFactory, methodCache);
             return samplingCallTree;
         }
+
+        #endregion
     }
 }

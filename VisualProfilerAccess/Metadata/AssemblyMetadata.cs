@@ -17,7 +17,5 @@ namespace VisualProfilerAccess.Metadata
         {
             get { return MetadataTypes.AssemblyMetadata; }
         }
-
-      
     }
 }

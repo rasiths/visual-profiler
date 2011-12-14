@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using VisualProfilerAccess.Metadata;
 using VisualProfilerAccess.SourceLocation;
 
 namespace VisualProfilerAccessTests.SourceLocationTests
 {
-    class SrcLocatorMockupFkt : ISourceLocatorFactory
+    internal class SrcLocatorMockupFkt : ISourceLocatorFactory
     {
+        #region ISourceLocatorFactory Members
+
         public ISourceLocator GetSourceLocator(string modulePath)
         {
-            SrcLocatorMockup srcLocatorMockup = new SrcLocatorMockup(modulePath);
+            var srcLocatorMockup = new SrcLocatorMockup(modulePath);
             return srcLocatorMockup;
         }
 
@@ -19,9 +18,11 @@ namespace VisualProfilerAccessTests.SourceLocationTests
         {
             return GetSourceLocator(methodMd.Class.Module.FilePath);
         }
+
+        #endregion
     }
 
-    class SrcLocatorMockup : ISourceLocator
+    internal class SrcLocatorMockup : ISourceLocator
     {
         private readonly string _modulePath;
 
@@ -30,13 +31,15 @@ namespace VisualProfilerAccessTests.SourceLocationTests
             _modulePath = modulePath;
         }
 
+        #region ISourceLocator Members
+
         public void Dispose()
         {
         }
 
         public IEnumerable<IMethodLine> GetMethodLines(uint methodMdToken)
         {
-            MethodLineMockup[] methodLineMockups = new []{ new MethodLineMockup(),new MethodLineMockup(),new MethodLineMockup()};
+            var methodLineMockups = new[] {new MethodLineMockup(), new MethodLineMockup(), new MethodLineMockup()};
             return methodLineMockups;
         }
 
@@ -44,10 +47,14 @@ namespace VisualProfilerAccessTests.SourceLocationTests
         {
             return _modulePath + ".cs";
         }
+
+        #endregion
     }
 
-    class MethodLineMockup : IMethodLine
+    internal class MethodLineMockup : IMethodLine
     {
+        #region IMethodLine Members
+
         public int StartLine
         {
             get { return 111; }
@@ -77,5 +84,7 @@ namespace VisualProfilerAccessTests.SourceLocationTests
         {
             get { return 111; }
         }
+
+        #endregion
     }
 }
