@@ -5,7 +5,7 @@ namespace VisualProfilerAccess.Metadata
 {
     public class ClassMetadata : MetadataBase<ClassMetadata>
     {
-        public ClassMetadata(Stream byteStream,  MetadataCache<ModuleMetadata> moduleCache) : base(byteStream)
+        public ClassMetadata(Stream byteStream, MetadataCache<ModuleMetadata> moduleCache) : base(byteStream)
         {
             Contract.Ensures(moduleCache != null);
             Name = byteStream.DeserializeString();

@@ -18,7 +18,8 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
 
         public override ProfilingDataTypes ProfilingDataType
         {
-            get { return ProfilingDataTypes.Tracing; } // should be ProfilingDataTypes.Mocking but I did not want to spoil the enum with the strange value. 
+            get { return ProfilingDataTypes.Tracing; }
+            // should be ProfilingDataTypes.Mocking but I did not want to spoil the enum with the strange value. 
         }
     }
 }

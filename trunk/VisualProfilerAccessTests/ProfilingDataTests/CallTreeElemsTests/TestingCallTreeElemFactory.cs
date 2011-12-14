@@ -4,12 +4,16 @@ using VisualProfilerAccess.ProfilingData.CallTreeElems;
 
 namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
 {
-    class TestingCallTreeElemFactory : ICallTreeElemFactory<TestingCallTreeElem>
+    internal class TestingCallTreeElemFactory : ICallTreeElemFactory<TestingCallTreeElem>
     {
+        #region ICallTreeElemFactory<TestingCallTreeElem> Members
+
         public TestingCallTreeElem GetCallTreeElem(Stream byteStream, MetadataCache<MethodMetadata> methodCache)
         {
             var mockCallTreeElem = new TestingCallTreeElem(byteStream, this, methodCache);
             return mockCallTreeElem;
         }
+
+        #endregion
     }
 }

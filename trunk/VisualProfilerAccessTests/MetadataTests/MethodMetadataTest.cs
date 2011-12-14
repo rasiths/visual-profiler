@@ -1,23 +1,22 @@
-﻿using Moq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Moq;
 using NUnit.Framework;
 using VisualProfilerAccess.Metadata;
 using VisualProfilerAccess.SourceLocation;
-using System.Linq;
 
 namespace VisualProfilerAccessTests.MetadataTests
 {
     [TestFixture]
     public class MethodMetadataTest
     {
-        #region Setup/Teardown
-
         [TestFixtureSetUp]
         public void SetUp()
         {
             var mockModuleCache = new Mock<MetadataCache<ModuleMetadata>>(MockBehavior.Strict);
             mockModuleCache.Setup(cache => cache[It.IsAny<uint>()]).Returns(() => null);
             _classMetadata = new ClassMetadata(_classBytes.ConvertToMemoryStream(), mockModuleCache.Object);
-            
+
             var mockClassCache = new Mock<MetadataCache<ClassMetadata>>(MockBehavior.Strict);
             mockClassCache.Setup(cache => cache[It.IsAny<uint>()]).Returns(_classMetadata);
 
@@ -31,25 +30,28 @@ namespace VisualProfilerAccessTests.MetadataTests
 
             var mockSourceLocator = new Mock<ISourceLocator>(MockBehavior.Strict);
             mockSourceLocator.Setup(soLoc => soLoc.GetMethodLines(It.IsAny<uint>())).Returns(
-                new[] {
-                    _mockMethodLine.Object,
-                    _mockMethodLine.Object,
-                    _mockMethodLine.Object
-                });
-            
+                new[]
+                    {
+                        _mockMethodLine.Object,
+                        _mockMethodLine.Object,
+                        _mockMethodLine.Object
+                    });
+
             mockSourceLocator.Setup(soLoc => soLoc.GetSourceFilePath(It.IsAny<uint>())).Returns(SourceFilePath);
 
             _mockSourceLocatorFactory = new Mock<ISourceLocatorFactory>(MockBehavior.Strict);
-            _mockSourceLocatorFactory.Setup(soFac => soFac.GetSourceLocator(It.IsAny<MethodMetadata>())).Returns(mockSourceLocator.Object);
-            
-            _methodMetadata1 = new MethodMetadata(_method1Bytes.ConvertToMemoryStream(), mockClassCache.Object, _mockSourceLocatorFactory.Object);
-            _methodMetadata2 = new MethodMetadata(_method2Bytes.ConvertToMemoryStream(), mockClassCache.Object, _mockSourceLocatorFactory.Object);
-            _methodMetadata3 = new MethodMetadata(_method3Bytes.ConvertToMemoryStream(), mockClassCache.Object, _mockSourceLocatorFactory.Object);
+            _mockSourceLocatorFactory.Setup(soFac => soFac.GetSourceLocator(It.IsAny<MethodMetadata>())).Returns(
+                mockSourceLocator.Object);
+
+            _methodMetadata1 = new MethodMetadata(_method1Bytes.ConvertToMemoryStream(), mockClassCache.Object,
+                                                  _mockSourceLocatorFactory.Object);
+            _methodMetadata2 = new MethodMetadata(_method2Bytes.ConvertToMemoryStream(), mockClassCache.Object,
+                                                  _mockSourceLocatorFactory.Object);
+            _methodMetadata3 = new MethodMetadata(_method3Bytes.ConvertToMemoryStream(), mockClassCache.Object,
+                                                  _mockSourceLocatorFactory.Object);
 
             mockClassCache.Verify(cache => cache[It.IsAny<uint>()], Times.Exactly(3));
         }
-
-        #endregion
 
         private readonly byte[] _classBytes = {
                                                   0x6C, 0x34, 0x21, 0x00, 0x02, 0x00, 0x00, 0x02, 0x2E, 0x00, 0x00, 0x00
@@ -123,6 +125,21 @@ namespace VisualProfilerAccessTests.MetadataTests
         private const string ExpectedName3 = "TestMessageWith2Arguments";
 
         [Test]
+        public void GetSourceFileTest()
+        {
+            Assert.AreEqual(SourceFilePath, _methodMetadata1.GetSourceFilePath());
+            IEnumerable<IMethodLine> sourceLocations = _methodMetadata1.GetSourceLocations();
+            Assert.AreEqual(3, sourceLocations.Count());
+            IMethodLine methodLine = sourceLocations.First();
+            Assert.AreEqual(12, methodLine.StartLine);
+            Assert.AreEqual(12, methodLine.EndLine);
+            Assert.AreEqual(160, methodLine.StartIndex);
+            Assert.AreEqual(220, methodLine.EndIndex);
+            Assert.AreEqual(10, methodLine.StartColumn);
+            Assert.AreEqual(70, methodLine.EndColumn);
+        }
+
+        [Test]
         public void IdTest()
         {
             Assert.AreEqual(ExpectedId1, _methodMetadata1.Id, "Method1 id does not match.");
@@ -170,8 +187,6 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void ParentIdTest()
         {
-
-
             Assert.AreEqual(_classMetadata.Id, _methodMetadata1.ClassId);
             Assert.IsTrue(ReferenceEquals(_classMetadata, _methodMetadata1.Class),
                           "Method1's parent module does not match.");
@@ -183,21 +198,6 @@ namespace VisualProfilerAccessTests.MetadataTests
             Assert.AreEqual(_classMetadata.Id, _methodMetadata3.ClassId);
             Assert.IsTrue(ReferenceEquals(_classMetadata, _methodMetadata3.Class),
                           "Method3's parent module does not match.");
-        }
-
-        [Test]
-        public void GetSourceFileTest()
-        {
-            Assert.AreEqual(SourceFilePath, _methodMetadata1.GetSourceFilePath());
-            var sourceLocations = _methodMetadata1.GetSourceLocations();
-            Assert.AreEqual(3, sourceLocations.Count());
-            var methodLine = sourceLocations.First();
-            Assert.AreEqual(12, methodLine.StartLine);
-            Assert.AreEqual(12, methodLine.EndLine);
-            Assert.AreEqual(160,methodLine.StartIndex);
-            Assert.AreEqual(220,methodLine.EndIndex);
-            Assert.AreEqual(10,methodLine.StartColumn);
-            Assert.AreEqual(70,methodLine.EndColumn);
         }
     }
 }

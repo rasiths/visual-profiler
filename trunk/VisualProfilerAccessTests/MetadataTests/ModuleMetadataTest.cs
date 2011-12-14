@@ -7,8 +7,6 @@ namespace VisualProfilerAccessTests.MetadataTests
     [TestFixture]
     public class ModuleMetadataTest
     {
-        #region Setup/Teardown
-
         [TestFixtureSetUp]
         public void SetUp()
         {
@@ -16,13 +14,11 @@ namespace VisualProfilerAccessTests.MetadataTests
 
             _mockAssemblyCache = new Mock<MetadataCache<AssemblyMetadata>>(MockBehavior.Strict);
             _mockAssemblyCache.Setup(cache => cache[It.IsAny<uint>()]).Returns(() => _assemblyMetadata).Verifiable();
-            
+
             _moduleMetadata = new ModuleMetadata(_moduleBytes.ConvertToMemoryStream(), _mockAssemblyCache.Object);
 
             _mockAssemblyCache.Verify();
         }
-
-        #endregion
 
         private readonly byte[] _assemblyBytes = {
                                                      0x00, 0x3A, 0x37, 0x00, 0x01, 0x00, 0x00, 0x20, 0x18, 0x00, 0x00,
@@ -46,7 +42,7 @@ namespace VisualProfilerAccessTests.MetadataTests
                                                    0x00, 0x67, 0x00, 0x5c, 0x00, 0x4d, 0x00, 0x61, 0x00, 0x6e, 0x00,
                                                    0x64, 0x00, 0x65, 0x00, 0x6c, 0x00, 0x62, 0x00, 0x72, 0x00, 0x6f,
                                                    0x00, 0x74, 0x00, 0x2e, 0x00, 0x65, 0x00, 0x78, 0x00, 0x65, 0x00,
-                                                   0x00, 0x3A, 0x37,0x00
+                                                   0x00, 0x3A, 0x37, 0x00
                                                };
 
         private AssemblyMetadata _assemblyMetadata;
@@ -56,6 +52,12 @@ namespace VisualProfilerAccessTests.MetadataTests
         private const uint ExpectedId = 0x00212e9c;
         private const uint ExpectedMdToken = 0x06000001;
         private const string ExpectedFile = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe";
+
+        [Test]
+        public void FileTest()
+        {
+            Assert.AreEqual(ExpectedFile, _moduleMetadata.FilePath);
+        }
 
         [Test]
         public void IdTest()
@@ -78,15 +80,8 @@ namespace VisualProfilerAccessTests.MetadataTests
         [Test]
         public void ParentIdTest()
         {
-            
             Assert.IsTrue(ReferenceEquals(_assemblyMetadata, _moduleMetadata.Assembly),
                           "Module's parent assembly does not match.");
-        }
-
-        [Test]
-        public void FileTest()
-        {
-            Assert.AreEqual(ExpectedFile, _moduleMetadata.FilePath);
         }
     }
 }

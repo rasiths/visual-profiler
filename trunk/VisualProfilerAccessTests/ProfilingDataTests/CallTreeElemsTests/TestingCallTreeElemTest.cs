@@ -11,21 +11,17 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
     [TestFixture]
     public class TestingCallTreeElemTest
     {
-        #region Setup/Teardown
-
         [TestFixtureSetUp]
         public void SetUp()
         {
             _memoryStream = _multipleElemBytes.ConvertToMemoryStream();
             _mockCallTreeElemFactory = new TestingCallTreeElemFactory();
 
-            _mockMetadataCache = new Mock<MetadataCache<MethodMetadata>> ();
+            _mockMetadataCache = new Mock<MetadataCache<MethodMetadata>>();
             _mockMetadataCache.SetupAllProperties();
 
             _rootElem = new TestingCallTreeElem(_memoryStream, _mockCallTreeElemFactory, _mockMetadataCache.Object);
         }
-
-        #endregion
 
         private readonly byte[] _singleElemBytes = {
                                                        0x34, 0x34, 0x16, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,

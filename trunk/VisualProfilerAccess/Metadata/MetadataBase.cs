@@ -20,5 +20,4 @@ namespace VisualProfilerAccess.Metadata
             MdToken = byteStream.DeserializeUint32();
         }
     }
-  
 }

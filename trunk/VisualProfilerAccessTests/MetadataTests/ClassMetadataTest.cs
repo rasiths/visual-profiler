@@ -7,13 +7,11 @@ namespace VisualProfilerAccessTests.MetadataTests
     [TestFixture]
     public class ClassMetadataTest
     {
-        #region Setup/Teardown
-
         [TestFixtureSetUp]
         public void SetUp()
         {
             var mockAssemblyCache = new Mock<MetadataCache<AssemblyMetadata>>(MockBehavior.Strict);
-            mockAssemblyCache.Setup(cache => cache[It.IsAny<uint>()]).Returns(()=>null);
+            mockAssemblyCache.Setup(cache => cache[It.IsAny<uint>()]).Returns(() => null);
             _moduleMetadata = new ModuleMetadata(_moduleBytes.ConvertToMemoryStream(), mockAssemblyCache.Object);
 
             _mockModuleCache = new Mock<MetadataCache<ModuleMetadata>>(MockBehavior.Strict);
@@ -23,8 +21,6 @@ namespace VisualProfilerAccessTests.MetadataTests
 
             _mockModuleCache.Verify();
         }
-
-        #endregion
 
         private readonly byte[] _moduleBytes = {
                                                    0x9C, 0x2E, 0x21, 0x00, 0x01, 0x00, 0x00, 0x06,
@@ -40,7 +36,7 @@ namespace VisualProfilerAccessTests.MetadataTests
                                                    0x00, 0x67, 0x00, 0x5c, 0x00, 0x4d, 0x00, 0x61, 0x00, 0x6e, 0x00,
                                                    0x64, 0x00, 0x65, 0x00, 0x6c, 0x00, 0x62, 0x00, 0x72, 0x00, 0x6f,
                                                    0x00, 0x74, 0x00, 0x2e, 0x00, 0x65, 0x00, 0x78, 0x00, 0x65, 0x00,
-                                                   0x00, 0x3A, 0x37,0x00
+                                                   0x00, 0x3A, 0x37, 0x00
                                                };
 
         private readonly byte[] _classBytes = {

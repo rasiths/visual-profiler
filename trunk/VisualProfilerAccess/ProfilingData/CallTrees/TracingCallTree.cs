@@ -8,7 +8,9 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
 {
     public class TracingCallTree : CallTree<TracingCallTree, TracingCallTreeElem>
     {
-        public TracingCallTree(Stream byteStream, ICallTreeElemFactory<TracingCallTreeElem> callTreeElemFactory, MetadataCache<MethodMetadata> methodCache) : base(byteStream, callTreeElemFactory, methodCache)
+        public TracingCallTree(Stream byteStream, ICallTreeElemFactory<TracingCallTreeElem> callTreeElemFactory,
+                               MetadataCache<MethodMetadata> methodCache)
+            : base(byteStream, callTreeElemFactory, methodCache)
         {
         }
 
@@ -28,8 +30,8 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
 
         public override void ConvertToString(StringBuilder stringBuilder)
         {
-            double userModeSec = UserModeDurationHns / 1e7;
-            double kernelModeSec = KernelModeDurationHns / 1e7;
+            double userModeSec = UserModeDurationHns/1e7;
+            double kernelModeSec = KernelModeDurationHns/1e7;
             stringBuilder.AppendFormat("Tum={0}s,Tkm={1}s", userModeSec, kernelModeSec);
         }
 

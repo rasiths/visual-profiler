@@ -8,7 +8,9 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
 {
     public class SamplingCallTree : CallTree<SamplingCallTree, SamplingCallTreeElem>
     {
-        public SamplingCallTree(Stream byteStream, ICallTreeElemFactory<SamplingCallTreeElem> callTreeElemFactory, MetadataCache<MethodMetadata> methodCache) : base(byteStream, callTreeElemFactory, methodCache)
+        public SamplingCallTree(Stream byteStream, ICallTreeElemFactory<SamplingCallTreeElem> callTreeElemFactory,
+                                MetadataCache<MethodMetadata> methodCache)
+            : base(byteStream, callTreeElemFactory, methodCache)
         {
         }
 
@@ -23,9 +25,9 @@ namespace VisualProfilerAccess.ProfilingData.CallTrees
 
         public override void ConvertToString(StringBuilder stringBuilder)
         {
-            double userModeSec = UserModeDurationHns / 1e7;
-            double kernelModeSec = KernelModeDurationHns / 1e7;
-            double wallClockDuration = WallClockDurationHns / 1e7;
+            double userModeSec = UserModeDurationHns/1e7;
+            double kernelModeSec = KernelModeDurationHns/1e7;
+            double wallClockDuration = WallClockDurationHns/1e7;
             stringBuilder.AppendFormat("Twc={2}s, Tum={0}s, Tkm={1}s", userModeSec, kernelModeSec, wallClockDuration);
         }
 

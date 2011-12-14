@@ -9,53 +9,51 @@ using Ninject.Modules;
 using Ninject.Parameters;
 using VisualProfilerAccess.Metadata;
 using VisualProfilerAccess.ProfilingData;
-using VisualProfilerAccess.ProfilingData.CallTreeElems;
 using VisualProfilerAccess.ProfilingData.CallTrees;
 using VisualProfilerAccess.SourceLocation;
 
 namespace VisualProfilerAccess
 {
-    class Program2
+    internal class Program2
     {
-        static void Main2(string[] args)
+        private static void Main2(string[] args)
         {
-
-
-
-            PdbReader pdbReader = new PdbReader(@"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe");
+            var pdbReader = new PdbReader(@"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe");
             IModule module = pdbReader.Module;
 
-            foreach (var namedTypeDefinition in module.GetAllTypes())
+            foreach (INamedTypeDefinition namedTypeDefinition in module.GetAllTypes())
             {
-                PropertyInfo propertyInfo2 = namedTypeDefinition.GetType().GetProperty("TokenValue", BindingFlags.NonPublic | BindingFlags.Instance);
-                uint value2 = (uint)propertyInfo2.GetValue(namedTypeDefinition, null);
+                PropertyInfo propertyInfo2 = namedTypeDefinition.GetType().GetProperty("TokenValue",
+                                                                                       BindingFlags.NonPublic |
+                                                                                       BindingFlags.Instance);
+                var value2 = (uint)propertyInfo2.GetValue(namedTypeDefinition, null);
 
-                foreach (var methodDefinition in namedTypeDefinition.Methods)
+                foreach (IMethodDefinition methodDefinition in namedTypeDefinition.Methods)
                 {
                     Console.WriteLine(methodDefinition.Name);
 
-                    PropertyInfo propertyInfo = methodDefinition.GetType().GetProperty("TokenValue", BindingFlags.NonPublic | BindingFlags.Instance);
-                    uint value = (uint)propertyInfo.GetValue(methodDefinition, null);
-                    foreach (var location in methodDefinition.Locations)
+                    PropertyInfo propertyInfo = methodDefinition.GetType().GetProperty("TokenValue",
+                                                                                       BindingFlags.NonPublic |
+                                                                                       BindingFlags.Instance);
+                    var value = (uint)propertyInfo.GetValue(methodDefinition, null);
+                    foreach (ILocation location in methodDefinition.Locations)
                     {
-                        foreach (var primarySourceLocation in pdbReader.GetAllPrimarySourceLocationsFor(location))
+                        foreach (
+                            IPrimarySourceLocation primarySourceLocation in
+                                pdbReader.GetAllPrimarySourceLocationsFor(location))
                         {
-
                             if (primarySourceLocation != null)
                             {
                                 Console.WriteLine("line {0}, {1}:{2}", primarySourceLocation.StartLine,
                                                   primarySourceLocation.StartColumn, primarySourceLocation.EndColumn);
-
                             }
                         }
                     }
                 }
             }
         }
-     }
+    }
 
-
-  
 
     public class VisualProfilerModule : NinjectModule
     {
@@ -87,24 +85,22 @@ namespace VisualProfilerAccess
         }
     }
 
-    
 
     internal class Program
     {
         private static void Main(string[] args)
         {
-            StandardKernel kernel = new StandardKernel(new VisualProfilerModule());
-            
+            var kernel = new StandardKernel(new VisualProfilerModule());
+
 
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
-            var processStartInfo = new ProcessStartInfo();
-            processStartInfo.FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe";
+            var processStartInfo = new ProcessStartInfo { FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe" };
 
             if (false)
             {
                 EventHandler<ProfilingDataUpdateEventArgs<TracingCallTree>> updateCallback = OnUpdateCallback;
                 var updateCallbackParam = new ConstructorArgument("updateCallback", updateCallback);
-               
+
                 var profilerAccess = new ProfilerAccess<TracingCallTree>(
                     processStartInfo,
                     ProfilerTypes.TracingProfiler,
@@ -134,7 +130,7 @@ namespace VisualProfilerAccess
         private static void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
         {
             Console.Clear();
-            foreach (var callTree in
+            foreach (TracingCallTree callTree in
                 eventArgs.CallTrees)
             {
                 ulong totalCycleTime = callTree.TotalCycleTime();
@@ -152,24 +148,18 @@ namespace VisualProfilerAccess
                                                               });
                 Console.WriteLine(callTreeString);
                 Console.WriteLine();
-
             }
         }
 
         private static void OnUpdateCallback2(object sender, ProfilingDataUpdateEventArgs<SamplingCallTree> eventArgs)
         {
             Console.Clear();
-            foreach (var callTree in
+            foreach (SamplingCallTree callTree in
                 eventArgs.CallTrees)
             {
-
-
                 Console.WriteLine(callTree.ToString(null));
                 Console.WriteLine();
-
             }
         }
-
-
     }
 }

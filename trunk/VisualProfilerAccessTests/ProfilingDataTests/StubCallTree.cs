@@ -8,7 +8,8 @@ namespace VisualProfilerAccessTests.ProfilingDataTests
 {
     public abstract class StubCallTree : CallTree<StubCallTree, StubCallTreeElem>
     {
-        public StubCallTree(Stream byteStream, ICallTreeElemFactory<StubCallTreeElem> callTreeElemFactory, MetadataCache<MethodMetadata> methodCache)
+        public StubCallTree(Stream byteStream, ICallTreeElemFactory<StubCallTreeElem> callTreeElemFactory,
+                            MetadataCache<MethodMetadata> methodCache)
             : base(byteStream, callTreeElemFactory, methodCache)
         {
         }
