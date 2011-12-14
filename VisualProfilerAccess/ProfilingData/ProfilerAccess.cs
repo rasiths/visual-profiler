@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
+using Ninject;
 using VisualProfilerAccess.ProfilingData.CallTrees;
 
 namespace VisualProfilerAccess.ProfilingData
@@ -12,6 +13,7 @@ namespace VisualProfilerAccess.ProfilingData
     public class ProfilerAccess<TCallTree> where TCallTree : CallTree
     {
         private const string NamePipeName = "VisualProfilerAccessPipe";
+        protected static StandardKernel Kernel = new StandardKernel(new VisualProfilerModule());
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private readonly ProfilerCommunicator<TCallTree> _profilerCommunicator;
         private Task _actionReceiverTask;
