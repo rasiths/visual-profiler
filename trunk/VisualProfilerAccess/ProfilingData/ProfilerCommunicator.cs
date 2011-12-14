@@ -67,13 +67,10 @@ namespace VisualProfilerAccess.ProfilingData
                     break;
 
                 case Actions.ProfilingFinished:
-                    eventArgs.CallTrees = null;
                     finishProfiling = true;
                     return;
 
                 default:
-                    eventArgs.Action = Actions.Error;
-                    eventArgs.CallTrees = null;
                     finishProfiling = true;
                     return;
                     
@@ -82,9 +79,9 @@ namespace VisualProfilerAccess.ProfilingData
             finishProfiling = false;
         }
 
-        public void SendCommandToProfilee(Stream byteStream)
+        public void SendCommandToProfilee(Stream byteStream, Commands commandToSend)
         {
-            byte[] commandBytes = BitConverter.GetBytes((UInt32)Commands.SendProfilingData);
+            byte[] commandBytes = BitConverter.GetBytes((UInt32)commandToSend);
             byteStream.Write(commandBytes, 0, commandBytes.Length);
 
         }

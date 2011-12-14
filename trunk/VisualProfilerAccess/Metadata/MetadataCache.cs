@@ -6,13 +6,13 @@ namespace VisualProfilerAccess.Metadata
     {
         private Dictionary<uint, TMetadata> _cache = new Dictionary<uint, TMetadata>();
 
-        public Dictionary<uint, TMetadata> Cache
+        public virtual Dictionary<uint, TMetadata> Cache
         {
             get { return _cache; }
             set { _cache = value; }
         }
 
-        public TMetadata this[uint metadataId]
+        public virtual TMetadata this[uint metadataId]
         {
             get
             {
@@ -24,7 +24,7 @@ namespace VisualProfilerAccess.Metadata
             }
         }
 
-        public void Add(TMetadata metadata)
+        public virtual void Add(TMetadata metadata)
         {
             this[metadata.Id] = metadata;
         }

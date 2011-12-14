@@ -57,7 +57,6 @@ namespace VisualProfilerAccess.Metadata
             var sourceFilePath = sourceLocator.GetSourceFilePath(MdToken);
             return sourceFilePath;
         }
-
     
         public IEnumerable<IMethodLine> GetSourceLocations()
         {

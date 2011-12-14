@@ -11,7 +11,7 @@ namespace VisualProfilerAccess.Metadata
         private readonly MetadataCache<ClassMetadata> _classCache;
         private readonly MetadataCache<ModuleMetadata> _moduleCache;
         private readonly MetadataCache<AssemblyMetadata> _assemblyCache;
-        private readonly ISourceLocatorFactory _sourceLocatorFactory = new SourceLocatorFactory();
+        private readonly ISourceLocatorFactory _sourceLocatorFactory;
 
         public MetadataDeserializer(
             MetadataCache<MethodMetadata> methodCache,
@@ -27,7 +27,7 @@ namespace VisualProfilerAccess.Metadata
             _sourceLocatorFactory = sourceLocatorFactory;
         }
 
-        public void DeserializeAllMetadataAndCacheIt(Stream byteStream)
+        public virtual void DeserializeAllMetadataAndCacheIt(Stream byteStream)
         {
             long initialStreamPostion = byteStream.Position;
             uint metadataByteCount = byteStream.DeserializeUint32();
