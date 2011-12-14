@@ -1,7 +1,8 @@
 namespace VisualProfilerAccess.ProfilingData
 {
-    internal enum Commands
+    public enum Commands
     {
-        SendProfilingData = 101
+        SendProfilingData = 101,
+        FinishProfiling = 102
     }
 }

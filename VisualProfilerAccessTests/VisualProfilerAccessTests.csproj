@@ -85,6 +85,9 @@
     <Compile Include="ProfilingDataTests\CallTreesTests\TestingCallTreeTest.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ProfilingDataTests\ProfilerCommunicatorTest.cs" />
+    <Compile Include="ProfilingDataTests\StubCallTree.cs" />
+    <Compile Include="ProfilingDataTests\StubCallTreeElem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SourceLocationTests\SourceLocatorTest.cs" />
     <Compile Include="SourceLocationTests\SrcLocatorMockup.cs" />

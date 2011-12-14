@@ -5,9 +5,6 @@ using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
-using Ninject;
-using Ninject.Parameters;
-using VisualProfilerAccess.ProfilingData.CallTreeElems;
 using VisualProfilerAccess.ProfilingData.CallTrees;
 
 namespace VisualProfilerAccess.ProfilingData
@@ -106,12 +103,13 @@ namespace VisualProfilerAccess.ProfilingData
             {
                 try
                 {
-                    _profilerCommunicator.SendCommandToProfilee(_pipeServer);
+                    _profilerCommunicator.SendCommandToProfilee(_pipeServer, Commands.SendProfilingData);
                 }
                 catch (IOException)
                 {
-                    bool problemOccurredBeforeCancalation = !cancellationToken.IsCancellationRequested;
-                    if (problemOccurredBeforeCancalation) throw;
+                    bool problemOccurredBeforeCancellation = !cancellationToken.IsCancellationRequested;
+                    _profilerCommunicator.SendCommandToProfilee(_pipeServer, Commands.FinishProfiling);
+                    if (problemOccurredBeforeCancellation) throw;
                 }
                 Thread.Sleep(ProfilerDataUpdatePeriod);
             }
