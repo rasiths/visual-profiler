@@ -30,26 +30,31 @@ namespace VisualProfilerAccessTests.ProfilingDataTests
         private ProfilingDataUpdateEventArgs<StubCallTree> _profilingDataUpdateEventArgs;
         private readonly AutoResetEvent _updateCallbackFinishedSync = new AutoResetEvent(false);
 
+        private readonly Mock<MetadataCache<MethodMetadata>> _mockMethodCache =
+            new Mock<MetadataCache<MethodMetadata>>();
+
         [TestFixtureSetUp]
         public void SetUpAttribute()
         {
-            var mockMethodCache = new Mock<MetadataCache<MethodMetadata>>();
             var mockMetadataDeserializer = new Mock<MetadataDeserializer>(MockBehavior.Default, null, null, null, null,
                                                                           null);
             mockMetadataDeserializer.Setup(mmd => mmd.DeserializeAllMetadataAndCacheIt(It.IsAny<Stream>()));
+            Mock<ICallTreeFactory<StubCallTree>> mockTreeFactory = MockTreeFactory();
 
+            _profilerCommunicator = new ProfilerCommunicator<StubCallTree>(
+                ProfilerTypes.TracingProfiler,
+                mockTreeFactory.Object,
+                mockMetadataDeserializer.Object,
+                _mockMethodCache.Object,
+                UpdateCallback);
+        }
+
+        private Mock<ICallTreeFactory<StubCallTree>> MockTreeFactory()
+        {
+            Mock<ICallTreeElemFactory<StubCallTreeElem>> mockTreeElemFactory = MockTreeElemFactory();
             var mockStream = new Mock<Stream>();
-
-            var mockTreeElemFactory = new Mock<ICallTreeElemFactory<StubCallTreeElem>>();
-            var mockTreeElem = new Mock<StubCallTreeElem>(MockBehavior.Default, mockStream.Object,
-                                                          mockTreeElemFactory.Object, mockMethodCache.Object);
-            mockTreeElemFactory.Setup(
-                tef => tef.GetCallTreeElem(It.IsAny<Stream>(), It.IsAny<MetadataCache<MethodMetadata>>())).Returns(
-                    mockTreeElem.Object);
-
-
             var mockTree = new Mock<StubCallTree>(MockBehavior.Default, mockStream.Object, mockTreeElemFactory.Object,
-                                                  mockMethodCache.Object);
+                                                  _mockMethodCache.Object);
             var mockTreeFactory = new Mock<ICallTreeFactory<StubCallTree>>();
             mockTreeFactory.Setup(mtf => mtf.GetCallTree(It.IsAny<Stream>(), It.IsAny<MetadataCache<MethodMetadata>>()))
                 .
@@ -60,13 +65,20 @@ namespace VisualProfilerAccessTests.ProfilingDataTests
                             var bytes = new byte[stubTreeByteCount];
                             st.Read(bytes, 0, stubTreeByteCount);
                         });
+            return mockTreeFactory;
+        }
 
-            _profilerCommunicator = new ProfilerCommunicator<StubCallTree>(
-                ProfilerTypes.TracingProfiler,
-                mockTreeFactory.Object,
-                mockMetadataDeserializer.Object,
-                mockMethodCache.Object,
-                UpdateCallback);
+        private Mock<ICallTreeElemFactory<StubCallTreeElem>> MockTreeElemFactory()
+        {
+            var mockStream = new Mock<Stream>();
+
+            var mockTreeElemFactory = new Mock<ICallTreeElemFactory<StubCallTreeElem>>();
+            var mockTreeElem = new Mock<StubCallTreeElem>(MockBehavior.Default, mockStream.Object,
+                                                          mockTreeElemFactory.Object, _mockMethodCache.Object);
+            mockTreeElemFactory.Setup(
+                tef => tef.GetCallTreeElem(It.IsAny<Stream>(), It.IsAny<MetadataCache<MethodMetadata>>())).Returns(
+                    mockTreeElem.Object);
+            return mockTreeElemFactory;
         }
 
         private void UpdateCallback(object sender,
@@ -147,6 +159,7 @@ namespace VisualProfilerAccessTests.ProfilingDataTests
 
             _updateCallbackFinishedSync.WaitOne();
             Assert.IsNotNull(_profilingDataUpdateEventArgs);
+            Assert.IsNotNull(_profilingDataUpdateEventArgs.CallTrees);
             Assert.AreEqual(numberOfCallTreesInStream, _profilingDataUpdateEventArgs.CallTrees.Count());
             Assert.AreEqual(ProfilerTypes.TracingProfiler, _profilingDataUpdateEventArgs.ProfilerType);
             Assert.AreEqual(Actions.SendingProfilingData, _profilingDataUpdateEventArgs.Action);

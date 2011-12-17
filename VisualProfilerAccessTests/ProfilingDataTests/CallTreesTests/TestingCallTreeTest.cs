@@ -105,6 +105,14 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
         }
 
         [Test]
+        public void TreeElemParentTest()
+        {
+            TestingCallTreeElem child = _callTree1.RootElem.Children[0].Children[0];
+            TestingCallTreeElem parent = _callTree1.RootElem.Children[0];
+            Assert.IsTrue(ReferenceEquals(parent, child.ParentElem));
+        }
+
+        [Test]
         public void TreeInitializationTest()
         {
             Assert.IsNotNull(_callTree1);
@@ -115,14 +123,6 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreesTests
             Assert.IsNotNull(_callTree2);
             Assert.IsNotNull(_callTree2.RootElem);
             Assert.AreEqual(0, _callTree2.RootElem.ChildrenCount);
-        }
-
-        [Test]
-        public void TreeElemParentTest()
-        {
-            var child = _callTree1.RootElem.Children[0].Children[0];
-            var parent = _callTree1.RootElem.Children[0];
-            Assert.IsTrue(ReferenceEquals(parent, child.ParentElem));
         }
     }
 }

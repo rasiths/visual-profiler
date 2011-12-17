@@ -15,7 +15,7 @@ namespace VisualProfilerAccess
             var processStartInfo = new ProcessStartInfo
                                        {FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe"};
 
-            if (false)
+            if (true)
             {
                 var profilerAccess = new TracingProfilerAccess(
                     processStartInfo,

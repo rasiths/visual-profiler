@@ -7,7 +7,6 @@ namespace VisualProfilerAccess.ProfilingData
     public class ProfilingDataUpdateEventArgs : EventArgs
     {
         public ProfilerTypes ProfilerType { get; set; }
-        public ProfilingDataTypes ProfilingDataType { get; set; }
         public Actions Action { get; set; }
     }
 

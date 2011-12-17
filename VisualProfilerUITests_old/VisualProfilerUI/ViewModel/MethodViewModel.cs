@@ -12,14 +12,13 @@ namespace VisualProfilerUI.ViewModel
     public class MethodViewModel : ViewModelBase
     {
         private Method _method;
-
+        private const int LineHeight = 5;
         public MethodViewModel(Method method )
         {
-            Contract.Ensures(method !=null);
+            Contract.Requires(method != null);
             _method = method;
             
         }
-
 
         public Brush Fill
         {
@@ -35,9 +34,17 @@ namespace VisualProfilerUI.ViewModel
         {
             get
             {
-                var firstLine = _method.MethodLines.First();
-                var startLineNumber = firstLine.StartLine;
-                return startLineNumber;
+                int top =_method.FirstLineNumber *  LineHeight;
+                return top;
+            }
+        }
+
+        public int Height
+        {
+            get
+            {
+                int height = _method.LineExtend*LineHeight;
+                return height;
             }
         }
     }

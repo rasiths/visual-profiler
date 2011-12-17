@@ -32,13 +32,13 @@ namespace VisualProfilerAccessTests.ProfilingDataTests.CallTreeElemsTests
                                                        0x00
                                                    };
 
-        private UInt32 ExpectedFunctionId = 0x163434;
-        private UInt32 ExpectedEnterCount = 1;
-        private UInt32 ExpectedLeaveCount = 1;
-        private UInt64 ExpectedWallClockDurationHns = 0xc94662;
+        private const UInt32 ExpectedFunctionId = 0x163434;
+        private const UInt32 ExpectedEnterCount = 1;
+        private const UInt32 ExpectedLeaveCount = 1;
+        private const UInt64 ExpectedWallClockDurationHns = 0xc94662;
         private UInt64 ExpectedKernelModeDurationHns;
-        private UInt64 ExpectedUserModeDurationHns = 0x72423;
-        private UInt32 ExpectedChildrenCount = 3;
+        private const UInt64 ExpectedUserModeDurationHns = 0x72423;
+        private const UInt32 ExpectedChildrenCount = 3;
         private ICallTreeElemFactory<TestingCallTreeElem> _mockCallTreeElemFactory;
 
 

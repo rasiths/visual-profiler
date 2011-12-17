@@ -36,34 +36,10 @@ namespace VisualProfilerAccess.ProfilingData
         public void ReceiveActionFromProfilee(Stream byteStream, out bool finishProfiling)
         {
             Actions receivedAction = byteStream.DeserializeActions();
-            var eventArgs = new ProfilingDataUpdateEventArgs<TCallTree>
-                                {
-                                    Action = receivedAction,
-                                    ProfilerType = _profilerType,
-                                    ProfilingDataType = ProfilingDataTypes.Nothing
-                                };
-
             switch (receivedAction)
             {
                 case Actions.SendingProfilingData:
-                    var streamLengthBytes = new byte[sizeof (UInt32)];
-                    byteStream.Read(streamLengthBytes, 0, streamLengthBytes.Length);
-
-                    uint streamLength = BitConverter.ToUInt32(streamLengthBytes, 0);
-                    var profilingDataBytes = new byte[streamLength];
-                    byteStream.Read(profilingDataBytes, 0, profilingDataBytes.Length);
-
-                    var profilingDataStream = new MemoryStream(profilingDataBytes);
-
-                    _metadataDeserializer.DeserializeAllMetadataAndCacheIt(profilingDataStream);
-
-                    var callTrees = new List<TCallTree>();
-                    while (profilingDataStream.Position < profilingDataStream.Length)
-                    {
-                        TCallTree callTree = _callTreeFactory.GetCallTree(profilingDataStream, _methodCache);
-                        callTrees.Add(callTree);
-                    }
-                    eventArgs.CallTrees = callTrees;
+                    DispatchSendingProfilingDataAction(byteStream);
                     break;
 
                 case Actions.ProfilingFinished:
@@ -71,11 +47,39 @@ namespace VisualProfilerAccess.ProfilingData
                     return;
 
                 default:
-                    finishProfiling = true;
-                    return;
+                    goto case Actions.ProfilingFinished;
             }
-            ThreadPool.QueueUserWorkItem(notUsed => _updateCallback(this, eventArgs));
+
             finishProfiling = false;
+        }
+
+        private void DispatchSendingProfilingDataAction(Stream byteStream)
+        {
+            var streamLength = byteStream.DeserializeUint32();
+            var profilingDataBytes = new byte[streamLength];
+            byteStream.Read(profilingDataBytes, 0, profilingDataBytes.Length);
+
+            List<TCallTree> callTrees;
+            using (var profilingDataStream = new MemoryStream(profilingDataBytes))
+            {
+                _metadataDeserializer.DeserializeAllMetadataAndCacheIt(profilingDataStream);
+
+                callTrees = new List<TCallTree>();
+                while (profilingDataStream.Position < profilingDataStream.Length)
+                {
+                    TCallTree callTree = _callTreeFactory.GetCallTree(profilingDataStream, _methodCache);
+                    callTrees.Add(callTree);
+                }
+            }
+
+            var eventArgs = new ProfilingDataUpdateEventArgs<TCallTree>
+                                {
+                                    Action = Actions.SendingProfilingData,
+                                    ProfilerType = _profilerType,
+                                    CallTrees = callTrees
+                                };
+
+            ThreadPool.QueueUserWorkItem(notUsed => _updateCallback(this, eventArgs));
         }
 
         public void SendCommandToProfilee(Stream byteStream, Commands commandToSend)
