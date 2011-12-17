@@ -21,8 +21,13 @@ namespace VisualProfilerAccess
                     processStartInfo,
                     TimeSpan.FromMilliseconds(1000),
                     OnUpdateCallback);
+                
 
                 profilerAccess.StartProfiler();
+                Thread.Sleep(2500);
+                profilerAccess.StopProfiler();
+                //Thread.Sleep(3500);
+              //  profilerAccess.StartProfiler();
                 profilerAccess.Wait();
                 Console.WriteLine("bye bye");
             }
