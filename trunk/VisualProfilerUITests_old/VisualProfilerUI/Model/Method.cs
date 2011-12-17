@@ -17,28 +17,17 @@ namespace VisualProfilerUI.Model
             string name,
             int firstLineNumber,
             int lineExtend,
-            IContainingUnit containingUnit,
-            IDictionary<Criterion, IValue> criteriaValuesMap,
-            IEnumerable<Method> callingMethods,
-            IEnumerable<Method> calledMethods)
+            IDictionary<Criterion, IValue> criteriaValuesMap)
         {
             Contract.Requires(!string.IsNullOrEmpty(name));
             Contract.Requires(firstLineNumber >= 0);
             Contract.Requires(lineExtend > 0);
-            Contract.Requires(containingUnit != null);
             Contract.Requires(criteriaValuesMap != null);
             Contract.Requires(criteriaValuesMap.Count != 0);
-            Contract.Requires(callingMethods != null);
-            Contract.Requires(calledMethods != null);
-
             Name = name;
             FirstLineNumber = firstLineNumber;
             LineExtend = lineExtend;
-            ContainingUnit = containingUnit;
             _criteriaValuesMap = criteriaValuesMap;
-            CallingMethods = callingMethods;
-            CalledMethods = calledMethods;
-
         }
 
         public Method()
@@ -49,8 +38,6 @@ namespace VisualProfilerUI.Model
         public virtual string Name { get; private set; }
 
         public virtual IEnumerable<Method> CallingMethods { get; private set; }
-
-        public virtual IContainingUnit ContainingUnit { get; private set; }
 
         public virtual IEnumerable<Method> CalledMethods { get; private set; }
 

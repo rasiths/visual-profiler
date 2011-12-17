@@ -13,30 +13,23 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using VisualProfilerUI.Model;
+using VisualProfilerUI.Model.ContainingUnits;
+using VisualProfilerUI.Model.Criteria;
+using VisualProfilerUI.Model.CriteriaContexts;
+using VisualProfilerUI.Model.Values;
 using VisualProfilerUI.ViewModel;
 
 namespace VisualProfilerUI
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
+
           
-          
-            UplnaBlbost[] uplnaBlbosts = new[]
-                                             {
-                                                 new UplnaBlbost() {Height = 10, Top = 150},
-                                                 new UplnaBlbost() {Height = 20, Top = 80}
-                                             };
-            UplnaBlbost[][] blbosts = new[] { uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts 
-            ,uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts ,uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts 
-            
-            };
-            itemControls.ItemsSource = blbosts;
         }
+
+
     }
 }

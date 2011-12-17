@@ -85,6 +85,7 @@
     <Compile Include="MethodControl.xaml.cs">
       <DependentUpon>MethodControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Model\CallTreeConvertor.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="Model\ContainingUnits\ContainingUnit.cs" />
     <Compile Include="Model\ContainingUnits\SourceFile.cs" />
