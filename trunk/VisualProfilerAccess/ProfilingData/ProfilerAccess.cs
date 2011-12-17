@@ -19,6 +19,7 @@ namespace VisualProfilerAccess.ProfilingData
         private Task _actionReceiverTask;
         private Task _commandSenderTask;
         private NamedPipeServerStream _pipeServer;
+        private readonly ManualResetEvent _stopProfilingEvent = new ManualResetEvent(true);
 
         public ProfilerAccess(
             ProcessStartInfo profileeProcessStartInfo,
@@ -33,6 +34,7 @@ namespace VisualProfilerAccess.ProfilingData
             ProfilerType = profilerType;
             ProfileeProcessStartInfo = profileeProcessStartInfo;
             ProfilerDataUpdatePeriod = profilingDataUpdatePeriod;
+            ProfilerStarted = false;
         }
 
         private Guid ProfilerCClassGuid
@@ -48,8 +50,9 @@ namespace VisualProfilerAccess.ProfilingData
 
         public ProcessStartInfo ProfileeProcessStartInfo { get; private set; }
         public ProfilerTypes ProfilerType { get; private set; }
-        public TimeSpan ProfilerDataUpdatePeriod { get; set; }
-        public Process ProfileeProcess { get; set; }
+        public TimeSpan ProfilerDataUpdatePeriod { get; private set; }
+        public Process ProfileeProcess { get; private set; }
+        public bool ProfilerStarted { get; private set; }
 
 
         private void InitNamePipe()
@@ -76,6 +79,7 @@ namespace VisualProfilerAccess.ProfilingData
         {
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_ENABLE_PROFILING", "1");
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER", ProfilerCClassGuid.ToString("B"));
+            //TODO Pozor pevna cesta!!!!!
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER_PATH",
                                                               @"D:\Honzik\Desktop\visual-profiler\Debug\VisualProfilerBackend.dll");
             ProfileeProcessStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", NamePipeName);
@@ -93,6 +97,7 @@ namespace VisualProfilerAccess.ProfilingData
                 if (finishLoop)
                 {
                     _cancellationTokenSource.Cancel();
+                    _stopProfilingEvent.Set();
                 }
             }
         }
@@ -115,14 +120,32 @@ namespace VisualProfilerAccess.ProfilingData
                     if (problemOccurredBeforeCancellation) throw;
                 }
                 Thread.Sleep(ProfilerDataUpdatePeriod);
+                _stopProfilingEvent.WaitOne();
             }
         }
 
         public void StartProfiler()
         {
-            InitNamePipe();
-            StartSendingCommandsToProfilee();
-            StartProfileeProcess();
+            if (!ProfilerStarted)
+            {
+                InitNamePipe();
+                StartSendingCommandsToProfilee();
+                StartProfileeProcess();
+                ProfilerStarted = true;
+            }else
+            {
+                _stopProfilingEvent.Set();
+            }
+        
+        }
+
+        public void StopProfiler()
+        {
+            if(ProfilerStarted)
+            {
+                _stopProfilingEvent.Reset();
+                
+            }
         }
 
         public void Wait()
