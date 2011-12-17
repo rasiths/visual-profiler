@@ -5,21 +5,19 @@ namespace VisualProfilerUI.Model.Values
 {
     public abstract class Value<TValue> : IValue where TValue : IComparable
     {
-        protected readonly TValue ActualValue;
-        protected readonly TValue MaxValue;
+        public readonly TValue ActualValue;
 
-        protected Value(TValue value, TValue maxValue)
+        protected Value(TValue value)
         {
             ActualValue = value;
-            MaxValue = maxValue;
         }
 
-        public abstract double ConvertToZeroOneScale();
+        public abstract double ConvertToZeroOneScale(IValue maxValue);
 
         public virtual int CompareTo(Value<TValue> other)
         {
-            Contract.Ensures(other != null);
-            Contract.Ensures(other.GetType() == this.GetType());
+            Contract.Requires(other != null);
+            Contract.Requires(other.GetType() == this.GetType());
             Value<TValue> otherCasted = other as Value<TValue>;
 
             var compareTo = ActualValue.CompareTo(otherCasted.ActualValue);

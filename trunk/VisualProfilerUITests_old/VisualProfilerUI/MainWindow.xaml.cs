@@ -32,7 +32,10 @@ namespace VisualProfilerUI
                                                  new UplnaBlbost() {Height = 10, Top = 150},
                                                  new UplnaBlbost() {Height = 20, Top = 80}
                                              };
-            UplnaBlbost[][] blbosts = new[] {uplnaBlbosts, uplnaBlbosts};
+            UplnaBlbost[][] blbosts = new[] { uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts 
+            ,uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts ,uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts, uplnaBlbosts 
+            
+            };
             itemControls.ItemsSource = blbosts;
         }
     }

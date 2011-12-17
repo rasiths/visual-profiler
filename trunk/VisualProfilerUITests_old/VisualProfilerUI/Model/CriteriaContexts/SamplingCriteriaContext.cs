@@ -17,8 +17,8 @@ namespace VisualProfilerUI.Model.CriteriaContexts
 
         public SamplingCriteriaContext(UintValue maxTopStackOccurrence, DoubleValue maxDuration)
         {
-            Contract.Ensures(maxTopStackOccurrence != null);
-            Contract.Ensures(maxDuration != null);
+            Contract.Requires(maxTopStackOccurrence != null);
+            Contract.Requires(maxDuration != null);
             _maxTopStackOccurrence = maxTopStackOccurrence;
             _maxDuration = maxDuration;
             _availableCriteria = new Criterion[]{_topStackOccurrenceCriteria, _durationCriteria};
@@ -31,7 +31,7 @@ namespace VisualProfilerUI.Model.CriteriaContexts
 
         public IValue GetMaxValueFor(Criterion criterion)
         {
-            if (criterion != _topStackOccurrenceCriteria)
+            if (criterion == _topStackOccurrenceCriteria)
                 return _maxTopStackOccurrence;
 
             if (criterion == _durationCriteria)

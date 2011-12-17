@@ -19,9 +19,9 @@ namespace VisualProfilerUI.Model.CriteriaContexts
 
         public TracingCriteriaContext(UintValue maxCallCount, DoubleValue maxTimeWallClock, DoubleValue maxTimeActive)
         {
-            Contract.Ensures(maxCallCount != null);
-            Contract.Ensures(maxTimeWallClock != null);
-            Contract.Ensures(maxTimeActive != null);
+            Contract.Requires(maxCallCount != null);
+            Contract.Requires(maxTimeWallClock != null);
+            Contract.Requires(maxTimeActive != null);
             _maxCallCount = maxCallCount;
             _maxTimeWallClock = maxTimeWallClock;
             _maxTimeActive = maxTimeActive;
