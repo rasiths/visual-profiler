@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using VisualProfilerUI.Model.CriteriaContexts;
+using VisualProfilerUI.Model.Methods;
 
 namespace VisualProfilerUI.Model.ContainingUnits
 {
+    
     public class SourceFile : ContainingUnit
     {
         public SourceFile(
@@ -12,6 +15,11 @@ namespace VisualProfilerUI.Model.ContainingUnits
             string displayName)
             : base(criteriaContext, containedMethods, name, displayName)
         {
+        }
+
+        public SourceFile()
+        {
+            
         }
     }
 }

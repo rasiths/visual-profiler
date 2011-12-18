@@ -19,7 +19,7 @@
     <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -86,6 +86,7 @@
       <DependentUpon>MethodControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Model\CallTreeConvertor.cs" />
+    <Compile Include="Model\Methods\TracingMethod.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="Model\ContainingUnits\ContainingUnit.cs" />
     <Compile Include="Model\ContainingUnits\SourceFile.cs" />
@@ -98,7 +99,7 @@
     <Compile Include="Model\Criteria\TracingCriteria\CallCountCriterion.cs" />
     <Compile Include="Model\Criteria\TracingCriteria\TimeActiveCriterion.cs" />
     <Compile Include="Model\Criteria\TracingCriteria\TimeWallClockCriterion.cs" />
-    <Compile Include="Model\Method.cs" />
+    <Compile Include="Model\Methods\Method.cs" />
     <Compile Include="Model\Values\DoubleValue.cs" />
     <Compile Include="Model\Values\IValue.cs" />
     <Compile Include="Model\Values\UintValue.cs" />

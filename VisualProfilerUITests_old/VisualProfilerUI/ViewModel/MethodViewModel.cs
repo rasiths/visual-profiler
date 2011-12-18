@@ -6,6 +6,7 @@ using System.Text;
 using System.Windows.Input;
 using System.Windows.Media;
 using VisualProfilerUI.Model;
+using VisualProfilerUI.Model.Methods;
 
 namespace VisualProfilerUI.ViewModel
 {
