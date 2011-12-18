@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using VisualProfilerUI.Model.CriteriaContexts;
+using VisualProfilerUI.Model.Methods;
 
 namespace VisualProfilerUI.Model.ContainingUnits
 {
@@ -26,6 +27,11 @@ namespace VisualProfilerUI.Model.ContainingUnits
             ContainedMethods = containedMethods;
             DisplayName = name;
             FullName = displayName;
+        }
+
+        protected ContainingUnit()
+        {
+            
         }
 
         public ICriteriaContext CriteriaContext { get; private set; }
