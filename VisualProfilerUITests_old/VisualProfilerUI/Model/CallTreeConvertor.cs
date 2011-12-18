@@ -83,7 +83,7 @@ namespace VisualProfilerUI.Model
                 new SourceFile(context,
                                kvp.Select(k => k.Value).ToArray(),
                                kvp.Key,
-                               Path.GetFileName(kvp.Key)));
+                               Path.GetFileName(kvp.Key))).ToArray();
 
          
         }

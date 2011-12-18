@@ -32,28 +32,21 @@ namespace VisualProfilerUI
         {
             InitializeComponent();
 
+            UplnaBlbost[] uplnaBlbosts = new[]
+                                             {
+                                                 new UplnaBlbost() {Top = 10, Height = 20},
+                                                 new UplnaBlbost() {Top = 40, Height = 20},
+                                                 new UplnaBlbost() {Top = 70, Height = 25},
+                                             };
+            itemControls.ItemsSource = new[]{ uplnaBlbosts};
 
-
-
+            // Profile();
         }
 
-        static object lockObject = new object();
-
-        private static void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
+        private static void Profile()
         {
-            lock (lockObject)
-            {
-                
-                    IEnumerable<TracingCallTree> tracingCallTrees = eventArgs.CallTrees;
-                    TracingCallTreeConvertor tracingCallTreeConvertor = new TracingCallTreeConvertor(tracingCallTrees);
-                
-            }
-        }
-
-        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
-        {
-
-            var processStartInfo = new ProcessStartInfo { FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe" };
+            var processStartInfo = new ProcessStartInfo
+                                       {FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe"};
 
 
             var profilerAccess = new TracingProfilerAccess(
@@ -62,7 +55,29 @@ namespace VisualProfilerUI
                 OnUpdateCallback);
 
             profilerAccess.StartProfiler();
-            profilerAccess.Wait();
+        }
+
+        static readonly object LockObject = new object();
+
+        private static int _enter = 0;
+
+        private static void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
+        {
+            if (Interlocked.CompareExchange(ref _enter,0,1) == 1)
+            {
+                lock (LockObject)
+                {
+                    IEnumerable<TracingCallTree> tracingCallTrees = eventArgs.CallTrees;
+                    TracingCallTreeConvertor tracingCallTreeConvertor = new TracingCallTreeConvertor(tracingCallTrees);
+                    _enter = 0;
+                }
+            }
+        }
+
+        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+        {
+
+            _enter = 1;
         }
     }
 

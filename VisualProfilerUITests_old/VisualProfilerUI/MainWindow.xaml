@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:VisualProfilerUI"
         Title="MainWindow" Height="350" Width="525">
-    <Button Click="ButtonBase_OnClick" > start </Button>
+    <!--<Button Click="ButtonBase_OnClick" > start </Button>-->
 
-        <!--<ItemsControl Name="itemControls">
+        <ItemsControl Name="itemControls">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal"/>
@@ -40,7 +40,7 @@
             </ItemsControl.ItemTemplate>
 
 
-        </ItemsControl>-->
+        </ItemsControl>
 
 
 </Window>
