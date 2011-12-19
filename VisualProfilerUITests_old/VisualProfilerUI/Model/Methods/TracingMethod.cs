@@ -13,13 +13,14 @@ namespace VisualProfilerUI.Model.Methods
         private readonly DoubleValue _timeActiveValue;
 
         public TracingMethod(
+            uint id,
             string name,
             int firstLineNumber,
             int lineExtend,
             UintValue callCountValue,
             Uint64Value timeWallClockValue,
             DoubleValue timeActiveValue)
-            : base(name, firstLineNumber, lineExtend)
+            : base(id, name, firstLineNumber, lineExtend)
         {
             _callCountValue = callCountValue;
             _timeWallClockValue = timeWallClockValue;

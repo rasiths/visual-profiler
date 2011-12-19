@@ -11,25 +11,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using VisualProfilerUI.Model;
-using VisualProfilerUI.ViewModel;
 
-namespace VisualProfilerUI
+namespace VisualProfilerUI.View
 {
     /// <summary>
-    /// Interaction logic for MethodControl.xaml
+    /// Interaction logic for ContainingUnitView.xaml
     /// </summary>
-    public partial class MethodControl : UserControl
+    public partial class ContainingUnitView : UserControl
     {
-
-        public MethodControl()
+        public ContainingUnitView()
         {
-            
+            InitializeComponent();
         }
-
-      
-
-     //   public int 
-    
-}
+    }
 }

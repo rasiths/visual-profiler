@@ -82,9 +82,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="MethodControl.xaml.cs">
-      <DependentUpon>MethodControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Model\CallTreeConvertor.cs" />
     <Compile Include="Model\Methods\TracingMethod.cs" />
     <Compile Include="RelayCommand.cs" />
@@ -106,9 +103,20 @@
     <Compile Include="Model\Values\Value.cs" />
     <Compile Include="UplnaBlbost.cs" />
     <Compile Include="ViewModel\ContainingUnitViewModel.cs" />
+    <Compile Include="ViewModel\DetailViewModel.cs" />
     <Compile Include="ViewModel\MethodViewModel.cs" />
+    <Compile Include="ViewModel\UILogic.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Compile Include="ViewModel\VisualProfilerUIViewModel.cs" />
+    <Compile Include="View\ContainingUnitView.xaml.cs">
+      <DependentUpon>ContainingUnitView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\DetailView.xaml.cs">
+      <DependentUpon>DetailView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\MethodView.xaml.cs">
+      <DependentUpon>MethodView.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -121,9 +129,17 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="MethodControl.xaml">
+    <Page Include="View\ContainingUnitView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\DetailView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\MethodView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

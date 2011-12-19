@@ -32,21 +32,22 @@ namespace VisualProfilerUI
         {
             InitializeComponent();
 
-            UplnaBlbost[] uplnaBlbosts = new[]
-                                             {
-                                                 new UplnaBlbost() {Top = 10, Height = 20},
-                                                 new UplnaBlbost() {Top = 40, Height = 20},
-                                                 new UplnaBlbost() {Top = 70, Height = 25},
-                                             };
-            itemControls.ItemsSource = new[]{ uplnaBlbosts};
+            _uplnaBlbosts = new[]
+                               {
+                                   new MethodViewModel(1,10, 10, 50){Fill = Brushes.Red, BorderBrush = Brushes.Black, BorderThinkness = 1},
+                                   new MethodViewModel(2,25, 30, 30){Fill = Brushes.Blue} ,
+                                   new MethodViewModel(3,67,18,99){Fill = Brushes.Green} ,
+                               };
+
+
+            itemControls.ItemsSource = new[] { _uplnaBlbosts };
 
             // Profile();
         }
 
-        private static void Profile()
+        private void Profile()
         {
-            var processStartInfo = new ProcessStartInfo
-                                       {FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe"};
+            var processStartInfo = new ProcessStartInfo { FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe" };
 
 
             var profilerAccess = new TracingProfilerAccess(
@@ -57,27 +58,45 @@ namespace VisualProfilerUI
             profilerAccess.StartProfiler();
         }
 
-        static readonly object LockObject = new object();
+        readonly object LockObject = new object();
 
-        private static int _enter = 0;
+        private int _enter = 0;
+        private MethodViewModel[] _uplnaBlbosts;
 
-        private static void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
+        private void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
         {
-            if (Interlocked.CompareExchange(ref _enter,0,1) == 1)
+            if (Interlocked.CompareExchange(ref _enter, 0, 1) == 1)
             {
                 lock (LockObject)
                 {
                     IEnumerable<TracingCallTree> tracingCallTrees = eventArgs.CallTrees;
                     TracingCallTreeConvertor tracingCallTreeConvertor = new TracingCallTreeConvertor(tracingCallTrees);
-                    _enter = 0;
+
+                    Dispatcher.BeginInvoke(new Action(() =>
+                                                          {
+                                                           itemControls.ItemsSource =  tracingCallTreeConvertor.SourceFiles;
+                                                          }), null);
+
                 }
             }
         }
 
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
+            //_enter = 1;
+            //Console.Beep(3000, 100);
+            //MethodViewModel[] uplnaBlbosts = new[]
+            //                                 {
+            //                                     new MethodViewModel(1,10, 10, 90) ,
+            //                                     new MethodViewModel(2,25, 10, 100) ,
+            //                                     new MethodViewModel(3,67,18,20) ,
+            //                                 };
+            //itemControls.ItemsSource = new[] { uplnaBlbosts };
 
-            _enter = 1;
+            foreach (var methodViewModel in _uplnaBlbosts)
+            {
+               methodViewModel.SetMax(200);
+            }
         }
     }
 

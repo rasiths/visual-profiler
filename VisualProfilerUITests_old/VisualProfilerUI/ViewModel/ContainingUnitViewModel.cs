@@ -28,14 +28,14 @@ namespace VisualProfilerUI.ViewModel
                 //base.OnPropertyChanged("ContainingUnit");
             }
         }
-        public IEnumerable<MethodViewModel> MethodViews
-        {
-            get
-            {
-                var methodViewModels = _containingUnit.ContainedMethods.Select(cm => new MethodViewModel(cm));
-                return methodViewModels;
-            }
-        }
+        //public IEnumerable<MethodViewModel> MethodViews
+        //{
+        //    get
+        //    {
+        //        var methodViewModels = _containingUnit.ContainedMethods.Select(cm => new MethodViewModel(cm));
+        //        return methodViewModels;
+        //    }
+        //}
 
         public string Name { get { return _containingUnit.DisplayName; }
        

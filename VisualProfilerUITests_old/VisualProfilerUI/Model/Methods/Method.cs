@@ -10,7 +10,7 @@ namespace VisualProfilerUI.Model.Methods
         private readonly IDictionary<Criterion, IValue> _criteriaValuesMap;
 
 
-        protected Method(
+        protected Method(uint id,
             string name,
             int firstLineNumber,
             int lineExtend)
@@ -18,12 +18,14 @@ namespace VisualProfilerUI.Model.Methods
             Contract.Requires(!string.IsNullOrEmpty(name));
             Contract.Requires(firstLineNumber >= 0);
             Contract.Requires(lineExtend > 0);
-           
+
+            Id = id;
             Name = name;
             FirstLineNumber = firstLineNumber;
             LineExtend = lineExtend;
         }
 
+        public uint Id { get; set; }
         public virtual string Name { get; private set; }
 
         public virtual IEnumerable<Method> CallingMethods { get;  set; }
