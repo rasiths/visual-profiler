@@ -51,6 +51,7 @@ namespace VisualProfilerUI.Model
                                (double)TracingCallTreeElemAggregator.TotalCycleTime;
 
                     Method method = new TracingMethod(
+                        agr.FunctionId,
                         agr.MethodMd.Name,
                         agr.MethodMd.GetSourceLocations().First().StartLine,
                         agr.MethodMd.GetSourceLocations().Last().EndLine,
@@ -86,6 +87,11 @@ namespace VisualProfilerUI.Model
                                Path.GetFileName(kvp.Key))).ToArray();
 
          
+        }
+
+        public IEnumerable<SourceFile> SourceFiles
+        {
+            get { return _sourceFiles; }
         }
 
         private void FlattenCallTree(TracingCallTreeElem rootElem, List<TracingCallTreeElem> flattenedTreeList)
