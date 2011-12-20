@@ -24,7 +24,7 @@ namespace VisualProfilerUI.ViewModel
         /// method does not exist in a Release build.
         /// </summary>
         [Conditional("DEBUG")]
-        [DebuggerStepThrough]
+   
         public void VerifyPropertyName(string propertyName)
         {
             // Verify that the property name matches a real,  

@@ -6,7 +6,7 @@ using VisualProfilerAccess.SourceLocation;
 
 namespace VisualProfilerAccess.Metadata
 {
-    public class MethodMetadata : MetadataBase<MethodMetadata>
+    public class MethodMetadata : MetadataBase
     {
         private readonly ISourceLocatorFactory _sourceLocatorFactory;
 
@@ -65,6 +65,7 @@ namespace VisualProfilerAccess.Metadata
         {
             ISourceLocator sourceLocator = _sourceLocatorFactory.GetSourceLocator(this);
             IEnumerable<IMethodLine> methodLines = sourceLocator.GetMethodLines(MdToken);
+            //methodLines.Where()
             return methodLines;
         }
     }

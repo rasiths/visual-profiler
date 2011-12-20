@@ -8,51 +8,53 @@ using System.Windows.Input;
 using System.Windows.Media;
 using VisualProfilerUI.Model;
 using VisualProfilerUI.Model.Methods;
+using VisualProfilerUI.View;
 
 namespace VisualProfilerUI.ViewModel
 {
     public class MethodViewModel : ViewModelBase
     {
-        private readonly int _top;
-        private readonly int _height;
-        private readonly int _value;
-        private Method _method;
-        private uint _id;
-        private const int LineHeight = 2;
-        private int MaxValue = 100;
-        //public MethodViewModel(Method method )
-        //{
-        //    Contract.Requires(method != null);
-        //    _method = method;
+        private readonly string _name;
+        public const int PixelPerLine = 1;
+        public MethodViewModel(Method method)
+            : this(
+            method.Id,
+            MethodView.MethodColor.ToBrush(),
+            MethodView.MethodBorderColor.ToBrush(),
+            2,
+            method.FirstLineNumber * PixelPerLine,
+            method.LineExtend, method.Name )
+        { }
 
-        //}
-        public MethodViewModel(uint id, int top, int height, int value)
+        public MethodViewModel(uint id, Brush fill, Brush borderBrush, int borderThickness, int top, int height, string name)
         {
-            _id = id;
-            _top = top;
-            _height = height;
-            _value = value;
-            ActivateCommand = new RelayCommand(o =>
-                                                   {
-                                                       Debug.WriteLine(_id);
-                                                       Console.Beep();
-                                                   });
+            _name = name;
+            Id = id;
+            Fill = fill;
+            BorderBrush = borderBrush;
+            BorderThinkness = borderThickness;
+            Top = top;
+            Height = height;
+
+            ActivateCommand = new RelayCommand(o => InvokeEvent(Activate));
+            DeActivateCommand = new RelayCommand(o => InvokeEvent(Deactivate));
+            HighlightCommand = new RelayCommand(o => InvokeEvent(Highlight));
         }
 
-        public void SetMax(int newMax)
+        private void InvokeEvent(Action<MethodViewModel> handler)
         {
-            MaxValue = newMax;
-            OnPropertyChanged("Fill");
+            if (handler != null)
+                handler(this);
         }
 
+        public event Action<MethodViewModel> Activate;
+        public event Action<MethodViewModel> Deactivate;
+        public event Action<MethodViewModel> Highlight;
 
         private Brush _fill;
         public Brush Fill
         {
-            get
-            {
-                return _fill;
-            }
+            get { return _fill; }
             set
             {
                 _fill = value;
@@ -75,32 +77,56 @@ namespace VisualProfilerUI.ViewModel
         public int BorderThinkness
         {
             get { return _borderThinkness; }
-            set { _borderThinkness = value;
-            OnPropertyChanged("BorderThinkness");
+            set
+            {
+                _borderThinkness = value;
+                OnPropertyChanged("BorderThinkness");
             }
         }
 
-        public int Top
+
+        private bool _isActive;
+        public bool IsActive
         {
-            get
+            get { return _isActive; }
+            set
             {
-                //  int top =_method.FirstLineNumber *  LineHeight;
-                // OnPropertyChanged();
-                return _top;
+                _isActive = value;
+                OnPropertyChanged("IsActive");
             }
         }
 
-        public int Height
+        public uint Id { get; set; }
+
+        private bool _isHighlighted;
+        public bool IsHighlighted
         {
-            get
+            get { return _isHighlighted; }
+            set
             {
-                //int height = _method.LineExtend*LineHeight;
-                return _height;
+                _isHighlighted = value;
+                OnPropertyChanged("IsHighlighted");
             }
         }
+
+        private double _opacity;
+        public double Opacity
+        {
+            get { return _opacity; }
+            set
+            {
+                _opacity = value;
+                OnPropertyChanged("Opacity");
+            }
+        }
+
+        public int Top { get; set; }
+
+        public int Height { get; set; }
 
         public ICommand ActivateCommand { get; set; }
+        public ICommand DeActivateCommand { get; set; }
 
-        public Color FillColorNoAlpha { get; set; }
+        public ICommand HighlightCommand { get; set; }
     }
 }

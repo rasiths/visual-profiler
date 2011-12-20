@@ -9,7 +9,7 @@ namespace VisualProfilerUI.ViewModel
             set
             {
                 _metrics = value;
-                OnPropertyChanged(Metrics);
+                OnPropertyChanged("Metrics");
             }
         }
 

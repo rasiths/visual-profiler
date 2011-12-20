@@ -15,12 +15,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using VisualProfilerAccess.Metadata;
 using VisualProfilerAccess.ProfilingData;
 using VisualProfilerAccess.ProfilingData.CallTrees;
 using VisualProfilerUI.Model;
 using VisualProfilerUI.Model.ContainingUnits;
 using VisualProfilerUI.Model.Criteria;
 using VisualProfilerUI.Model.CriteriaContexts;
+using VisualProfilerUI.Model.Methods;
 using VisualProfilerUI.Model.Values;
 using VisualProfilerUI.ViewModel;
 
@@ -32,17 +34,17 @@ namespace VisualProfilerUI
         {
             InitializeComponent();
 
-            _uplnaBlbosts = new[]
-                               {
-                                   new MethodViewModel(1,10, 10, 50){Fill = Brushes.Red, BorderBrush = Brushes.Black, BorderThinkness = 1},
-                                   new MethodViewModel(2,25, 30, 30){Fill = Brushes.Blue} ,
-                                   new MethodViewModel(3,67,18,99){Fill = Brushes.Green} ,
-                               };
+            //_uplnaBlbosts = new[]
+            //                   {
+            //                       new MethodViewModel(1,10, 10, 50){Fill = Brushes.Red, BorderBrush = Brushes.Black, BorderThinkness = 1},
+            //                       new MethodViewModel(2,25, 30, 30){Fill = Brushes.Blue} ,
+            //                       new MethodViewModel(3,67,18,99){Fill = Brushes.Green} ,
+            //                   };
 
 
-            itemControls.ItemsSource = new[] { _uplnaBlbosts };
+            //itemControls.ItemsSource = new[] { _uplnaBlbosts };
 
-            // Profile();
+            Profile();
         }
 
         private void Profile()
@@ -69,13 +71,43 @@ namespace VisualProfilerUI
             {
                 lock (LockObject)
                 {
-                    IEnumerable<TracingCallTree> tracingCallTrees = eventArgs.CallTrees;
-                    TracingCallTreeConvertor tracingCallTreeConvertor = new TracingCallTreeConvertor(tracingCallTrees);
 
                     Dispatcher.BeginInvoke(new Action(() =>
-                                                          {
-                                                           itemControls.ItemsSource =  tracingCallTreeConvertor.SourceFiles;
-                                                          }), null);
+                    {
+                        var treeConvertor = new TracingCallTreeConvertor(eventArgs.CallTrees);
+
+                        // DetailViewModel detailViewModel = new DetailViewModel();
+
+                        var containingUnitViewModels = treeConvertor.SourceFiles.Select(sf =>
+                        {
+                            var methodViewModels = sf.ContainedMethods.Select(cm => new MethodViewModel(cm));
+                            var containingUnitViewModel = new ContainingUnitViewModel(
+                                System.IO.Path.GetFileName(sf.FullName));
+                            containingUnitViewModel.MethodViewModels = methodViewModels.OrderBy(mvm => mvm.Top).ToArray();
+                            return containingUnitViewModel;
+                        }).ToArray();
+
+
+                        List<MethodViewModel> allMethodViewModels = new List<MethodViewModel>();
+                        foreach (var containingUnitViewModel in containingUnitViewModels)
+                        {
+                            allMethodViewModels.AddRange(containingUnitViewModel.MethodViewModels);
+                        }
+
+                        var uiLogic = new UILogic();
+                        uiLogic.ActiveCriterion = TracingCriteriaContext.CallCountCriterion;
+                        uiLogic.CriteriaContext = treeConvertor.CriteriaContext;
+                        uiLogic.MethodModelByIdDict = treeConvertor.MethodDictionary.ToDictionary(kvp => kvp.Key.Id,
+                                                                                                  kvp => kvp.Value);
+                        uiLogic.MethodVMByIdDict = allMethodViewModels.ToDictionary(kvp => kvp.Id, kvp => kvp);
+                        var detailViewModel = new DetailViewModel();
+                        detail.DataContext = detailViewModel;
+                        uiLogic.Detail = detailViewModel;
+                        uiLogic.InitAllMethodViewModels();
+
+
+                        itemControls.ItemsSource = containingUnitViewModels;
+                    }), null);
 
                 }
             }
@@ -83,7 +115,7 @@ namespace VisualProfilerUI
 
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
-            //_enter = 1;
+            _enter = 1;
             //Console.Beep(3000, 100);
             //MethodViewModel[] uplnaBlbosts = new[]
             //                                 {
@@ -93,10 +125,10 @@ namespace VisualProfilerUI
             //                                 };
             //itemControls.ItemsSource = new[] { uplnaBlbosts };
 
-            foreach (var methodViewModel in _uplnaBlbosts)
-            {
-               methodViewModel.SetMax(200);
-            }
+            //foreach (var methodViewModel in _uplnaBlbosts)
+            //{
+            //    methodViewModel.SetMax(200);
+            //}
         }
     }
 

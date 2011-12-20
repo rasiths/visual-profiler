@@ -3,7 +3,7 @@ using System.IO;
 
 namespace VisualProfilerAccess.Metadata
 {
-    public class ClassMetadata : MetadataBase<ClassMetadata>
+    public class ClassMetadata : MetadataBase
     {
         public ClassMetadata(Stream byteStream, MetadataCache<ModuleMetadata> moduleCache) : base(byteStream)
         {

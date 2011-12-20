@@ -17,7 +17,7 @@ namespace VisualProfilerUITests.ModelTests.CriteriaContextsTests
         private TimeWallClockCriterion _timeWallClockCriterion;
         private TracingCriteriaContext _tracingCriteriaContext;
         private DoubleValue _maxTimeActive;
-        private DoubleValue _maxTimeWallClock;
+        private Uint64Value _maxTimeWallClock;
         private UintValue _maxCallCount;
 
         [TestFixtureSetUp]
@@ -28,7 +28,7 @@ namespace VisualProfilerUITests.ModelTests.CriteriaContextsTests
             _timeWallClockCriterion = new TimeWallClockCriterion();
 
             _maxCallCount = new UintValue(50);
-            _maxTimeWallClock = new DoubleValue(100);
+            _maxTimeWallClock = new Uint64Value(100);
             _maxTimeActive = new DoubleValue(150);
             _tracingCriteriaContext = new TracingCriteriaContext(_maxCallCount, _maxTimeWallClock, _maxTimeActive);
         }

@@ -2,7 +2,7 @@
 
 namespace VisualProfilerAccess.Metadata
 {
-    public class AssemblyMetadata : MetadataBase<AssemblyMetadata>
+    public class AssemblyMetadata : MetadataBase
     {
         public AssemblyMetadata(Stream byteStream) : base(byteStream)
         {

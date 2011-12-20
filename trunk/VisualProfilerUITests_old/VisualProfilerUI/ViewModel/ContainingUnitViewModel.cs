@@ -9,36 +9,35 @@ namespace VisualProfilerUI.ViewModel
 {
     public class ContainingUnitViewModel : ViewModelBase
     {
-        private IContainingUnit _containingUnit;
+        private string _name;
 
-        public ContainingUnitViewModel(IContainingUnit containingUnit)
+        public string Name
         {
-            Contract.Requires(containingUnit != null);
-            Contract.Requires(containingUnit.ContainedMethods != null);
-            Contract.Requires(containingUnit.ContainedMethods.Count() > 0);
-            _containingUnit = containingUnit;
-        }
-
-        public IContainingUnit ContainingUnit
-        {
-            get { return _containingUnit; }
+            get { return _name; }
             set
             {
-                _containingUnit = value;
-                //base.OnPropertyChanged("ContainingUnit");
+                _name = value;
+                OnPropertyChanged("Name");
             }
         }
-        //public IEnumerable<MethodViewModel> MethodViews
-        //{
-        //    get
-        //    {
-        //        var methodViewModels = _containingUnit.ContainedMethods.Select(cm => new MethodViewModel(cm));
-        //        return methodViewModels;
-        //    }
-        //}
 
-        public string Name { get { return _containingUnit.DisplayName; }
-       
+        private IEnumerable<MethodViewModel> _methodViewModels;
+
+        public IEnumerable<MethodViewModel> MethodViewModels
+        {
+            get { return _methodViewModels; }
+            set
+            {
+                _methodViewModels = value;
+                OnPropertyChanged("MethodViewModels");
+            }
         }
+
+
+        public ContainingUnitViewModel(string name)
+        {
+            _name = name;
+        }
+
     }
 }

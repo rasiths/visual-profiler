@@ -62,6 +62,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MetadataTests\Extensions.cs" />
+    <Compile Include="MetadataTests\MetadataBaseTest.cs" />
     <Compile Include="MetadataTests\MetadataDeserializerEmptyStreamTest.cs" />
     <Compile Include="MetadataTests\MetadataDeserializerTest.cs">
       <SubType>Code</SubType>

@@ -1,12 +1,14 @@
 ﻿<UserControl x:Class="VisualProfilerUI.View.ContainingUnitView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:View="clr-namespace:VisualProfilerUI.View" >
-    <ItemsControl ItemsSource="{Binding }">
-    <!--<ItemsControl ItemsSource="{Binding Path=ContainedMethods}">-->
+             xmlns:View="clr-namespace:VisualProfilerUI.View"
+             xmlns:ViewModel="clr-namespace:VisualProfilerUI.ViewModel">
+    <!--<ItemsControl ItemsSource="{Binding }">-->
+
+    <ItemsControl ItemsSource="{Binding Path=MethodViewModels }">
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-                <Canvas Width="20" Height="150"/>
+                <Canvas Width="60" Height="150"/>
             </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemContainerStyle>
@@ -16,14 +18,18 @@
             </Style>
         </ItemsControl.ItemContainerStyle>
         <ItemsControl.ItemTemplate>
+            <!--<DataTemplate DataType="{x:Type ViewModel:MethodViewModel}">-->
             <DataTemplate>
                 <!--<Rectangle Width="10" Height="{Binding Path=Height}" Fill="Coral" />-->
+
+                <!--<View:MethodView  MouseEnteredCommand="{Binding Path=ActivateCommand}" />-->
                 <View:MethodView 
-                                MouseEnteredCommand="{Binding Path=ActivateCommand}" 
-                                Fill="{Binding Path=Fill}" 
-                                Height="{Binding Path=Height}"
-                                />
+                    MouseEnteredCommand="{Binding Path=ActivateCommand}" 
+                    MouseLeft="{Binding Path=DeActivateCommand}"
+                    />
+                <!--<View:MotherFucker></View:MotherFucker>-->
             </DataTemplate>
         </ItemsControl.ItemTemplate>
     </ItemsControl>
+
 </UserControl>

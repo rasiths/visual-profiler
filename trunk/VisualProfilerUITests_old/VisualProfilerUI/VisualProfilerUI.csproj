@@ -102,12 +102,12 @@
     <Compile Include="Model\Values\UintValue.cs" />
     <Compile Include="Model\Values\Value.cs" />
     <Compile Include="UplnaBlbost.cs" />
+    <Compile Include="ViewModel\ColorExtensions.cs" />
     <Compile Include="ViewModel\ContainingUnitViewModel.cs" />
     <Compile Include="ViewModel\DetailViewModel.cs" />
     <Compile Include="ViewModel\MethodViewModel.cs" />
     <Compile Include="ViewModel\UILogic.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
-    <Compile Include="ViewModel\VisualProfilerUIViewModel.cs" />
     <Compile Include="View\ContainingUnitView.xaml.cs">
       <DependentUpon>ContainingUnitView.xaml</DependentUpon>
     </Compile>

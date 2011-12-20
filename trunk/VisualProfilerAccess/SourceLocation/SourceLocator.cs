@@ -9,6 +9,8 @@ namespace VisualProfilerAccess.SourceLocation
 {
     public class SourceLocator : ISourceLocator, IDisposable
     {
+        private const int MaxSourceLineLength = 10000;
+
         public SourceLocator(string modulePath)
         {
             LocationsByToken = new Dictionary<uint, IEnumerable<CciMethodLine>>();
@@ -54,7 +56,6 @@ namespace VisualProfilerAccess.SourceLocation
                                                                                        BindingFlags.NonPublic |
                                                                                        BindingFlags.Instance);
                     var methodMdToken = (uint) propertyInfo.GetValue(methodDefinition, null);
-
                     var primarySourceLocations = new List<IPrimarySourceLocation>();
                     foreach (ILocation location in methodDefinition.Locations)
                     {
@@ -64,7 +65,7 @@ namespace VisualProfilerAccess.SourceLocation
                     }
 
                     IEnumerable<CciMethodLine> cciMethodLines =
-                        primarySourceLocations.Select(sl => new CciMethodLine(sl));
+                        primarySourceLocations.Where(sl => sl.StartLine < MaxSourceLineLength).Select(sl => new CciMethodLine(sl));
                     LocationsByToken[methodMdToken] = cciMethodLines;
                 }
             }
