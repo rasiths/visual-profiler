@@ -10,6 +10,7 @@ using System.Xml.Serialization;
 using VisualProfilerAccess.Metadata;
 using VisualProfilerAccess.ProfilingData.CallTreeElems;
 using VisualProfilerAccess.ProfilingData.CallTrees;
+using VisualProfilerAccess.SourceLocation;
 using VisualProfilerUI.Model.ContainingUnits;
 using VisualProfilerUI.Model.Criteria;
 using VisualProfilerUI.Model.Criteria.TracingCriteria;
@@ -21,7 +22,8 @@ namespace VisualProfilerUI.Model
 {
     public class TracingCallTreeConvertor
     {
-        private IEnumerable<SourceFile> _sourceFiles;
+        private readonly IEnumerable<SourceFile> _sourceFiles;
+        private readonly Dictionary<MethodMetadata, Method> _methodDictionary;
 
         public TracingCallTreeConvertor(IEnumerable<TracingCallTree> tracingCallTrees)
         {
@@ -34,54 +36,69 @@ namespace VisualProfilerUI.Model
                 FlattenCallTree(callTree.RootElem, flattenedTreeList);
             }
 
+            MaxAndAggregatedValues maxAndAggregatedValues = new MaxAndAggregatedValues();
             var aggregators = flattenedTreeList.GroupBy(
                 elem => elem.MethodMetadata).Select(
                 grouping =>
                 {
                     MethodMetadata methodMetadata = grouping.Key;
-                    var aggregator = new TracingCallTreeElemAggregator(methodMetadata);
+                    var aggregator = new TracingCallTreeElemAggregator(methodMetadata, maxAndAggregatedValues);
                     aggregator.AggregateRange(grouping);
                     return aggregator;
                 });
 
             // TracingCallTreeElemAggregator[] tracingCallTreeElemAggregators = aggregators.ToArray();
-            Dictionary<MethodMetadata, Method> methodDictionary = aggregators.Select(agr =>
+            _methodDictionary = aggregators.Select(agr =>
+            {
+                double activeTime = agr.CycleTime * totalActiveTime /
+                                    (double)maxAndAggregatedValues.TotalCycleTime;
+
+                int startLine;
+                int endLine;
+                bool isConstructor = agr.MethodMd.Name.EndsWith("ctor");
+                if (isConstructor)
+                    FindConstructorBody(agr.MethodMd, out startLine, out endLine);
+                else
                 {
-                    double activeTime = agr.CycleTime * totalActiveTime /
-                               (double)TracingCallTreeElemAggregator.TotalCycleTime;
+                    startLine = agr.MethodMd.GetSourceLocations().First().StartLine;
+                    endLine = agr.MethodMd.GetSourceLocations().Last().EndLine;
+                }
+ 
+                Method method = new TracingMethod(
+                    agr.FunctionId,
+                    agr.MethodMd.Name,
+                    startLine, 
+                    endLine - startLine + 1,
+                    new UintValue(agr.EnterCount),
+                    new Uint64Value(agr.WallClockDurationHns),
+                    new DoubleValue(activeTime));
 
-                    Method method = new TracingMethod(
-                        agr.FunctionId,
-                        agr.MethodMd.Name,
-                        agr.MethodMd.GetSourceLocations().First().StartLine,
-                        agr.MethodMd.GetSourceLocations().Last().EndLine,
-                        new UintValue(agr.EnterCount),
-                        new Uint64Value(agr.WallClockDurationHns),
-                        new DoubleValue(activeTime));
-
-                    return new KeyValuePair<MethodMetadata, Method>(agr.MethodMd, method);
-                }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                return new KeyValuePair<MethodMetadata, Method>(agr.MethodMd, method);
+            }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
 
             foreach (var agr in aggregators)
             {
-                Method method = methodDictionary[agr.MethodMd];
-                method.CalledMethods = methodDictionary.Where(kvp =>
+                Method method = _methodDictionary[agr.MethodMd];
+                method.CalledMethods = _methodDictionary.Where(kvp =>
                     agr.CalledFunctions.Contains(kvp.Key)).Select(kvp => kvp.Value).ToArray();
-                method.CallingMethods = methodDictionary.Where(kvp =>
+                method.CallingMethods = _methodDictionary.Where(kvp =>
                    agr.CallingFunctions.Contains(kvp.Key)).Select(kvp => kvp.Value).ToArray();
             }
 
 
-            double maxActiveTime = TracingCallTreeElemAggregator.TotalCycleTime * totalActiveTime / (double)
-                                                                                   TracingCallTreeElemAggregator.TotalCycleTime;
-            TracingCriteriaContext context = new TracingCriteriaContext(
-                new UintValue(TracingCallTreeElemAggregator.MaxEnterCount),
-                new Uint64Value(TracingCallTreeElemAggregator.MaxWallClockDurationHns),
+
+
+
+            double maxActiveTime = maxAndAggregatedValues.TotalCycleTime * totalActiveTime / (double)
+                                                                                   maxAndAggregatedValues.TotalCycleTime;
+            CriteriaContext = new TracingCriteriaContext(
+                new UintValue(maxAndAggregatedValues.MaxEnterCount),
+                new Uint64Value(maxAndAggregatedValues.MaxWallClockDurationHns),
                 new DoubleValue(maxActiveTime));
 
-            _sourceFiles = methodDictionary.GroupBy(kvp => kvp.Key.GetSourceFilePath()).Select(kvp =>
-                new SourceFile(context,
+            _sourceFiles = _methodDictionary.GroupBy(kvp => kvp.Key.GetSourceFilePath()).Select(kvp =>
+                new SourceFile(CriteriaContext,
                                kvp.Select(k => k.Value).ToArray(),
                                kvp.Key,
                                Path.GetFileName(kvp.Key))).ToArray();
@@ -89,10 +106,32 @@ namespace VisualProfilerUI.Model
          
         }
 
+        private void FindConstructorBody(MethodMetadata method, out int startLine, out int endline)
+        {
+            IMethodLine openingBrace = method.GetSourceLocations().FirstOrDefault(sl => sl.EndIndex - sl.StartIndex == 1);
+            IMethodLine closingBrace = method.GetSourceLocations().LastOrDefault(sl => sl.EndIndex - sl.StartIndex == 1);
+            if(openingBrace != null && closingBrace != null )
+            {
+                startLine = openingBrace.StartLine;
+                endline = closingBrace.EndLine;
+            }else
+            {
+                startLine = method.GetSourceLocations().First().StartLine;
+                endline = method.GetSourceLocations().Last().EndLine;
+            }
+        }
+
         public IEnumerable<SourceFile> SourceFiles
         {
             get { return _sourceFiles; }
         }
+
+        public Dictionary<MethodMetadata, Method> MethodDictionary
+        {
+            get { return _methodDictionary; }
+        }
+
+        public TracingCriteriaContext CriteriaContext { get; set; }
 
         private void FlattenCallTree(TracingCallTreeElem rootElem, List<TracingCallTreeElem> flattenedTreeList)
         {
@@ -106,23 +145,17 @@ namespace VisualProfilerUI.Model
 
     }
 
+    public class MaxAndAggregatedValues
+    {
+        public ulong TotalCycleTime { get; set; }
+        public uint MaxEnterCount { get; set; }
+        public uint MaxLeaveCount { get; set; }
+        public ulong MaxWallClockDurationHns { get; set; }
+        public ulong MaxCycleTime { get; set; }
+    }
+
     public class TracingCallTreeElemAggregator
     {
-        [ThreadStatic]
-        private static ulong _maxWallClockDurationHns;
-
-        [ThreadStatic]
-        private static uint _maxLeaveCount;
-
-        [ThreadStatic]
-        private static uint _maxEnterCount;
-
-        [ThreadStatic]
-        private static ulong _totalCycleTime;
-
-        [ThreadStatic]
-        private static ulong _maxCycleTime;
-
         public uint FunctionId { get; set; }
         public UInt32 EnterCount { get; set; }
         public UInt32 LeaveCount { get; set; }
@@ -133,57 +166,31 @@ namespace VisualProfilerUI.Model
         public HashSet<MethodMetadata> CallingFunctions { get; set; }
         public HashSet<MethodMetadata> CalledFunctions { get; set; }
 
-        public static UInt64 TotalCycleTime
-        {
-            get { return _totalCycleTime; }
-            set { _totalCycleTime = value; }
-        }
+        public MaxAndAggregatedValues MaxAndAggregatedValues { get; set; }
 
-        public static UInt32 MaxEnterCount
-        {
-            get { return _maxEnterCount; }
-            set { _maxEnterCount = value; }
-        }
-
-        public static UInt32 MaxLeaveCount
-        {
-            get { return _maxLeaveCount; }
-            set { _maxLeaveCount = value; }
-        }
-
-        public static UInt64 MaxWallClockDurationHns
-        {
-            get { return _maxWallClockDurationHns; }
-            set { _maxWallClockDurationHns = value; }
-        }
-
-        public static UInt64 MaxCycleTime
-        {
-            get { return _maxCycleTime; }
-            set { _maxCycleTime = value; }
-        }
-
-        public TracingCallTreeElemAggregator(MethodMetadata methodMd)
+        public TracingCallTreeElemAggregator(MethodMetadata methodMd, MaxAndAggregatedValues maxAndAggregatedValues)
         {
             CallingFunctions = new HashSet<MethodMetadata>();
             CalledFunctions = new HashSet<MethodMetadata>();
             FunctionId = methodMd.Id;
             MethodMd = methodMd;
+            MaxAndAggregatedValues = maxAndAggregatedValues;
         }
 
         public void Aggregate(TracingCallTreeElem callTreeElem)
         {
+            
             Contract.Requires(FunctionId == callTreeElem.FunctionId);
             EnterCount += callTreeElem.EnterCount;
             LeaveCount += callTreeElem.LeaveCount;
             WallClockDurationHns += callTreeElem.WallClockDurationHns;
             CycleTime += callTreeElem.CycleTime;
-            TotalCycleTime += callTreeElem.CycleTime;
+            MaxAndAggregatedValues.TotalCycleTime += callTreeElem.CycleTime;
 
-            MaxEnterCount = Math.Max(MaxEnterCount, callTreeElem.EnterCount);
-            MaxLeaveCount = Math.Max(MaxLeaveCount, callTreeElem.LeaveCount);
+            MaxAndAggregatedValues.MaxEnterCount = Math.Max(MaxAndAggregatedValues.MaxEnterCount, callTreeElem.EnterCount);
+            MaxAndAggregatedValues.MaxLeaveCount = Math.Max(MaxAndAggregatedValues.MaxLeaveCount, callTreeElem.LeaveCount);
             WallClockDurationHns = Math.Max(WallClockDurationHns, callTreeElem.WallClockDurationHns);
-            MaxCycleTime = Math.Max(MaxCycleTime, callTreeElem.CycleTime);
+            MaxAndAggregatedValues.MaxCycleTime = Math.Max(MaxAndAggregatedValues.MaxCycleTime, callTreeElem.CycleTime);
 
             if (!callTreeElem.ParentElem.IsRootElem())
                 CallingFunctions.Add(callTreeElem.ParentElem.MethodMetadata);

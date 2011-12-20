@@ -2,7 +2,7 @@
 
 namespace VisualProfilerAccess.Metadata
 {
-    public class ModuleMetadata : MetadataBase<ModuleMetadata>
+    public class ModuleMetadata : MetadataBase
     {
         public ModuleMetadata(Stream byteStream, MetadataCache<AssemblyMetadata> assemblyCache) : base(byteStream)
         {

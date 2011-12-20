@@ -9,6 +9,7 @@ namespace VisualProfilerAccess
 {
     internal class Program
     {
+        static ManualResetEvent ManualResetEvent = new ManualResetEvent(false);
         private static void Main(string[] args)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
@@ -24,11 +25,8 @@ namespace VisualProfilerAccess
                 
 
                 profilerAccess.StartProfiler();
-                Thread.Sleep(2500);
-                profilerAccess.StopProfiler();
-                //Thread.Sleep(3500);
-              //  profilerAccess.StartProfiler();
-                profilerAccess.Wait();
+             profilerAccess.Wait();
+                //ManualResetEvent
                 Console.WriteLine("bye bye");
             }
             else

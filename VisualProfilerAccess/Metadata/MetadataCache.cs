@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace VisualProfilerAccess.Metadata
 {
-    public class MetadataCache<TMetadata> where TMetadata : MetadataBase<TMetadata>
+    public class MetadataCache<TMetadata> where TMetadata : MetadataBase
     {
         private Dictionary<uint, TMetadata> _cache = new Dictionary<uint, TMetadata>();
 
