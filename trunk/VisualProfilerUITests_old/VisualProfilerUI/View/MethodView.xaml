@@ -17,5 +17,3 @@
                Height="{Binding Path=Height}" 
                Fill="{StaticResource ResourceKey=background}" />
 </View:MethodViewBase>
-<!--MouseEnteredCommand="{Binding Path=ActivateCommand}" 
-                     MouseLeft="{Binding Path=DeActivateCommand}"-->
