@@ -141,6 +141,7 @@ namespace VisualProfilerUI.ViewModel
             {
                 SortedMethodVMs.Add(methodVM);
             }
+           
         }
 
         public void MethodHighlighted(uint methodId)

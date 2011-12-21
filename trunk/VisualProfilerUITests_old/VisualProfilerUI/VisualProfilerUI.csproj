@@ -83,7 +83,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\CallTreeConvertor.cs" />
+    <Compile Include="Model\CallTreeConvertors\CallTreeConvertor.cs" />
+    <Compile Include="Model\CallTreeConvertors\MethodAggregator.cs" />
+    <Compile Include="Model\CallTreeConvertors\Sampling\SamplingGlobalAggregatedValues.cs" />
+    <Compile Include="Model\CallTreeConvertors\Sampling\SamplingCallTreeConvertor.cs" />
+    <Compile Include="Model\CallTreeConvertors\Sampling\SamplingMethodAggregator.cs" />
+    <Compile Include="Model\CallTreeConvertors\Tracing\TracingCallTreeConvertor.cs" />
+    <Compile Include="Model\CallTreeConvertors\Tracing\TracingGlobalAggregatedValues.cs" />
+    <Compile Include="Model\CallTreeConvertors\Tracing\TracingMethodAggregator.cs" />
+    <Compile Include="Model\Methods\SamplingMethod.cs" />
     <Compile Include="Model\Methods\TracingMethod.cs" />
     <Compile Include="Model\Values\Uint64Value.cs" />
     <Compile Include="RelayCommand.cs" />
