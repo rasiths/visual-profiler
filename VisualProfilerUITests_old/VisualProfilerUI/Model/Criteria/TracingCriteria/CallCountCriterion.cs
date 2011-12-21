@@ -6,5 +6,9 @@ namespace VisualProfilerUI.Model.Criteria.TracingCriteria
             : base("Call count")
         {
         }
+
+        public override int Divider { get { return 1; } }
+
+        public override string Unit { get { return "calls"; } }
     }
 }

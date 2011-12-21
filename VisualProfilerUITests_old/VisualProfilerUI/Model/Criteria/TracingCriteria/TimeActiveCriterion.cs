@@ -5,5 +5,9 @@ namespace VisualProfilerUI.Model.Criteria.TracingCriteria
         public TimeActiveCriterion() : base("Active time")
         {
         }
+
+        public override int Divider { get { return 10000; } }
+
+        public override string Unit { get { return "ms"; } }
     }
 }

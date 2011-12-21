@@ -6,5 +6,15 @@ namespace VisualProfilerUI.Model.Criteria.SamplingCriteria
             : base("Top stack occurrence")
         {
         }
+
+        public override int Divider
+        {
+            get { return 1; }
+        }
+
+        public override string Unit
+        {
+            get { return "call"; }
+        }
     }
 }

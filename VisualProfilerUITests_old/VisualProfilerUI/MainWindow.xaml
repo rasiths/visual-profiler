@@ -3,31 +3,49 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:v="clr-namespace:VisualProfilerUI.View" 
         xmlns:vm="clr-namespace:VisualProfilerUI.ViewModel"
-        Title="MainWindow" Height="350" Width="525">
-    <!--<Window.Resources>
-        <DataTemplate DataType="{x:Type vm:DetailViewModel}">
-            <v:DetailView x:Name="detail" MethodName="{Binding Path=MethodName}" Metrics="{Binding Path=Metrics}" />
-        </DataTemplate>
-    </Window.Resources>-->
-    
-    
+        Title="MainWindow" Height="350" Width="525"
+        TextOptions.TextFormattingMode="Display"
+        
+         >
+    <Window.Background>
+        <ImageBrush ImageSource="Images/main_background.png" TileMode="Tile"  ViewportUnits="Absolute" Viewport="0,0,8,8"  ></ImageBrush>
+
+    </Window.Background>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme/ExpressionLight.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="Control.Foreground" Value="WhiteSmoke"/>
+            </Style>
+        </ResourceDictionary>
+
+      
+    </Window.Resources>
+  
+
     <StackPanel>
         <Button  Click="ButtonBase_OnClick" >start</Button>
-<v:DetailView x:Name="detail"  />
 
-        
-        <ItemsControl Name="itemControls">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate >
-                    <v:ContainingUnitView />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <v:CriteriaSwitchView x:Name="criteriaSwitch" />
+        <v:DetailView x:Name="detail"  />
+        <v:SortedMethodsView x:Name="sortedMethods" />
+
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Visible" Height="250">
+            <ItemsControl Name="itemControls">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top"  />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate >
+                        <v:ContainingUnitView />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </StackPanel>
 
 </Window>

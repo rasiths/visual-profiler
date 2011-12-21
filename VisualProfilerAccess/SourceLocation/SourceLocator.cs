@@ -9,7 +9,7 @@ namespace VisualProfilerAccess.SourceLocation
 {
     public class SourceLocator : ISourceLocator, IDisposable
     {
-        private const int MaxSourceLineLength = 10000;
+        private const int MaxSourceLineLength = 20000;
 
         public SourceLocator(string modulePath)
         {

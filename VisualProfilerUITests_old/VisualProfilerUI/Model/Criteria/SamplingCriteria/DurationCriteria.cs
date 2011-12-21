@@ -6,5 +6,9 @@ namespace VisualProfilerUI.Model.Criteria.SamplingCriteria
             : base("Duration")
         {
         }
+
+        public override int Divider { get { return 10000; } }
+
+        public override string Unit { get { return "ms"; } }
     }
 }

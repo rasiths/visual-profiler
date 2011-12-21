@@ -39,5 +39,7 @@ namespace VisualProfilerUI.ViewModel
             _name = name;
         }
 
+        public int Height { get; set; }
+
     }
 }

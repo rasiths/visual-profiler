@@ -12,8 +12,9 @@ namespace VisualProfilerUI.Model.ContainingUnits
             ICriteriaContext criteriaContext,
             IEnumerable<Method> containedMethods,
             string name,
-            string displayName)
-            : base(criteriaContext, containedMethods, name, displayName)
+            string displayName,
+            int height)
+            : base(criteriaContext, containedMethods, name, displayName, height)
         {
         }
 

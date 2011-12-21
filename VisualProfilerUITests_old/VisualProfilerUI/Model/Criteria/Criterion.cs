@@ -1,6 +1,6 @@
 namespace VisualProfilerUI.Model.Criteria
 {
-    public class Criterion 
+    public class Criterion
     {
         public Criterion(string name)
         {
@@ -44,6 +44,11 @@ namespace VisualProfilerUI.Model.Criteria
         public override int GetHashCode()
         {
             return (Name != null ? Name.GetHashCode() : 0);
+        }
+
+        public virtual int Divider { get { return 1; }}
+
+        public virtual string Unit { get { return ""; }
         }
     }
 }

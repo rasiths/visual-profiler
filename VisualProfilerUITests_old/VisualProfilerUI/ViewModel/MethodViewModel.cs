@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using VisualProfilerUI.Model;
 using VisualProfilerUI.Model.Methods;
+using VisualProfilerUI.Model.Values;
 using VisualProfilerUI.View;
 
 namespace VisualProfilerUI.ViewModel
@@ -21,7 +22,7 @@ namespace VisualProfilerUI.ViewModel
             method.Id,
             MethodView.MethodColor.ToBrush(),
             MethodView.MethodBorderColor.ToBrush(),
-            2,
+            3,
             method.FirstLineNumber * PixelPerLine,
             method.LineExtend, method.Name )
         { }
@@ -128,5 +129,9 @@ namespace VisualProfilerUI.ViewModel
         public ICommand DeActivateCommand { get; set; }
 
         public ICommand HighlightCommand { get; set; }
+
+        public IValue ActiveValue { get; set; }
+
+        public double OpacityTemp { get; set; }
     }
 }
