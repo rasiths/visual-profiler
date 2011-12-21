@@ -83,7 +83,7 @@ namespace VisualProfilerAccess.ProfilingData
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER", ProfilerCClassGuid.ToString("B"));
             //TODO Pozor pevna cesta!!!!!
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER_PATH",
-                                                              @"D:\Honzik\Desktop\visual-profiler\Debug\VisualProfilerBackend.dll");
+                                                              @"D:\Honzik\Desktop\visual-profiler\Release\VisualProfilerBackend.dll");
             ProfileeProcessStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", _namePipeName);
             ProfileeProcessStartInfo.UseShellExecute = false;
             ProfileeProcess = Process.Start(ProfileeProcessStartInfo);
