@@ -42,16 +42,16 @@ namespace VisualProfilerUI
 
 
 
-            Profile();
+            Profile(ProfilerTypes.TracingProfiler);
         }
 
-        private void Profile()
+        public void Profile(ProfilerTypes profiler)
         {
             ProcessStartInfo processStartInfo = new ProcessStartInfo { FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe" };
             CriterionSwitchViewModel[] criterionSwitchVMs;
             _uiLogic = new UILogic();
-            bool tracing = false;
-            if (tracing)
+            
+            if (profiler == ProfilerTypes.TracingProfiler)
             {
                 var profilerAccess = new TracingProfilerAccess(
                     processStartInfo,
