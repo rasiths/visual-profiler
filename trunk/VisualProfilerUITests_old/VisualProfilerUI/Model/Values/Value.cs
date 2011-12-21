@@ -24,10 +24,8 @@ namespace VisualProfilerUI.Model.Values
             return compareTo;
         }
 
-        public virtual string GetAsString()
-        {
-            return ActualValue.ToString();
-        }
+        public abstract string GetAsString(int divider);
+    
 
         public int CompareTo(IValue other)
         {

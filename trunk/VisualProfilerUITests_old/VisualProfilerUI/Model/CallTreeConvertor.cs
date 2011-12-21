@@ -28,31 +28,30 @@ namespace VisualProfilerUI.Model
         public TracingCallTreeConvertor(IEnumerable<TracingCallTree> tracingCallTrees)
         {
 
-            UInt64 totalActiveTime = 0;
+            UInt64 globalAggregatedActiveTime = 0;
             List<TracingCallTreeElem> flattenedTreeList = new List<TracingCallTreeElem>();
             foreach (var callTree in tracingCallTrees)
             {
-                totalActiveTime = callTree.UserModeDurationHns + callTree.KernelModeDurationHns;
+                globalAggregatedActiveTime = callTree.UserModeDurationHns + callTree.KernelModeDurationHns;
                 FlattenCallTree(callTree.RootElem, flattenedTreeList);
             }
 
-            MaxAndAggregatedValues maxAndAggregatedValues = new MaxAndAggregatedValues();
+            GlobalAggregatedValues globalAggregatedValues = new GlobalAggregatedValues();
             var aggregators = flattenedTreeList.GroupBy(
                 elem => elem.MethodMetadata).Select(
                 grouping =>
                 {
                     MethodMetadata methodMetadata = grouping.Key;
-                    var aggregator = new TracingCallTreeElemAggregator(methodMetadata, maxAndAggregatedValues);
+                    var aggregator = new TracingMethodAggregator(methodMetadata, globalAggregatedValues);
                     aggregator.AggregateRange(grouping);
                     return aggregator;
                 });
 
-            // TracingCallTreeElemAggregator[] tracingCallTreeElemAggregators = aggregators.ToArray();
+            int maxEndLine = 0;
             _methodDictionary = aggregators.Select(agr =>
             {
-                double activeTime = agr.CycleTime * totalActiveTime /
-                                    (double)maxAndAggregatedValues.TotalCycleTime;
-
+                double activeTime = agr.CycleTime * globalAggregatedActiveTime /
+                                    (double)globalAggregatedValues.TotalCycleTime;
                 int startLine;
                 int endLine;
                 bool isConstructor = agr.MethodMd.Name.EndsWith("ctor");
@@ -63,11 +62,12 @@ namespace VisualProfilerUI.Model
                     startLine = agr.MethodMd.GetSourceLocations().First().StartLine;
                     endLine = agr.MethodMd.GetSourceLocations().Last().EndLine;
                 }
- 
+                maxEndLine = Math.Max(maxEndLine, endLine);
+
                 Method method = new TracingMethod(
                     agr.FunctionId,
                     agr.MethodMd.Name,
-                    startLine, 
+                    startLine,
                     endLine - startLine + 1,
                     new UintValue(agr.EnterCount),
                     new Uint64Value(agr.WallClockDurationHns),
@@ -87,38 +87,62 @@ namespace VisualProfilerUI.Model
             }
 
 
+            UintValue maxCallCount = new UintValue(uint.MinValue);
+            Uint64Value maxWallClockDuration = new Uint64Value(uint.MinValue);
+            DoubleValue maxActiveTime = new DoubleValue(double.MinValue);
+            foreach (var method in _methodDictionary.Values)
+            {
+                maxCallCount = (UintValue)Max(method.GetValueFor(TracingCriteriaContext.CallCountCriterion), maxCallCount);
+                maxWallClockDuration = (Uint64Value)Max(method.GetValueFor(TracingCriteriaContext.TimeWallClockCriterion), maxWallClockDuration);
+                maxActiveTime = (DoubleValue)Max(method.GetValueFor(TracingCriteriaContext.TimeActiveCriterion), maxActiveTime);
 
+            }
 
+            
 
-            double maxActiveTime = maxAndAggregatedValues.TotalCycleTime * totalActiveTime / (double)
-                                                                                   maxAndAggregatedValues.TotalCycleTime;
             CriteriaContext = new TracingCriteriaContext(
-                new UintValue(maxAndAggregatedValues.MaxEnterCount),
-                new Uint64Value(maxAndAggregatedValues.MaxWallClockDurationHns),
-                new DoubleValue(maxActiveTime));
+                                     maxCallCount,
+                                     maxWallClockDuration,
+                                     maxActiveTime);
 
             _sourceFiles = _methodDictionary.GroupBy(kvp => kvp.Key.GetSourceFilePath()).Select(kvp =>
                 new SourceFile(CriteriaContext,
                                kvp.Select(k => k.Value).ToArray(),
                                kvp.Key,
-                               Path.GetFileName(kvp.Key))).ToArray();
+                               Path.GetFileName(kvp.Key),
+                               maxEndLine
+                               )).ToArray();
 
-         
+
         }
 
         private void FindConstructorBody(MethodMetadata method, out int startLine, out int endline)
         {
             IMethodLine openingBrace = method.GetSourceLocations().FirstOrDefault(sl => sl.EndIndex - sl.StartIndex == 1);
             IMethodLine closingBrace = method.GetSourceLocations().LastOrDefault(sl => sl.EndIndex - sl.StartIndex == 1);
-            if(openingBrace != null && closingBrace != null )
+            if (openingBrace != null && closingBrace != null)
             {
                 startLine = openingBrace.StartLine;
                 endline = closingBrace.EndLine;
-            }else
+            }
+            else
             {
                 startLine = method.GetSourceLocations().First().StartLine;
                 endline = method.GetSourceLocations().Last().EndLine;
             }
+        }
+
+        private IValue Max(IValue first, IValue second)
+        {
+            if (first.CompareTo(second) >= 0)
+            {
+                return first;
+            }
+            else
+            {
+                return second;
+            }
+
         }
 
         public IEnumerable<SourceFile> SourceFiles
@@ -145,16 +169,13 @@ namespace VisualProfilerUI.Model
 
     }
 
-    public class MaxAndAggregatedValues
+    public class GlobalAggregatedValues
     {
         public ulong TotalCycleTime { get; set; }
-        public uint MaxEnterCount { get; set; }
-        public uint MaxLeaveCount { get; set; }
-        public ulong MaxWallClockDurationHns { get; set; }
-        public ulong MaxCycleTime { get; set; }
+        public ulong TotalActiveTime { get; set; }
     }
 
-    public class TracingCallTreeElemAggregator
+    public class TracingMethodAggregator
     {
         public uint FunctionId { get; set; }
         public UInt32 EnterCount { get; set; }
@@ -166,31 +187,27 @@ namespace VisualProfilerUI.Model
         public HashSet<MethodMetadata> CallingFunctions { get; set; }
         public HashSet<MethodMetadata> CalledFunctions { get; set; }
 
-        public MaxAndAggregatedValues MaxAndAggregatedValues { get; set; }
+        public GlobalAggregatedValues GlobalAggregatedValues { get; set; }
 
-        public TracingCallTreeElemAggregator(MethodMetadata methodMd, MaxAndAggregatedValues maxAndAggregatedValues)
+        public TracingMethodAggregator(MethodMetadata methodMd, GlobalAggregatedValues globalAggregatedValues)
         {
             CallingFunctions = new HashSet<MethodMetadata>();
             CalledFunctions = new HashSet<MethodMetadata>();
             FunctionId = methodMd.Id;
             MethodMd = methodMd;
-            MaxAndAggregatedValues = maxAndAggregatedValues;
+            GlobalAggregatedValues = globalAggregatedValues;
         }
 
         public void Aggregate(TracingCallTreeElem callTreeElem)
         {
-            
+
             Contract.Requires(FunctionId == callTreeElem.FunctionId);
             EnterCount += callTreeElem.EnterCount;
             LeaveCount += callTreeElem.LeaveCount;
             WallClockDurationHns += callTreeElem.WallClockDurationHns;
             CycleTime += callTreeElem.CycleTime;
-            MaxAndAggregatedValues.TotalCycleTime += callTreeElem.CycleTime;
-
-            MaxAndAggregatedValues.MaxEnterCount = Math.Max(MaxAndAggregatedValues.MaxEnterCount, callTreeElem.EnterCount);
-            MaxAndAggregatedValues.MaxLeaveCount = Math.Max(MaxAndAggregatedValues.MaxLeaveCount, callTreeElem.LeaveCount);
-            WallClockDurationHns = Math.Max(WallClockDurationHns, callTreeElem.WallClockDurationHns);
-            MaxAndAggregatedValues.MaxCycleTime = Math.Max(MaxAndAggregatedValues.MaxCycleTime, callTreeElem.CycleTime);
+            GlobalAggregatedValues.TotalCycleTime += callTreeElem.CycleTime;
+         
 
             if (!callTreeElem.ParentElem.IsRootElem())
                 CallingFunctions.Add(callTreeElem.ParentElem.MethodMetadata);

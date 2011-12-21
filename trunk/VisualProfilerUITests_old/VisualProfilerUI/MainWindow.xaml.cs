@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -34,16 +35,23 @@ namespace VisualProfilerUI
         {
             InitializeComponent();
 
-            //_uplnaBlbosts = new[]
-            //                   {
-            //                       new MethodViewModel(1,10, 10, 50){Fill = Brushes.Red, BorderBrush = Brushes.Black, BorderThinkness = 1},
-            //                       new MethodViewModel(2,25, 30, 30){Fill = Brushes.Blue} ,
-            //                       new MethodViewModel(3,67,18,99){Fill = Brushes.Green} ,
-            //                   };
+            _uiLogic = new UILogic();
+            _uiLogic.ActiveCriterion = TracingCriteriaContext.CallCountCriterion;
+            
 
+            var criterionSwitchVMs = new[] {
+                new CriterionSwitchViewModel(TracingCriteriaContext.CallCountCriterion){IsActive = true},
+                new CriterionSwitchViewModel(TracingCriteriaContext.TimeActiveCriterion),
+                new CriterionSwitchViewModel(TracingCriteriaContext.TimeWallClockCriterion)};
+            _uiLogic.CriterionSwitchVMs = criterionSwitchVMs;
 
-            //itemControls.ItemsSource = new[] { _uplnaBlbosts };
+            foreach (var switchVM in criterionSwitchVMs)
+            {
+                switchVM.CriterionChanged += _uiLogic.ActivateCriterion;
+            }
 
+            criteriaSwitch.DataContext = criterionSwitchVMs;
+       
             Profile();
         }
 
@@ -63,7 +71,8 @@ namespace VisualProfilerUI
         readonly object LockObject = new object();
 
         private int _enter = 0;
-        private MethodViewModel[] _uplnaBlbosts;
+   
+        private UILogic _uiLogic;
 
         private void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
         {
@@ -83,6 +92,7 @@ namespace VisualProfilerUI
                             var methodViewModels = sf.ContainedMethods.Select(cm => new MethodViewModel(cm));
                             var containingUnitViewModel = new ContainingUnitViewModel(
                                 System.IO.Path.GetFileName(sf.FullName));
+                            containingUnitViewModel.Height = sf.Height;
                             containingUnitViewModel.MethodViewModels = methodViewModels.OrderBy(mvm => mvm.Top).ToArray();
                             return containingUnitViewModel;
                         }).ToArray();
@@ -94,19 +104,23 @@ namespace VisualProfilerUI
                             allMethodViewModels.AddRange(containingUnitViewModel.MethodViewModels);
                         }
 
-                        var uiLogic = new UILogic();
-                        uiLogic.ActiveCriterion = TracingCriteriaContext.CallCountCriterion;
-                        uiLogic.CriteriaContext = treeConvertor.CriteriaContext;
-                        uiLogic.MethodModelByIdDict = treeConvertor.MethodDictionary.ToDictionary(kvp => kvp.Key.Id,
+                 
+
+                        _uiLogic.CriteriaContext = treeConvertor.CriteriaContext;
+                        _uiLogic.MethodModelByIdDict = treeConvertor.MethodDictionary.ToDictionary(kvp => kvp.Key.Id,
                                                                                                   kvp => kvp.Value);
-                        uiLogic.MethodVMByIdDict = allMethodViewModels.ToDictionary(kvp => kvp.Id, kvp => kvp);
+                        _uiLogic.MethodVMByIdDict = allMethodViewModels.ToDictionary(kvp => kvp.Id, kvp => kvp);
                         var detailViewModel = new DetailViewModel();
                         detail.DataContext = detailViewModel;
-                        uiLogic.Detail = detailViewModel;
-                        uiLogic.InitAllMethodViewModels();
-
+                        _uiLogic.Detail = detailViewModel;
+                        _uiLogic.InitAllMethodViewModels();
 
                         itemControls.ItemsSource = containingUnitViewModels;
+                        var sortedMethodVMs = new ObservableCollection<MethodViewModel>(_uiLogic.MethodVMByIdDict.Values);
+                        
+                        sortedMethods.DataContext = sortedMethodVMs;
+                        _uiLogic.SortedMethodVMs = sortedMethodVMs;
+                        _uiLogic.ActivateCriterion(_uiLogic.ActiveCriterion);
                     }), null);
 
                 }
@@ -116,19 +130,7 @@ namespace VisualProfilerUI
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
             _enter = 1;
-            //Console.Beep(3000, 100);
-            //MethodViewModel[] uplnaBlbosts = new[]
-            //                                 {
-            //                                     new MethodViewModel(1,10, 10, 90) ,
-            //                                     new MethodViewModel(2,25, 10, 100) ,
-            //                                     new MethodViewModel(3,67,18,20) ,
-            //                                 };
-            //itemControls.ItemsSource = new[] { uplnaBlbosts };
-
-            //foreach (var methodViewModel in _uplnaBlbosts)
-            //{
-            //    methodViewModel.SetMax(200);
-            //}
+          
         }
     }
 

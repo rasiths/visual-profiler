@@ -19,7 +19,8 @@ namespace VisualProfilerUI.Model.ContainingUnits
             ICriteriaContext criteriaContext,
             IEnumerable<Method> containedMethods,
             string name,
-            string displayName)
+            string displayName,
+            int height)
         {
             Contract.Requires(criteriaContext != null);
             Contract.Requires(containedMethods != null);
@@ -27,16 +28,18 @@ namespace VisualProfilerUI.Model.ContainingUnits
             ContainedMethods = containedMethods;
             DisplayName = name;
             FullName = displayName;
+            Height = height;
         }
 
         protected ContainingUnit()
         {
-            
+
         }
 
         public ICriteriaContext CriteriaContext { get; private set; }
         public IEnumerable<Method> ContainedMethods { get; private set; }
         public string DisplayName { get; private set; }
         public string FullName { get; private set; }
+        public int Height { get; private set; }
     }
 }

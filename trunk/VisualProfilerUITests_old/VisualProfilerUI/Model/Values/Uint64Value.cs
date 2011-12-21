@@ -3,32 +3,30 @@ using System.Diagnostics.Contracts;
 
 namespace VisualProfilerUI.Model.Values
 {
-    public class DoubleValue : Value<double>
+    public class Uint64Value : Value<ulong>
     {
-        public DoubleValue(double value) 
+        public Uint64Value(UInt64 value)
             : base(value)
-        {
-        }
+        { }
 
         public override double ConvertToZeroOneScale(IValue maxValue)
         {
             Contract.Requires(maxValue != null);
-            Contract.Requires(maxValue is DoubleValue);
+            Contract.Requires(maxValue is Uint64Value);
             Contract.Ensures(0 <= Contract.Result<double>());
             Contract.Ensures(Contract.Result<double>() <= 1);
-            double maxValueDouble = (maxValue as DoubleValue).ActualValue;
-            bool isZero = Math.Abs(maxValueDouble - 0) <= Double.Epsilon;
-            if (isZero)
+            Uint64Value uint64MaxValue = (Uint64Value) maxValue ;
+            if (uint64MaxValue.ActualValue == 0)
                 return 0;
             else
-                return ActualValue / maxValueDouble;
+                return ActualValue / (double)uint64MaxValue.ActualValue;
         }
 
         public override string GetAsString(int divider)
         {
             Contract.Requires(divider != 0);
 
-            return string.Format("{0:N0}", ActualValue / divider);
+            return string.Format("{0:N0}", ActualValue / (ulong)divider);
         }
     }
 }

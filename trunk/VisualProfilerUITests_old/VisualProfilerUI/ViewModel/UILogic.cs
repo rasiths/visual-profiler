@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
@@ -27,6 +28,10 @@ namespace VisualProfilerUI.ViewModel
         public Criterion ActiveCriterion { get; set; }
 
         public ICriteriaContext CriteriaContext { get; set; }
+
+        public CriterionSwitchViewModel[] CriterionSwitchVMs { get; set; }
+
+        public ObservableCollection<MethodViewModel> SortedMethodVMs { get; set; }
 
         //public void OnCriteriaChanged(Criterion newCriterion)
         //{
@@ -62,7 +67,7 @@ namespace VisualProfilerUI.ViewModel
             Method method = MethodModelByIdDict[methodId];
             Detail.MethodName = method.Name;
             IValue value = method.GetValueFor(ActiveCriterion);
-            Detail.Metrics = value.GetAsString();
+            Detail.Metrics = value.GetAsString(ActiveCriterion.Divider) +" "+ ActiveCriterion.Unit;
         }
 
         private void ClearDetail()
@@ -81,43 +86,68 @@ namespace VisualProfilerUI.ViewModel
             ActiveMethodVM = methodVM;
             methodVM.IsActive = true;
             methodVM.BorderBrush = MethodView.ActiveMethodBorderColor.ToBrush();
+            ActiveMethodVM.OpacityTemp = ActiveMethodVM.Opacity;
+            ActiveMethodVM.Opacity = 1;
             ShowMethodInDetail(methodVM.Id);
         }
 
         public void MethodDeactivated(MethodViewModel methodVM)
         {
             Contract.Requires(ActiveMethodVM.Id == methodVM.Id);
-          
+
+            ActiveMethodVM.Opacity = ActiveMethodVM.OpacityTemp;
             ActiveMethodVM = null;
             methodVM.BorderBrush = MethodView.MethodBorderColor.ToBrush();
             methodVM.IsActive = false;
+            
         }
 
         public void InitAllMethodViewModels()
         {
             foreach (var kvp in MethodVMByIdDict)
             {
-                uint methodId = kvp.Key;
                 MethodViewModel methodViewModel = kvp.Value;
                 methodViewModel.Activate += MethodActivate;
                 methodViewModel.Deactivate += MethodDeactivated;
-                //methodViewModel.Highlight + 
+            }
+        }
+
+        public void ActivateCriterion(Criterion criterion)
+        {
+            if (MethodVMByIdDict == null)
+                return;
+            ActiveCriterion = criterion;
+            foreach (var kvp in MethodVMByIdDict)
+            {
+                uint methodId = kvp.Key;
+                MethodViewModel methodViewModel = kvp.Value;
+
                 Method method = MethodModelByIdDict[methodId];
                 Contract.Assume(method.Id == methodViewModel.Id);
-                IValue activeValue = method.GetValueFor(ActiveCriterion);
-                IValue maxValue = CriteriaContext.GetMaxValueFor(ActiveCriterion);
-                methodViewModel.Opacity = activeValue.ConvertToZeroOneScale(maxValue);
+                IValue activeValue = method.GetValueFor(criterion);
+                IValue maxValue = CriteriaContext.GetMaxValueFor(criterion);
+
+                methodViewModel.Opacity = activeValue.ConvertToZeroOneScale(maxValue)*0.8 + 0.1;
+                methodViewModel.ActiveValue = activeValue;
+            
+            }
+
+            var newSortedMethodVMs = SortedMethodVMs.OrderByDescending(mvm => mvm.ActiveValue).ToArray();
+            SortedMethodVMs.Clear();
+            foreach (var methodVM in newSortedMethodVMs)
+            {
+                SortedMethodVMs.Add(methodVM);
             }
         }
 
         public void MethodHighlighted(uint methodId)
         {
-            
+            //not implemented in this version
         }
 
         public void MethodSuppress(uint methodId)
         {
-
+            //not implemented in this version 
         }
 
         
