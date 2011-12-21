@@ -1,7 +1,7 @@
 ﻿<UserControl x:Class="VisualProfilerUI.View.SortedMethodsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:View="clr-namespace:VisualProfilerUI.View">
-    <ScrollViewer  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" >
+    <ScrollViewer  HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Hidden" FocusVisualStyle="{x:Null}" >
         <ItemsControl ItemsSource="{Binding}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>

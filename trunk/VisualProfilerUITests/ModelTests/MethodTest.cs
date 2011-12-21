@@ -32,7 +32,7 @@ namespace VisualProfilerUITests.ModelTests
             _activeTime = new DoubleValue(3);
             Mock<IEnumerable<Method>> mockCallingMethods = new Mock<IEnumerable<Method>>(MockBehavior.Strict);
             Mock<IEnumerable<Method>> mockCalledMethods = new Mock<IEnumerable<Method>>(MockBehavior.Strict);
-            _method = new TracingMethod(1,"stub", 20, 50, _enterCount,_wallClockDurationHns,_activeTime );//, mockCallingMethods.Object,
+            _method = new TracingMethod(1,"stub", 20, 50, "MethodFull", @"C:\code\source.cs",_enterCount,_wallClockDurationHns,_activeTime );//, mockCallingMethods.Object,
                                  //mockCalledMethods.Object);
         }
 

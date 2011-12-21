@@ -37,7 +37,7 @@ namespace VisualProfilerUI
 
             _uiLogic = new UILogic();
             _uiLogic.ActiveCriterion = TracingCriteriaContext.CallCountCriterion;
-            
+
 
             var criterionSwitchVMs = new[] {
                 new CriterionSwitchViewModel(TracingCriteriaContext.CallCountCriterion){IsActive = true},
@@ -45,24 +45,25 @@ namespace VisualProfilerUI
                 new CriterionSwitchViewModel(TracingCriteriaContext.TimeWallClockCriterion)};
             _uiLogic.CriterionSwitchVMs = criterionSwitchVMs;
 
+
+
             foreach (var switchVM in criterionSwitchVMs)
             {
                 switchVM.CriterionChanged += _uiLogic.ActivateCriterion;
             }
 
             criteriaSwitch.DataContext = criterionSwitchVMs;
-       
+
             Profile();
         }
 
         private void Profile()
         {
-            var processStartInfo = new ProcessStartInfo { FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe" };
-
+            ProcessStartInfo processStartInfo = new ProcessStartInfo { FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe" };
 
             var profilerAccess = new TracingProfilerAccess(
                 processStartInfo,
-                TimeSpan.FromMilliseconds(2000),
+                TimeSpan.FromMilliseconds(1000),
                 OnUpdateCallback);
 
             profilerAccess.StartProfiler();
@@ -71,12 +72,12 @@ namespace VisualProfilerUI
         readonly object LockObject = new object();
 
         private int _enter = 0;
-   
+
         private UILogic _uiLogic;
 
         private void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
         {
-            if (Interlocked.CompareExchange(ref _enter, 0, 1) == 1)
+            //  if (Interlocked.CompareExchange(ref _enter, 0, 1) == 1)
             {
                 lock (LockObject)
                 {
@@ -104,7 +105,7 @@ namespace VisualProfilerUI
                             allMethodViewModels.AddRange(containingUnitViewModel.MethodViewModels);
                         }
 
-                 
+
 
                         _uiLogic.CriteriaContext = treeConvertor.CriteriaContext;
                         _uiLogic.MethodModelByIdDict = treeConvertor.MethodDictionary.ToDictionary(kvp => kvp.Key.Id,
@@ -115,12 +116,14 @@ namespace VisualProfilerUI
                         _uiLogic.Detail = detailViewModel;
                         _uiLogic.InitAllMethodViewModels();
 
-                        itemControls.ItemsSource = containingUnitViewModels;
+                        containingUnits.ItemsSource = containingUnitViewModels;
+                        containingUnits.DataContext = treeConvertor.MaxEndLine + 20;
                         var sortedMethodVMs = new ObservableCollection<MethodViewModel>(_uiLogic.MethodVMByIdDict.Values);
-                        
+
                         sortedMethods.DataContext = sortedMethodVMs;
                         _uiLogic.SortedMethodVMs = sortedMethodVMs;
                         _uiLogic.ActivateCriterion(_uiLogic.ActiveCriterion);
+                        //  unitsScrollView.Height = treeConvertor.MaxEndLine + 20;
                     }), null);
 
                 }
@@ -130,7 +133,7 @@ namespace VisualProfilerUI
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
             _enter = 1;
-          
+
         }
     }
 

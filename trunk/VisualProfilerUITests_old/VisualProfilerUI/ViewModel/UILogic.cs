@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Media;
@@ -49,9 +50,9 @@ namespace VisualProfilerUI.ViewModel
 
         //        Color adjustedMethodColor = horizontalMethod.FillColorNoAlpha;
         //        adjustedMethodColor.A = (byte) (valueZeroOneScale*byte.MaxValue);
-                
+
         //        SolidColorBrush newBrush = new SolidColorBrush(adjustedMethodColor);
-                
+
         //        horizontalMethod.Fill = newBrush;
         //        verticalMethod.Fill = newBrush;
         //    }
@@ -67,7 +68,9 @@ namespace VisualProfilerUI.ViewModel
             Method method = MethodModelByIdDict[methodId];
             Detail.MethodName = method.Name;
             IValue value = method.GetValueFor(ActiveCriterion);
-            Detail.Metrics = value.GetAsString(ActiveCriterion.Divider) +" "+ ActiveCriterion.Unit;
+            Detail.Metrics = value.GetAsString(ActiveCriterion.Divider) + " " + ActiveCriterion.Unit;
+            Detail.Class = method.ClassFullName; 
+                Detail.Source=Path.GetFileName(method.SourceFile);
         }
 
         private void ClearDetail()
@@ -93,13 +96,13 @@ namespace VisualProfilerUI.ViewModel
 
         public void MethodDeactivated(MethodViewModel methodVM)
         {
-            Contract.Requires(ActiveMethodVM.Id == methodVM.Id);
-
+            if (ActiveMethodVM == null) return;
+            Contract.Assume(ActiveMethodVM.Id == methodVM.Id);
             ActiveMethodVM.Opacity = ActiveMethodVM.OpacityTemp;
             ActiveMethodVM = null;
             methodVM.BorderBrush = MethodView.MethodBorderColor.ToBrush();
             methodVM.IsActive = false;
-            
+
         }
 
         public void InitAllMethodViewModels()
@@ -127,9 +130,9 @@ namespace VisualProfilerUI.ViewModel
                 IValue activeValue = method.GetValueFor(criterion);
                 IValue maxValue = CriteriaContext.GetMaxValueFor(criterion);
 
-                methodViewModel.Opacity = activeValue.ConvertToZeroOneScale(maxValue)*0.8 + 0.1;
+                methodViewModel.Opacity = activeValue.ConvertToZeroOneScale(maxValue) * 0.8 + 0.1;
                 methodViewModel.ActiveValue = activeValue;
-            
+
             }
 
             var newSortedMethodVMs = SortedMethodVMs.OrderByDescending(mvm => mvm.ActiveValue).ToArray();
@@ -150,7 +153,7 @@ namespace VisualProfilerUI.ViewModel
             //not implemented in this version 
         }
 
-        
+
 
     }
 }

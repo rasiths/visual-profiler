@@ -12,7 +12,7 @@ namespace VisualProfilerAccess.ProfilingData
 {
     public class ProfilerAccess<TCallTree> where TCallTree : CallTree
     {
-        private const string NamePipeName = "VisualProfilerAccessPipe";
+        private readonly string _namePipeName;
         protected static StandardKernel Kernel = new StandardKernel(new VisualProfilerModule());
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private readonly ProfilerCommunicator<TCallTree> _profilerCommunicator;
@@ -35,6 +35,7 @@ namespace VisualProfilerAccess.ProfilingData
             ProfileeProcessStartInfo = profileeProcessStartInfo;
             ProfilerDataUpdatePeriod = profilingDataUpdatePeriod;
             ProfilerStarted = false;
+            _namePipeName = "VisualProfilerAccessPipe" + new Random(DateTime.Now.Millisecond).Next(int.MaxValue);
         }
 
         private Guid ProfilerCClassGuid
@@ -57,7 +58,8 @@ namespace VisualProfilerAccess.ProfilingData
 
         private void InitNamePipe()
         {
-            _pipeServer = new NamedPipeServerStream("VisualProfilerAccessPipe", PipeDirection.InOut, 1,
+            
+            _pipeServer = new NamedPipeServerStream(_namePipeName, PipeDirection.InOut, 1,
                                                     PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
         }
 
@@ -82,7 +84,7 @@ namespace VisualProfilerAccess.ProfilingData
             //TODO Pozor pevna cesta!!!!!
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER_PATH",
                                                               @"D:\Honzik\Desktop\visual-profiler\Debug\VisualProfilerBackend.dll");
-            ProfileeProcessStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", NamePipeName);
+            ProfileeProcessStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", _namePipeName);
             ProfileeProcessStartInfo.UseShellExecute = false;
             ProfileeProcess = Process.Start(ProfileeProcessStartInfo);
         }
