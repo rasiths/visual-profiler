@@ -17,10 +17,12 @@ namespace VisualProfilerUI.Model.Methods
             string name,
             int firstLineNumber,
             int lineExtend,
+            string classFullName,
+            string sourceFile,
             UintValue callCountValue,
             Uint64Value timeWallClockValue,
             DoubleValue timeActiveValue)
-            : base(id, name, firstLineNumber, lineExtend)
+            : base(id, name, firstLineNumber, lineExtend,classFullName,sourceFile)
         {
             _callCountValue = callCountValue;
             _timeWallClockValue = timeWallClockValue;

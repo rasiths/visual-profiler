@@ -35,8 +35,9 @@ namespace VisualProfilerUI.ViewModel
             get { return _isActive; }
             set
             {
-                OnPropertyChanged("IsActive");
+                
                 _isActive = value;
+                OnPropertyChanged("IsActive");
             }
         }
     }

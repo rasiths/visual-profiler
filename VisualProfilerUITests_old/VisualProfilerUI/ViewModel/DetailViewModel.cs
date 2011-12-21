@@ -23,5 +23,27 @@ namespace VisualProfilerUI.ViewModel
                 OnPropertyChanged("MethodName");
             }
         }
+
+        private string _class;
+        public string Class
+        {
+            get { return _class; }
+            set
+            {
+                _class = value;
+                OnPropertyChanged("Class");
+            }
+        }
+
+        private string _source;
+        public string Source
+        {
+            get { return _source; }
+            set
+            {
+                _source = value;
+                OnPropertyChanged("Source");
+            }
+        }
     }
 }

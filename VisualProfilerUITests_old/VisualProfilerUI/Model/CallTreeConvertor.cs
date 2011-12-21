@@ -24,6 +24,12 @@ namespace VisualProfilerUI.Model
     {
         private readonly IEnumerable<SourceFile> _sourceFiles;
         private readonly Dictionary<MethodMetadata, Method> _methodDictionary;
+        private int _maxEndLine;
+
+        public int MaxEndLine
+        {
+            get { return _maxEndLine; }
+        }
 
         public TracingCallTreeConvertor(IEnumerable<TracingCallTree> tracingCallTrees)
         {
@@ -47,7 +53,7 @@ namespace VisualProfilerUI.Model
                     return aggregator;
                 });
 
-            int maxEndLine = 0;
+            _maxEndLine = 0;
             _methodDictionary = aggregators.Select(agr =>
             {
                 double activeTime = agr.CycleTime * globalAggregatedActiveTime /
@@ -62,13 +68,15 @@ namespace VisualProfilerUI.Model
                     startLine = agr.MethodMd.GetSourceLocations().First().StartLine;
                     endLine = agr.MethodMd.GetSourceLocations().Last().EndLine;
                 }
-                maxEndLine = Math.Max(maxEndLine, endLine);
+                _maxEndLine = Math.Max(_maxEndLine, endLine);
 
                 Method method = new TracingMethod(
                     agr.FunctionId,
                     agr.MethodMd.Name,
                     startLine,
                     endLine - startLine + 1,
+                    agr.MethodMd.Class.Name,
+                    agr.MethodMd.GetSourceFilePath(),
                     new UintValue(agr.EnterCount),
                     new Uint64Value(agr.WallClockDurationHns),
                     new DoubleValue(activeTime));
@@ -98,8 +106,6 @@ namespace VisualProfilerUI.Model
 
             }
 
-            
-
             CriteriaContext = new TracingCriteriaContext(
                                      maxCallCount,
                                      maxWallClockDuration,
@@ -110,7 +116,7 @@ namespace VisualProfilerUI.Model
                                kvp.Select(k => k.Value).ToArray(),
                                kvp.Key,
                                Path.GetFileName(kvp.Key),
-                               maxEndLine
+                               _maxEndLine +10
                                )).ToArray();
 
 
