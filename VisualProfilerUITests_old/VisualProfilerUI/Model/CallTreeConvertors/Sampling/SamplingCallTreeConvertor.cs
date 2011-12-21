@@ -83,10 +83,12 @@ namespace VisualProfilerUI.Model.CallTreeConvertors.Sampling
             _methodDictionary = _aggregators.Select(
                 methodAgr =>
                     {
-                        double duration = (methodAgr.StackTopOccurrenceCount+methodAgr.LastProfiledFrameInStackCount)*
+                        uint stackOccurence = methodAgr.StackTopOccurrenceCount +methodAgr.LastProfiledFrameInStackCount;
+                        uint globalStackOccurence = _globalAggregatedValues.StackTopOccurrenceCount+_globalAggregatedValues.LastProfiledFrameInStackCount;
+                        double duration = (stackOccurence) *
                                             _globalAggregatedValues.WallClockDurationHns/
-                                            (double) (_globalAggregatedValues.StackTopOccurrenceCount+_globalAggregatedValues.LastProfiledFrameInStackCount);
-                        ;
+                                            (double)(globalStackOccurence);
+                        
                         int startLine;
                         int endLine;
                         bool isConstructor = methodAgr.MethodMd.Name.EndsWith("ctor");
@@ -108,7 +110,7 @@ namespace VisualProfilerUI.Model.CallTreeConvertors.Sampling
                             endLine - startLine + 1,
                             methodAgr.MethodMd.Class.Name,
                             methodAgr.MethodMd.GetSourceFilePath(),
-                            new UintValue(methodAgr.StackTopOccurrenceCount + methodAgr.LastProfiledFrameInStackCount),
+                            new UintValue(methodAgr.StackTopOccurrenceCount ),
                             new DoubleValue(duration));
 
                         return new KeyValuePair<MethodMetadata, Method>(methodAgr.MethodMd,
