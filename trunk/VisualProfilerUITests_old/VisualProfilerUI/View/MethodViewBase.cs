@@ -64,8 +64,6 @@ namespace VisualProfilerUI.View
 
         #endregion
 
-       
-
 
         protected void MethodViewMouseEnter(object sender, MouseEventArgs e)
         {

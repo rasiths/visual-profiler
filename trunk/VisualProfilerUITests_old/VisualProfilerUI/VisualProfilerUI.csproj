@@ -27,7 +27,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
+    <CodeContractsEnableRuntimeChecking>False</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
     <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
     <CodeContractsRuntimeCallSiteRequires>False</CodeContractsRuntimeCallSiteRequires>
@@ -61,6 +61,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -111,7 +114,6 @@
     <Compile Include="Model\Values\IValue.cs" />
     <Compile Include="Model\Values\UintValue.cs" />
     <Compile Include="Model\Values\Value.cs" />
-    <Compile Include="UplnaBlbost.cs" />
     <Compile Include="ViewModel\ColorExtensions.cs" />
     <Compile Include="ViewModel\ContainingUnitViewModel.cs" />
     <Compile Include="ViewModel\CriterionSwitchViewModel.cs" />
@@ -137,6 +139,10 @@
     </Compile>
     <Compile Include="View\SortedMethodView.xaml.cs">
       <DependentUpon>SortedMethodView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VisualProfilerUIView.xaml.cs">
+      <DependentUpon>VisualProfilerUIView.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -175,6 +181,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\SortedMethodView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="VisualProfilerUIView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
