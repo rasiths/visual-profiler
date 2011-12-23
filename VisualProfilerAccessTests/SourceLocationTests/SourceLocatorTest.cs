@@ -182,7 +182,7 @@ namespace VisualProfilerAccessTests.SourceLocationTests
         public void SourceLocatorGetMethodLinesLambdaMethodTest()
         {
             IMethodLine[] methodLines = _iSourceLocator.GetMethodLines((uint) _lambdaMethod.MetadataToken).ToArray();
-            Assert.AreEqual(5, methodLines.Length);
+            Assert.AreEqual(4, methodLines.Length);
         }
 
         [Test]
