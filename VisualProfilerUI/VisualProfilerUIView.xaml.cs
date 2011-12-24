@@ -20,6 +20,8 @@ namespace VisualProfilerUI
     {
         public VisualProfilerUIView()
         {
+            if (Application.ResourceAssembly == null)
+                Application.ResourceAssembly = typeof(MainWindow).Assembly;
             InitializeComponent();
             Profile(ProfilerTypes.TracingProfiler);
         }
