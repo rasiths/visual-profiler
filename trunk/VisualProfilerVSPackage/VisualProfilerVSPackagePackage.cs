@@ -65,6 +65,7 @@ namespace JanVratislav.VisualProfilerVSPackage
         
         private void MenuItemCallback2(object sender, EventArgs e)
         {
+            string codeBase = this.GetType().Assembly.CodeBase;
 
             ToolWindowPane window = this.FindToolWindow(typeof(VisualProfilerToolWindow), 0, true);
             if ((null == window) || (null == window.Frame))
