@@ -1,18 +1,24 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.ComponentModel.Design;
+using System.Windows;
+using EnvDTE;
+using EnvDTE80;
 using JanVratislav.VisualProfilerVSPackage.View;
 using Microsoft.Win32;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
+using VisualProfilerAccess.ProfilingData;
+using VisualProfilerUI;
 
 namespace JanVratislav.VisualProfilerVSPackage
 {
-   
+
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
@@ -27,54 +33,112 @@ namespace JanVratislav.VisualProfilerVSPackage
 
         protected override void Initialize()
         {
-            Trace.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
+            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
 
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if ( null != mcs )
+            if (null != mcs)
             {
                 CommandID menuCommandIDTracing = new CommandID(GuidList.guidVisualProfilerVSPackageCmdSet, (int)PkgCmdIDList.cmdidStartVisualProfilerTracingMode);
-                MenuCommand menuItemTracing = new MenuCommand(MenuItemCallback, menuCommandIDTracing );
-                mcs.AddCommand( menuItemTracing );
+                MenuCommand menuItemTracing = new MenuCommand(TracingCallback, menuCommandIDTracing);
+                mcs.AddCommand(menuItemTracing);
 
                 CommandID menuCommandIDSampling = new CommandID(GuidList.guidVisualProfilerVSPackageCmdSet, (int)PkgCmdIDList.cmdidStartVisualProfilerSamplingMode);
-                MenuCommand menuItemSampling = new MenuCommand(MenuItemCallback2, menuCommandIDSampling);
+                MenuCommand menuItemSampling = new MenuCommand(SamplingCallback, menuCommandIDSampling);
                 mcs.AddCommand(menuItemSampling);
-              
+
             }
         }
 
-        private void MenuItemCallback(object sender, EventArgs e)
+        private void TracingCallback(object sender, EventArgs e)
         {
-            IVsUIShell uiShell = (IVsUIShell)GetService(typeof(SVsUIShell));
-            Guid clsid = Guid.Empty;
-            int result;
-            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(uiShell.ShowMessageBox(
-                       0,
-                       ref clsid,
-                       "VisualProfilerVSPackage",
-                       string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.ToString()),
-                       string.Empty,
-                       0,
-                       OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                       OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST,
-                       OLEMSGICON.OLEMSGICON_INFO,
-                       0,        // false
-                       out result));
-        } 
-        
-        private void MenuItemCallback2(object sender, EventArgs e)
-        {
-            string codeBase = this.GetType().Assembly.CodeBase;
+            StartProfiler(ProfilerTypes.TracingProfiler);
+        }
 
-            ToolWindowPane window = this.FindToolWindow(typeof(VisualProfilerToolWindow), 0, true);
-            if ((null == window) || (null == window.Frame))
+        private void SamplingCallback(object sender, EventArgs e)
+        {
+           StartProfiler(ProfilerTypes.SamplingProfiler);
+        }
+
+        private void StartProfiler(ProfilerTypes profilerType)
+        {
+            try
             {
-                throw new NotSupportedException("Cannot create a window.");
+                bool buildSuccedded = StartBuild();
+                if (!buildSuccedded) throw new Exception("Could not build the solution.");
+
+                Project startUpProject = GetStartUpProject();
+                if (startUpProject == null) throw new Exception("Could not locate a startUp project.");
+              
+                string assemblyPath = GetOutputAssemblyPath(startUpProject);
+                if (string.IsNullOrEmpty(assemblyPath)) throw new Exception("Could not locate the output assembly.");
+                if (Path.GetExtension(assemblyPath) != ".exe") throw new Exception("The output of the startUp project is not an executable.");
+                if (!File.Exists(assemblyPath)) throw new Exception("The output executable file could not be found.");
+
+                VisualProfilerToolWindow window = this.FindToolWindow(typeof(VisualProfilerToolWindow), 0, true) as VisualProfilerToolWindow;
+                if ((null == window) || (null == window.Frame)) throw new NotSupportedException("Cannot create a window.");
+                window.VisualProfilerUIView.Profile(profilerType, assemblyPath);
+                window.Caption = string.Format("Visual Profiler - {0} Mode", GetModeString(profilerType));
+                IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
+                ErrorHandler.ThrowOnFailure(windowFrame.Show());
+
             }
-            IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
-            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message, "Profiler initialization failed.", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
+        private string GetModeString(ProfilerTypes profilerType)
+        {
+            string profilerTypeName = profilerType.ToString();
+            int indexOfProfiler = profilerTypeName.IndexOf("Profiler");
+            string modeString = profilerTypeName.Substring(0, profilerTypeName.Length - indexOfProfiler - 1);
+            return modeString;
+        }
+
+        private bool StartBuild()
+        {
+
+            var dte = GetService(typeof(SDTE)) as DTE2;
+            dte.Solution.SolutionBuild.Build(true);
+            int numberOfFailures = dte.Solution.SolutionBuild.LastBuildInfo;
+            bool buildSucceeded = numberOfFailures == 0;
+            return buildSucceeded;
+        }
+
+        private Project GetStartUpProject()
+        {
+            var dte = GetService(typeof(SDTE)) as DTE2;
+
+            Array startupProjects = dte.Solution.SolutionBuild.StartupProjects as Array;
+            string value = startupProjects.GetValue(0) as string;
+
+            Project startUpProject = null;
+
+            var array = dte.Solution.Projects as Array;
+            foreach (var project in dte.Solution.Projects)
+            {
+                var project1 = project as Project;
+                if (project1.FullName.EndsWith(value))
+                {
+                    startUpProject = project1;
+                }
+            }
+
+            return startUpProject;
+        }
+
+        private string GetOutputAssemblyPath(EnvDTE.Project vsProject)
+        {
+            string fullPath = vsProject.Properties.Item("FullPath").Value.ToString();
+            string outputPath = vsProject.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();
+            string outputDir = Path.Combine(fullPath, outputPath);
+            string outputFileName = vsProject.Properties.Item("OutputFileName").Value.ToString();
+            string assemblyPath = Path.Combine(outputDir, outputFileName);
+            return assemblyPath;
+        }
+
 
     }
 }

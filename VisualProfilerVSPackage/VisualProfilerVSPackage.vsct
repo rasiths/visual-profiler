@@ -69,16 +69,16 @@
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
           <CommandName>cmdidStartVisualProfilerTracingMode</CommandName>
-          <ButtonText>Start Visual Profiler in tracing mode</ButtonText>
+          <ButtonText>Start Visual Profiler in Tracing Mode</ButtonText>
         </Strings>
       </Button>
       
       <Button guid="guidVisualProfilerVSPackageCmdSet" id="cmdidStartVisualProfilerSamplingMode" priority="0x0100" type="Button">
         <Parent guid="guidVisualProfilerVSPackageCmdSet" id="MyMenuGroup" />
-        <Icon guid="guidImages" id="bmpPic1" />
+        <Icon guid="guidImages" id="bmpPic2" />
         <Strings>
           <CommandName>cmdidStartVisualProfilerSamplingMode</CommandName>
-          <ButtonText>Start Visual Profiler in sampling mode</ButtonText>
+          <ButtonText>Start Visual Profiler in Sampling Mode</ButtonText>
         </Strings>
       </Button>
 
@@ -117,7 +117,7 @@
     
     
     
-    <GuidSymbol name="guidImages" value="{cc8f5622-f95a-42a1-b7c1-4fc86646ab7c}" >
+    <GuidSymbol name="guidImages" value="{cc8f5622-f95a-42a1-b7c1-4fc86646ab7d}" >
       <IDSymbol name="bmpPic1" value="1" />
       <IDSymbol name="bmpPic2" value="2" />
       <IDSymbol name="bmpPicSearch" value="3" />

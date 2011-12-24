@@ -23,12 +23,12 @@ namespace VisualProfilerUI
             if (Application.ResourceAssembly == null)
                 Application.ResourceAssembly = typeof(MainWindow).Assembly;
             InitializeComponent();
-            Profile(ProfilerTypes.TracingProfiler);
+          //  Profile(ProfilerTypes.TracingProfiler);
         }
 
-        public void Profile(ProfilerTypes profiler)
+        public void Profile(ProfilerTypes profiler, string processPath)
         {
-            ProcessStartInfo processStartInfo = new ProcessStartInfo { FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe" };
+            ProcessStartInfo processStartInfo = new ProcessStartInfo { FileName = processPath };
             CriterionSwitchViewModel[] criterionSwitchVMs;
             _uiLogic = new UILogic();
             
@@ -47,7 +47,6 @@ namespace VisualProfilerUI
                 new CriterionSwitchViewModel(TracingCriteriaContext.CallCountCriterion){IsActive = true},
                 new CriterionSwitchViewModel(TracingCriteriaContext.TimeActiveCriterion),
                 new CriterionSwitchViewModel(TracingCriteriaContext.TimeWallClockCriterion)};
-                ;
             }
             else
             {

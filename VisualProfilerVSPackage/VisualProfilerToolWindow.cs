@@ -22,6 +22,8 @@ namespace JanVratislav.VisualProfilerVSPackage
     [System.Runtime.InteropServices.Guid("fa4d1b50-5999-44b4-9c50-030b5687f2f2")]
     public class VisualProfilerToolWindow : ToolWindowPane
     {
+        private VisualProfilerUIView _visualProfilerUIView;
+
         /// <summary>
         /// Standard constructor for the tool window.
         /// </summary>
@@ -29,7 +31,7 @@ namespace JanVratislav.VisualProfilerVSPackage
             base(null)
         {
             // Set the window title reading it from the resources.
-            this.Caption = "Visual Profiler";
+            //this.Caption = "Visual Profiler";
             // Set the image that will appear on the tab of the window frame
             // when docked with an other window
             // The resource ID correspond to the one defined in the resx file
@@ -37,13 +39,16 @@ namespace JanVratislav.VisualProfilerVSPackage
             // the strip being 16x16.
             this.BitmapResourceID = 301;
             this.BitmapIndex = 1;
-            
 
-            // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
-            // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on 
-            // the object returned by the Content property.
-            base.Content = new VisualProfilerUIView();
 
+            _visualProfilerUIView = new VisualProfilerUIView();
+            base.Content = _visualProfilerUIView;
+
+        }
+
+        public VisualProfilerUIView VisualProfilerUIView
+        {
+            get { return _visualProfilerUIView; }
         }
     }
 }
