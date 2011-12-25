@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using JanVratislav.VisualProfilerVSPackage.View;
+
 using Microsoft.VisualStudio.Shell;
 using VisualProfilerUI;
 
@@ -22,7 +22,7 @@ namespace JanVratislav.VisualProfilerVSPackage
     [System.Runtime.InteropServices.Guid("fa4d1b50-5999-44b4-9c50-030b5687f2f2")]
     public class VisualProfilerToolWindow : ToolWindowPane
     {
-        private VisualProfilerUIView _visualProfilerUIView;
+        private readonly VisualProfilerUIView _visualProfilerUIView;
 
         /// <summary>
         /// Standard constructor for the tool window.

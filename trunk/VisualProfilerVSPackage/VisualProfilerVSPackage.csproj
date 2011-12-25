@@ -8,7 +8,7 @@
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JanVratislav.VisualProfilerVSPackage</RootNamespace>
+    <RootNamespace>VisualProfilerVSPackage</RootNamespace>
     <AssemblyName>VisualProfilerVSPackage</AssemblyName>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>VisualProfilerKey.snk</AssemblyOriginatorKeyFile>
@@ -140,40 +140,38 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Guids.cs" />
-    <Compile Include="Resources.Designer.cs">
+    <Compile Include="PackageFiles\Guids.cs" />
+    <Compile Include="PackageFiles\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="View\VisualProfilerWindowView.xaml.cs">
-      <DependentUpon>VisualProfilerWindowView.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="PackageFiles\GlobalSuppressions.cs" />
     <Compile Include="VisualProfilerToolWindow.cs" />
     <Compile Include="VisualProfilerVSPackagePackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PkgCmdID.cs" />
+    <Compile Include="PackageFiles\PkgCmdID.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources.resx">
+    <EmbeddedResource Include="PackageFiles\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="VSPackage.resx">
+    <EmbeddedResource Include="PackageFiles\VSPackage.resx">
       <MergeWithCTO>true</MergeWithCTO>
       <ManifestResourceName>VSPackage</ManifestResourceName>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="source.extension.vsixmanifest">
+    <None Include="PackageFiles\source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
     <None Include="VisualProfilerKey.snk" />
   </ItemGroup>
   <ItemGroup>
-    <VSCTCompile Include="VisualProfilerVSPackage.vsct">
+    <VSCTCompile Include="PackageFiles\VisualProfilerVSPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
   </ItemGroup>
@@ -188,12 +186,6 @@
     <Content Include="Resources\Package.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="View\VisualProfilerWindowView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\VisualProfilerAccess\VisualProfilerAccess.csproj">
       <Project>{EF9CE7CB-9985-4C4B-ADBC-9D7DAAA43D56}</Project>
       <Name>VisualProfilerAccess</Name>
@@ -204,6 +196,9 @@
       <Name>VisualProfilerUI</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup</IncludeOutputGroupsInVSIX>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="View\" />
   </ItemGroup>
   <PropertyGroup>
     <UseCodebase>true</UseCodebase>

@@ -7,7 +7,6 @@ using System.ComponentModel.Design;
 using System.Windows;
 using EnvDTE;
 using EnvDTE80;
-using JanVratislav.VisualProfilerVSPackage.View;
 using Microsoft.Win32;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -16,6 +15,7 @@ using Microsoft.VisualStudio.Shell;
 using VisualProfilerAccess.ProfilingData;
 using VisualProfilerUI;
 using VisualProfilerUI.ViewModel;
+using VisualProfilerVSPackage.PackageFiles;
 
 namespace JanVratislav.VisualProfilerVSPackage
 {
