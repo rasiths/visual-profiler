@@ -82,7 +82,7 @@ namespace VisualProfilerUI
 
         private void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
         {
-            if (Interlocked.CompareExchange(ref _enter, 0, 1) == 1)
+        //    if (Interlocked.CompareExchange(ref _enter, 0, 1) == 1)
             {
                 lock (LockObject)
                 {
