@@ -29,13 +29,13 @@ namespace VisualProfilerUI.View
 
         #endregion
 
-        public static readonly DependencyProperty MouseLeftProperty =
-            DependencyProperty.Register("MouseLeft", typeof(ICommand), typeof(MethodViewBase), new PropertyMetadata(default(ICommand)));
+        public static readonly DependencyProperty MouseLeftCommandProperty =
+            DependencyProperty.Register("MouseLeftCommand", typeof(ICommand), typeof(MethodViewBase), new PropertyMetadata(default(ICommand)));
 
-        public ICommand MouseLeft
+        public ICommand MouseLeftCommand
         {
-            get { return (ICommand)GetValue(MouseLeftProperty); }
-            set { SetValue(MouseLeftProperty, value); }
+            get { return (ICommand)GetValue(MouseLeftCommandProperty); }
+            set { SetValue(MouseLeftCommandProperty, value); }
         }
 
         #region MouseUpCommand
@@ -50,20 +50,6 @@ namespace VisualProfilerUI.View
         }
 
         #endregion
-
-        #region FillProperty
-
-        //public static readonly DependencyProperty FillProperty =
-        //    DependencyProperty.Register("Fill", typeof (Brush), typeof (MethodView), new PropertyMetadata(default(Brush)));
-
-        //public Brush Fill
-        //{
-        //    get { return (Brush) GetValue(FillProperty); }
-        //    set { SetValue(FillProperty, value); }
-        //}
-
-        #endregion
-
 
         protected void MethodViewMouseEnter(object sender, MouseEventArgs e)
         {
@@ -83,9 +69,9 @@ namespace VisualProfilerUI.View
 
         protected void MethodViewOnMouseLeave(object sender, MouseEventArgs e)
         {
-            if (MouseLeft != null && MouseLeft.CanExecute(null))
+            if (MouseLeftCommand != null && MouseLeftCommand.CanExecute(null))
             {
-                MouseLeft.Execute(null);
+                MouseLeftCommand.Execute(null);
             }
         }
     }

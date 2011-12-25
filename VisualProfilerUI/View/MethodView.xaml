@@ -5,7 +5,7 @@
              MouseLeave="MethodViewOnMouseLeave"
              MouseUp="MethodViewOnMouseUp"
              MouseEnteredCommand="{Binding Path=ActivateCommand}" 
-             MouseLeft="{Binding Path=DeActivateCommand}"
+             MouseLeftCommand="{Binding Path=DeactivateCommand}"
              MouseUpCommand="{Binding Path=HighlightCommand}"        
              BorderBrush="{Binding Path=BorderBrush}" 
              BorderThickness="2"
