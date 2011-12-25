@@ -1,8 +1,7 @@
 ﻿// PkgCmdID.cs
 // MUST match PkgCmdID.h
-using System;
 
-namespace JanVratislav.VisualProfilerVSPackage
+namespace VisualProfilerVSPackage.PackageFiles
 {
     static class PkgCmdIDList
     {

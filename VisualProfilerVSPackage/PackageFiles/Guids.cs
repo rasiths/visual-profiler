@@ -1,8 +1,9 @@
 ﻿// Guids.cs
 // MUST match guids.h
+
 using System;
 
-namespace JanVratislav.VisualProfilerVSPackage
+namespace VisualProfilerVSPackage.PackageFiles
 {
     static class GuidList
     {
