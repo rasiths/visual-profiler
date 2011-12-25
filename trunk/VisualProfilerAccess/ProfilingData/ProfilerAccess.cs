@@ -81,12 +81,18 @@ namespace VisualProfilerAccess.ProfilingData
         {
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_ENABLE_PROFILING", "1");
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER", ProfilerCClassGuid.ToString("B"));
-            //TODO Pozor pevna cesta!!!!!
-            ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER_PATH",
-                                                              @"D:\Honzik\Desktop\visual-profiler\Release\VisualProfilerBackend.dll");
+            string profilerDllPath = GetProfilerPath();
+            ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER_PATH", profilerDllPath);
             ProfileeProcessStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", _namePipeName);
             ProfileeProcessStartInfo.UseShellExecute = false;
             ProfileeProcess = Process.Start(ProfileeProcessStartInfo);
+        }
+
+        private string GetProfilerPath()
+        {
+            string profilerFolderPath = Path.GetDirectoryName(GetType().Assembly.Location);
+            string profilerDllPath = profilerFolderPath + @"\VisualProfilerBackendDll\VisualProfilerBackend.dll";
+            return profilerDllPath;
         }
 
         private void InboundMessageLoop(object state)

@@ -21,6 +21,6 @@
   </References>
   <Content>
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
-    <Assembly AssemblyName="Microsoft.Cci.MetadataHelper.dll"></Assembly>
+    <Assembly AssemblyName="VisualProfilerBackendDll\VisualProfilerBackend.dll"></Assembly>
   </Content>
 </Vsix>
