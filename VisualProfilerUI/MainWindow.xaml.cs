@@ -37,7 +37,7 @@ namespace VisualProfilerUI
         public MainWindow()
         {
             InitializeComponent();
-            //visualProfilerUI.Profile(ProfilerTypes.TracingProfiler, );
+            visualProfilerUI.Profile(ProfilerTypes.TracingProfiler, @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe");
         }
     }
 
