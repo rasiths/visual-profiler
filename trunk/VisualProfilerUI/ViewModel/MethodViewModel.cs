@@ -38,7 +38,7 @@ namespace VisualProfilerUI.ViewModel
             Height = height;
 
             ActivateCommand = new RelayCommand(o => InvokeEvent(Activate));
-            DeActivateCommand = new RelayCommand(o => InvokeEvent(Deactivate));
+            DeactivateCommand = new RelayCommand(o => InvokeEvent(Deactivate));
             HighlightCommand = new RelayCommand(o => InvokeEvent(Highlight));
         }
 
@@ -122,16 +122,11 @@ namespace VisualProfilerUI.ViewModel
         }
 
         public int Top { get; set; }
-
         public int Height { get; set; }
-
         public ICommand ActivateCommand { get; set; }
-        public ICommand DeActivateCommand { get; set; }
-
+        public ICommand DeactivateCommand { get; set; }
         public ICommand HighlightCommand { get; set; }
-
         public IValue ActiveValue { get; set; }
-
         public double OpacityTemp { get; set; }
     }
 }
