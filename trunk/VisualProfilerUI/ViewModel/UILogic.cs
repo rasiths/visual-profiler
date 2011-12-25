@@ -34,34 +34,17 @@ namespace VisualProfilerUI.ViewModel
 
         public ObservableCollection<MethodViewModel> SortedMethodVMs { get; set; }
 
-        //public void OnCriteriaChanged(Criterion newCriterion)
-        //{
-        //    ActiveCriterion = newCriterion;
-        //    IValue maxValue = CriteriaContext.GetMaxValueFor(newCriterion);
-        //    foreach (var method in MethodModelByIdDict.Values)
-        //    {
-        //        IValue newValue = method.GetValueFor(newCriterion);
-        //        double valueZeroOneScale = newValue.ConvertToZeroOneScale(maxValue);
+        public event Action<MethodViewModel> MethodClick;
 
-        //        Tuple<MethodViewModel, MethodViewModel> horVerTuple = HorVerMethodsByIdDict[method.Id];
-        //        var horizontalMethod = horVerTuple.Item1;
-        //        var verticalMethod = horVerTuple.Item2;
+        public void OnMethodClick(MethodViewModel methodViewModel)
+        {
+            Action<MethodViewModel> handler = MethodClick;
+            if (handler != null)
+            {
+                handler(methodViewModel);
+            }
+        }
 
-
-        //        Color adjustedMethodColor = horizontalMethod.FillColorNoAlpha;
-        //        adjustedMethodColor.A = (byte) (valueZeroOneScale*byte.MaxValue);
-
-        //        SolidColorBrush newBrush = new SolidColorBrush(adjustedMethodColor);
-
-        //        horizontalMethod.Fill = newBrush;
-        //        verticalMethod.Fill = newBrush;
-        //    }
-
-        //    if(ActiveMethodId!=null)
-        //    {
-        //        ShowMethodInDetail(ActiveMethodId.Value);
-        //    }
-        //}
 
         private void ShowMethodInDetail(uint methodId)
         {
@@ -102,7 +85,6 @@ namespace VisualProfilerUI.ViewModel
             ActiveMethodVM = null;
             methodVM.BorderBrush = MethodView.MethodBorderColor.ToBrush();
             methodVM.IsActive = false;
-
         }
 
         public void InitAllMethodViewModels()
@@ -112,6 +94,7 @@ namespace VisualProfilerUI.ViewModel
                 MethodViewModel methodViewModel = kvp.Value;
                 methodViewModel.Activate += MethodActivate;
                 methodViewModel.Deactivate += MethodDeactivated;
+                methodViewModel.Highlight += OnMethodClick;
             }
         }
 
@@ -154,7 +137,11 @@ namespace VisualProfilerUI.ViewModel
             //not implemented in this version 
         }
 
-
-
+        public string GetSourceFilePathForMethod(MethodViewModel methodViewModel)
+        {
+            Method method = MethodModelByIdDict[methodViewModel.Id];
+            string sourceFile = method.SourceFile;
+            return sourceFile;
+        }
     }
 }

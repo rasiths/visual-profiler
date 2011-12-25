@@ -15,6 +15,7 @@ using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using VisualProfilerAccess.ProfilingData;
 using VisualProfilerUI;
+using VisualProfilerUI.ViewModel;
 
 namespace JanVratislav.VisualProfilerVSPackage
 {
@@ -26,6 +27,8 @@ namespace JanVratislav.VisualProfilerVSPackage
     [Guid(GuidList.guidVisualProfilerVSPackagePkgString)]
     public sealed class VisualProfilerVSPackagePackage : Package
     {
+        private DTE2 _dte;
+
         public VisualProfilerVSPackagePackage()
         {
             Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
@@ -48,6 +51,8 @@ namespace JanVratislav.VisualProfilerVSPackage
                 mcs.AddCommand(menuItemSampling);
 
             }
+
+            _dte = GetService(typeof(SDTE)) as DTE2;
         }
 
         private void TracingCallback(object sender, EventArgs e)
@@ -77,6 +82,14 @@ namespace JanVratislav.VisualProfilerVSPackage
 
                 VisualProfilerToolWindow window = this.FindToolWindow(typeof(VisualProfilerToolWindow), 0, true) as VisualProfilerToolWindow;
                 if ((null == window) || (null == window.Frame)) throw new NotSupportedException("Cannot create a window.");
+
+                UILogic uiLogic = window.VisualProfilerUIView.UILogic;
+                window.VisualProfilerUIView.UILogic.MethodClick +=
+                    mvm =>
+                        {
+                            string sourcePath = uiLogic.GetSourceFilePathForMethod(mvm);
+                            _dte.ItemOperations.OpenFile(sourcePath);
+                        };
                 window.VisualProfilerUIView.Profile(profilerType, assemblyPath);
                 window.Caption = string.Format("Visual Profiler - {0} Mode", GetModeString(profilerType));
                 IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
@@ -89,6 +102,7 @@ namespace JanVratislav.VisualProfilerVSPackage
             }
         }
 
+
         private string GetModeString(ProfilerTypes profilerType)
         {
             string profilerTypeName = profilerType.ToString();
@@ -99,25 +113,19 @@ namespace JanVratislav.VisualProfilerVSPackage
 
         private bool StartBuild()
         {
-
-            var dte = GetService(typeof(SDTE)) as DTE2;
-            dte.Solution.SolutionBuild.Build(true);
-            int numberOfFailures = dte.Solution.SolutionBuild.LastBuildInfo;
+            _dte.Solution.SolutionBuild.Build(true);
+            int numberOfFailures = _dte.Solution.SolutionBuild.LastBuildInfo;
             bool buildSucceeded = numberOfFailures == 0;
             return buildSucceeded;
         }
 
         private Project GetStartUpProject()
         {
-            var dte = GetService(typeof(SDTE)) as DTE2;
-
-            Array startupProjects = dte.Solution.SolutionBuild.StartupProjects as Array;
+           Array startupProjects = _dte.Solution.SolutionBuild.StartupProjects as Array;
             string value = startupProjects.GetValue(0) as string;
 
             Project startUpProject = null;
-
-            var array = dte.Solution.Projects as Array;
-            foreach (var project in dte.Solution.Projects)
+            foreach (var project in _dte.Solution.Projects)
             {
                 var project1 = project as Project;
                 if (project1.FullName.EndsWith(value))
