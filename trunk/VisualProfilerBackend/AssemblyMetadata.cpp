@@ -24,17 +24,8 @@ AssemblyMetadata::AssemblyMetadata(AssemblyID assemblyId,ICorProfilerInfo3 * pPr
 	bool visualProfilerTargetAttrApplied = hr == S_OK;
 	if(!visualProfilerTargetAttrApplied){
 		_isProfilingEnabled = false;
-		//_isProfilingEnabled = true; //uncomment to profile all assemblies
-		return;
-	}
-	
-	int expectedNumberOfBytes = 5;
-	int booleanBytePosition = 2;
-	if(byteCount == expectedNumberOfBytes){
-		BYTE isProfilingEnabledByte = pBytes[booleanBytePosition];
-		_isProfilingEnabled = isProfilingEnabledByte > 0;
 	}else{
-		_isProfilingEnabled = false;
+		_isProfilingEnabled = true;
 	}
 }
 

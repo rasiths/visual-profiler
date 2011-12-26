@@ -72,7 +72,7 @@ HRESULT STDMETHODCALLTYPE CTracingProfiler::Initialize( IUnknown *pICorProfilerI
 	this->pProfilerInfo->SetEnterLeaveFunctionHooks3(enterFunction, leaveFunction , tailcallFuntion);
 
 	tracingProfiler = this;
-	Beep(4000, 100);
+	//Beep(4000, 100);
 	return S_OK;
 }
 

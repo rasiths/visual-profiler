@@ -58,7 +58,6 @@ namespace VisualProfilerAccess.ProfilingData
 
         private void InitNamePipe()
         {
-            
             _pipeServer = new NamedPipeServerStream(_namePipeName, PipeDirection.InOut, 1,
                                                     PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
         }
@@ -81,14 +80,14 @@ namespace VisualProfilerAccess.ProfilingData
         {
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_ENABLE_PROFILING", "1");
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER", ProfilerCClassGuid.ToString("B"));
-            string profilerDllPath = GetProfilerPath();
+            string profilerDllPath = GetProfilerDllPath();
             ProfileeProcessStartInfo.EnvironmentVariables.Add("COR_PROFILER_PATH", profilerDllPath);
             ProfileeProcessStartInfo.EnvironmentVariables.Add("VisualProfiler.PipeName", _namePipeName);
             ProfileeProcessStartInfo.UseShellExecute = false;
             ProfileeProcess = Process.Start(ProfileeProcessStartInfo);
         }
 
-        private string GetProfilerPath()
+        private string GetProfilerDllPath()
         {
             string profilerFolderPath = Path.GetDirectoryName(GetType().Assembly.Location);
             string profilerDllPath = profilerFolderPath + @"\VisualProfilerBackendDll\VisualProfilerBackend.dll";
@@ -105,6 +104,7 @@ namespace VisualProfilerAccess.ProfilingData
                 if (finishLoop)
                 {
                     _cancellationTokenSource.Cancel();
+                    _pipeServer.Dispose();
                     _stopProfilingEvent.Set();
                 }
             }
@@ -123,6 +123,7 @@ namespace VisualProfilerAccess.ProfilingData
                 }
                 catch (IOException)
                 {
+                     _pipeServer.Dispose();
                     bool problemOccurredBeforeCancellation = !cancellationToken.IsCancellationRequested;
                     _profilerCommunicator.SendCommandToProfilee(_pipeServer, Commands.FinishProfiling);
                     if (problemOccurredBeforeCancellation) throw;
@@ -144,15 +145,13 @@ namespace VisualProfilerAccess.ProfilingData
             {
                 _stopProfilingEvent.Set();
             }
-        
         }
 
         public void StopProfiler()
         {
             if(ProfilerStarted)
             {
-                _stopProfilingEvent.Reset();
-                
+                _stopProfilingEvent.Reset();                
             }
         }
 

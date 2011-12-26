@@ -16,6 +16,7 @@ using VisualProfilerAccess.ProfilingData;
 using VisualProfilerUI;
 using VisualProfilerUI.ViewModel;
 using VisualProfilerVSPackage.PackageFiles;
+using VisualProfilerVSPackage.View;
 
 namespace JanVratislav.VisualProfilerVSPackage
 {
@@ -91,6 +92,7 @@ namespace JanVratislav.VisualProfilerVSPackage
                             _dte.ItemOperations.OpenFile(sourcePath);
                         };
                 window.VisualProfilerUIView.Profile(profilerType, assemblyPath);
+                window.VisualProfilerUIView.DataUpdate += ContainingUnitView.UpdateDataOfContainingUnits;
                 window.Caption = string.Format("Visual Profiler - {0} Mode", GetModeString(profilerType));
                 IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
                 ErrorHandler.ThrowOnFailure(windowFrame.Show());

@@ -4,7 +4,6 @@
              TextOptions.TextFormattingMode="Display">
     <UserControl.Background>
         <ImageBrush ImageSource="Images/main_background.png" TileMode="Tile"  ViewportUnits="Absolute" Viewport="0,0,8,8"  ></ImageBrush>
-
     </UserControl.Background>
 
     <UserControl.Resources>
@@ -15,13 +14,11 @@
             <Style TargetType="{x:Type TextBlock}">
                 <Setter Property="Control.Foreground" Value="WhiteSmoke"/>
             </Style>
-
         </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
-
             <RowDefinition Height="70"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
@@ -31,13 +28,10 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-
         <Canvas Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"  >
             <v:DetailView x:Name="detail"  />
-            <Button  Click="ButtonBase_OnClick" Height="20" Canvas.Left="200" >start</Button>
+            <!--<Button  Click="ButtonBase_OnClick" Height="20" Canvas.Left="200" >start</Button>-->
         </Canvas>
-
-
 
         <v:CriteriaSwitchView x:Name="criteriaSwitch" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" />
         <v:SortedMethodsView x:Name="sortedMethods" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Top" />
@@ -53,7 +47,7 @@
             <ItemsControl Name="containingUnits" >
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" Height="{Binding}"  />
+                        <StackPanel Orientation="Horizontal" Height="{Binding Path=Height}"  />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
@@ -63,7 +57,6 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-
     </Grid>
 </UserControl>
 
