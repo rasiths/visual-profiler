@@ -20,7 +20,7 @@ namespace VisualProfilerUI
     {
         private int _enter = 0;
         private readonly UILogic _uiLogic;
-        readonly object LockObject = new object();
+        readonly object _lockObject = new object();
 
         public VisualProfilerUIView()
         {
@@ -66,12 +66,11 @@ namespace VisualProfilerUI
                 profilerAccess.StartProfiler();
 
                 _uiLogic.ActiveCriterion = SamplingCriteriaContext.TopStackOccurrenceCriteria;
+
                 criterionSwitchVMs = new[] {
                 new CriterionSwitchViewModel(SamplingCriteriaContext.TopStackOccurrenceCriteria){IsActive = true},
                 new CriterionSwitchViewModel(SamplingCriteriaContext.DurationCriteria)};
-
             }
-
 
             foreach (var switchVM in criterionSwitchVMs)
             {
@@ -80,17 +79,16 @@ namespace VisualProfilerUI
 
             criteriaSwitch.DataContext = criterionSwitchVMs;
             _uiLogic.CriterionSwitchVMs = criterionSwitchVMs;
-
         }
 
         private void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
         {
-            //    if (Interlocked.CompareExchange(ref _enter, 0, 1) == 1)
+           //if (Interlocked.CompareExchange(ref _enter, 0, 1) == 1)
             {
-                lock (LockObject)
+                lock (_lockObject)
                 {
                     CallTreeConvertor treeConvertor = new TracingCallTreeConvertor(eventArgs.CallTrees);
-                    SetupUI(treeConvertor);
+                    UpdateUI(treeConvertor);
                 }
             }
         }
@@ -99,22 +97,22 @@ namespace VisualProfilerUI
         {
             //if (Interlocked.CompareExchange(ref _enter, 0, 1) == 1)
             {
-                lock (LockObject)
+                lock (_lockObject)
                 {
                     CallTreeConvertor treeConvertor = new SamplingCallTreeConvertor(eventArgs.CallTrees);
-                    SetupUI(treeConvertor);
+                    UpdateUI(treeConvertor);
                 }
             }
         }
 
-        private void SetupUI(CallTreeConvertor treeConvertor)
+        private void UpdateUI(CallTreeConvertor treeConvertor)
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 var containingUnitViewModels = treeConvertor.SourceFiles.Select(sf =>
                 {
                     var methodViewModels = sf.ContainedMethods.Select(cm => new MethodViewModel(cm));
-                    var containingUnitViewModel = new ContainingUnitViewModel(System.IO.Path.GetFileName(sf.FullName));
+                    var containingUnitViewModel = new ContainingUnitViewModel(sf.FullName);
                     containingUnitViewModel.Height = sf.Height;
                     containingUnitViewModel.MethodViewModels = methodViewModels.OrderBy(mvm => mvm.Top).ToArray();
                     return containingUnitViewModel;
@@ -137,15 +135,23 @@ namespace VisualProfilerUI
                 _uiLogic.InitAllMethodViewModels();
 
                 containingUnits.ItemsSource = containingUnitViewModels;
-                containingUnits.DataContext = treeConvertor.MaxEndLine + 20;
-                var sortedMethodVMs = new ObservableCollection<MethodViewModel>(_uiLogic.MethodVMByIdDict.Values);
+                containingUnits.DataContext = new { Height = treeConvertor.MaxEndLine + 20 };
 
+                OnDataUpdate(containingUnitViewModels);
+
+                var sortedMethodVMs = new ObservableCollection<MethodViewModel>(_uiLogic.MethodVMByIdDict.Values);
                 sortedMethods.DataContext = sortedMethodVMs;
                 _uiLogic.SortedMethodVMs = sortedMethodVMs;
                 _uiLogic.ActivateCriterion(_uiLogic.ActiveCriterion);
             }), null);
+        }
 
+        public event Action<IEnumerable<ContainingUnitViewModel>> DataUpdate;
 
+        public void OnDataUpdate(IEnumerable<ContainingUnitViewModel> data)
+        {
+            Action<IEnumerable<ContainingUnitViewModel>> handler = DataUpdate;
+            if (handler != null) handler(data);
         }
 
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)

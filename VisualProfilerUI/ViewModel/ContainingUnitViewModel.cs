@@ -33,7 +33,6 @@ namespace VisualProfilerUI.ViewModel
             }
         }
 
-
         public ContainingUnitViewModel(string name)
         {
             _name = name;

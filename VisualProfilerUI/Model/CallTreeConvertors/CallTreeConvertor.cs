@@ -87,7 +87,7 @@ namespace VisualProfilerUI.Model.CallTreeConvertors
                 new SourceFile(
                     criteriaContext: CriteriaContext,
                     containedMethods: kvp.Select(k => k.Value).ToArray(),
-                    name: kvp.Key,
+                    fullName: kvp.Key,
                     displayName: Path.GetFileName(kvp.Key),
                     height: _maxEndLine + 10
                     )).ToArray();

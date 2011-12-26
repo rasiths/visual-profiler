@@ -22,5 +22,6 @@
   <Content>
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     <Assembly AssemblyName="VisualProfilerBackendDll\VisualProfilerBackend.dll"></Assembly>
+    <MefComponent>|%CurrentProject%|</MefComponent>
   </Content>
 </Vsix>

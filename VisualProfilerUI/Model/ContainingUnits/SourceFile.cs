@@ -11,16 +11,13 @@ namespace VisualProfilerUI.Model.ContainingUnits
         public SourceFile(
             ICriteriaContext criteriaContext,
             IEnumerable<Method> containedMethods,
-            string name,
+            string fullName,
             string displayName,
             int height)
-            : base(criteriaContext, containedMethods, name, displayName, height)
-        {
-        }
+            : base(criteriaContext, containedMethods, fullName, displayName, height)
+        {}
 
         public SourceFile()
-        {
-            
-        }
+        {}
     }
 }
