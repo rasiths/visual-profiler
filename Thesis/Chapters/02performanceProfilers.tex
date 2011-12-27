@@ -4,24 +4,24 @@ In this chapter we present various characteristics and mechanisms of performance
 
 \label{01ProfModes}
 \section{Profiling modes}
-An application can be profiled in several ways that differ in the results' precision, profiling overhead. 
+An application can be profiled in several ways that differ in the precision of their results and profiling overhead. 
 
 \subsection{Sampling profiling}
-In this mode, the profiler stops periodically every profilee's thread and inspects method frames on its call stacks. The output snapshot is not an exact representation of the runtime conditions rather a statistical approximation, but the profiling overhead is very low and the profilee runs almost in full speed with minimum side effects, such as additional memory allocations, cache faults and context switches.
+In this mode, the profiler stops periodically every profilee's thread and inspects method frames on its call stacks. The output snapshot is not an exact representation of the runtime conditions rather a statistical approximation, but the profiling overhead is very low and the profilee runs almost at full speed with minimum side effects, such as additional memory allocations, cache faults and context switches.
 
-The profiling overhead does not depend on the number of method called by the profilee as in other modes. The introduced error of the results is equal to half of the sampling period.
+The profiling overhead does not depend on the number of methods called by the profilee as in other modes. The introduced error of the results is equal to half of the sampling period.
 
 The profiler cannot count the number of method calls and the method duration are computed purely based on gathered statistics. 
 
-No source code or binary alternations in required, the runtime ability to stop execution to do a call stack snapshot or alternatively an interrupt instruction can by used.
+No source code or binary alternations is required, the runtime ability to stop execution to do a call stack snapshot or alternatively an interrupt instruction can be used.
 
 \subsection{Tracing profiling}
-This way of profiling relies on a runtime environment or some kind of hardware notification when a method is entered and left and leads to accurate results, providing exact count of method calls and their durations, however, with some added overhead. In addition, the overhead increases with the method calls count and slows down the profilee.
+This way of profiling relies on a runtime environment or some kind of hardware notification when a method is entered and left and leads to accurate results, providing exact count of method calls and their durations, however, with some added overhead. In addition, the overhead increases with the number of method calls and slows down the profilee.
 
-As with the sampling profiling, there are no changes to code or binaries required. The profiler has to only register callback methods for the entry/leave notifications with the runtime or the hardware profiling infrastructure.
+Similar to the sampling profiling, there are no changes to code or binaries required. The profiler has only to register callback methods for the entry/leave notifications with the runtime or the hardware profiling infrastructure.
 
 \subsection{Instrumentation profiling}
-The profilee code or binaries are modified by injection of arbitrary code or instructions in order to collect profiling data. This approach can have similar effects and results as the tracing profiling, but offers a lot more choice of what and how to profile. There are chances of alternation the original profilee behaviour or even introducing bugs.
+The profilee code or binaries are modified by injection of arbitrary code or instructions in order to collect profiling data. This approach can have similar effects and results as the tracing profiling, but offers a lot more choice of what and how to profile. There are chances of alternation of the original profilee behaviour or even introducing bugs.
 
 Instrumentation can be perform on every level of the software live-time (source, compilation, binary, runtime) and can be both manual, performed by a developer, as well as automatic, done by a compiler or a runtime environment.
 
@@ -31,15 +31,15 @@ A profiler can measure profiling result on different levels of a program. Not ev
 \subsection{Line-by-line granularity}
 Line-by-line profiling is the most accurate method and most demanding. Every program statement is measured and analysed. It brings precise result, however, the additional burden can alter the program's behaviour.
 
-Such fine granularity can be achieved only by the instrumentation profiling.
+Such a fine granularity can be achieved only by the instrumentation profiling.
 
 \subsection{Method granularity} 
-Only information regarding an entire method run are collected. The lower overhead can ease the profilee and still provide very informative results.
+Only information regarding an entire method run are collected. The lower overhead can improve performance of the profilee and still provide very informative results.
 
-This level of granularity is the only option for the sampling profilers and most cases the tracing profilers. The instrumentation profilers can be easily converted from the line-by-line to the method granularity.
+This level of granularity is the only option for the sampling profilers and most types of the tracing profilers. The instrumentation profilers can be easily converted from the line-by-line to the method granularity.
 
 \subsection{Selective granularity}
-The profiling process can be filtered with combined levels of granularity, where some parts of code are monitored on the line-by-line and others only on the method manners or not at all in order to capture desired statistic with lowest possible overhead and highest possible accuracy.
+The profiling process can be filtered with combined levels of granularity, where some parts of code are monitored on the line-by-line level and others only on the method level or not at all in order to capture desired statistic with lowest possible overhead and highest possible accuracy.
 
 \begin{figure}
 	\centering
@@ -50,7 +50,7 @@ The profiling process can be filtered with combined levels of granularity, where
 
 
 \section{Profiling results}
-During the process of profiling various kinds of data can be collected. For some application, it is sufficient to count the method hit count for others is a detailed call stack analysis required. Again, the amount of result information places overhead on the profilee, in this case primary on the memory (caches, pages...) and secondary on the CPU.
+During the process of profiling various kinds of data can be collected. For some application, it is sufficient to count the method hit count; for others is a detailed call stack analysis required. Again, the amount of result information places overhead on the profilee, in this case primary on the memory (caches, pages...) and secondary on the CPU.
 
 \subsection{Time measurement}
 There are several different kinds of the program time measurement a profiler can provide. Not every profiling mode can provide every single measurement. As usually, the measurement accuracy is counterweighted with the computational complexity.
@@ -59,13 +59,13 @@ There are several different kinds of the program time measurement a profiler can
 The wall time measurement starts when a thread enters a method and ends when the thread leaves the method. The resulting time does not reflect if the method does useful computation or is in either a wait, a sleep or a join mode.
 
 \subsubsection*{User and kernel time}
-In comparison with the wall time, the user and kernel time measurement counts solely time spent executing a method exclusive the time spent by waiting, sleeping or joining.
+In comparison with the wall time, the user and kernel time measurement counts solely time spent executing a method except the time spent by waiting, sleeping or joining.
 
-Every profiling mode is capable of both the wall time as well as the user and kernel time measurement, either by statistically distributing the program execution time over the method hit counts or by reading CPU registers or system performance counters.
+Every profiling mode is capable of both the wall time as well as the user and kernel time measurements, either by statistically distributing the program execution time over the method hit counts or by reading CPU registers or system performance counters.
 
 \subsection{Call trees}
-When relations among methods calls allows the profiler to reconstruct a call tree. The call tree reveals hit count of functions and, more importantly, what function calls which function. This insight helps to find hot spots and understand the runtime conditions.
-Additional function parameter analysis is also possible, but in cost of higher CPU and memory overhead. A example of a call tree is shown on the figure \ref{fig:01callGraphRedGate}.
+Relations among method calls allow the profiler to reconstruct a call tree. The call tree reveals hit count of functions and, more importantly, what function calls which function. This insight helps to find hot spots and understand the runtime conditions.
+Additional function parameter analysis is also possible, but at the cost of higher CPU and memory overhead. A example of a call tree is shown in the figure \ref{fig:01callGraphRedGate}.
 
 \begin{figure}
 	\centering
@@ -74,24 +74,24 @@ Additional function parameter analysis is also possible, but in cost of higher C
 	\label{fig:01callGraphRedGate}
 \end{figure}
 
-Some profilers do not track calls hierarchy and they only record function hit count and duration. It is referred by the term flat call tree.
+Some profilers do not track calls hierarchy and they only record function hit count and duration. In this case, the call tree is referred by the term flat call tree.
 
 \section{Available .NET performance profilers}
-On the market, there is many various options in the field of .NET performance profiling. The commercial solutions offer many features and integration with others tools, however, not with Visual Studio in most cases. There are also a few open source alternatives.
+On the market, there is many various options in the field of .NET performance profiling. The commercial solutions offer many features and integration with other tools, however, not with Visual Studio in most cases. There are also a few open source alternatives.
 
-Unfortunately, we could not carry out deeper performance and features assessment of available profilers, since we do not have required financial and time resources for this challenging and but very interesting undertaking.
+Unfortunately, we could not carry out deeper performance and features assessment of available profilers, since we did not have required financial and time resources for this challenging and but very interesting undertaking.
 
 \subsection*{Commercial solutions}
 
 \subsection{JetBrains dotTrace}
-dotTrace profiles .NET Framework 1.0 to 4.0, Silverlight 4, or .NET Compact Framework 3.5. It offers partial integration with the Visual Studio and others JetBrains tools. All the profiling modes as presented and the profiling can run remotely.
+dotTrace profiles .NET Framework 1.0 to 4.0, Silverlight 4, or .NET Compact Framework 3.5. It offers partial integration with the Visual Studio and others JetBrains tools. All the profiling modes described above are supported and the profiling can run remotely.
 
 \textit{\href{http://www.jetbrains.org}{www.jetbrains.org}	}
 
 \subsection{Redgate ANTS Performance Profiler}
-This tool targets similar set of .NET applications. In addition it offers SQL and I/O  profiling, live results, all the profiling modes and time schemas. 
+This tool targets similar set of .NET applications as JetBrains dotTrace. In addition it offers SQL and I/O  profiling, live results, all the profiling modes and time schemas. 
 
-It offers some integration in the Visual Studio and allows to see code directly from the profiling tool. 
+It offers basic integration with the Visual Studio and allows to see code directly from the profiling tool. 
 
 \textit{\href{http://www.red-gate.com}{www.red-gate.com}}
 
@@ -114,15 +114,15 @@ We were unable to find anything about the Visual Studio integration. So we assum
 This tool is integrated to the Visual Studio and supports the native and managed code profiling. It has the sampling and instrumenting profiling modes. It is shipped only with higher editions of the Visual Studio
 
 \subsection{Others}
-There is even more very comparable profiling suites offering very similar functionality as aforementioned solutions as the Telerik JustTrace, the SpeedTrace Pro and maybe even other that we have not discovered.
+There are many other professional profiling profiling solutions comparable to those mentioned above (among others the Telerik JustTrace, the SpeedTrace Pro).
 
 It is a challenging task to pick the right solution for one's needs with the right licensing options.
 
 \subsection*{Open source solutions}
-The open source choice is not as vast as the commercial, so far offering only two solutions.
+The open source alternatives are not as numerous as the commercial ones. There are only two solutions.
 
 \subsection{SlimTune}
-SlimTune is a free profiler that offers advanced features as remote profiling 32-bit and 64-bit profiling, live results. There is very little information available and user has to dive into the source code to find out about its inner mechanisms.
+SlimTune is a free profiler that offers advanced features as remote profiling of 32-bit and 64-bit profiling, live results. There is very little information available and user has to dive into the source code to find out about its inner mechanisms.
 
 \textit{\href{http://code.google.com/p/slimtune}{code.google.com/p/slimtune}}
 
@@ -134,7 +134,7 @@ Unfortunately, this project does not seem to be actively developed.
 \textit{\href{http://dotnet.jku.at/projects/Prof-It/}{dotnet.jku.at/projects/Prof-It}}
 
 \section*{Summary}
-In this we have look at and explained the sampling, the tracing and the instrumenting profiling modes. Then we focused on the profiling results and their granularity, mainly the call trees and different kinds of inspected durations. In the end of the chapter a short overview of the current commercial and open-source scene was presented.
+In this introduction, we have look at and explained the sampling, the tracing and the instrumenting profiling modes. Then we focused on the profiling results and their granularity, mainly the call trees and different kinds of inspected durations. In the end of the chapter, a short overview of the current commercial and open-source scene was presented.
 
  
 
