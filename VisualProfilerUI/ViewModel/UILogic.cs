@@ -45,7 +45,6 @@ namespace VisualProfilerUI.ViewModel
             }
         }
 
-
         private void ShowMethodInDetail(uint methodId)
         {
             Method method = MethodModelByIdDict[methodId];

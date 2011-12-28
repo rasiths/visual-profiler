@@ -107,8 +107,8 @@ Global
 		{45676B80-BACC-42EC-B85A-86CA5CAE89BE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{45676B80-BACC-42EC-B85A-86CA5CAE89BE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{45676B80-BACC-42EC-B85A-86CA5CAE89BE}.Release|Win32.ActiveCfg = Release|Any CPU
-		{45676B80-BACC-42EC-B85A-86CA5CAE89BE}.Release|x86.ActiveCfg = Release|x86
-		{45676B80-BACC-42EC-B85A-86CA5CAE89BE}.Release|x86.Build.0 = Release|x86
+		{45676B80-BACC-42EC-B85A-86CA5CAE89BE}.Release|x86.ActiveCfg = Debug|x86
+		{45676B80-BACC-42EC-B85A-86CA5CAE89BE}.Release|x86.Build.0 = Debug|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -110,8 +110,8 @@
     <Compile Include="Model\CriteriaContexts\SamplingCriteriaContext.cs" />
     <Compile Include="Model\CriteriaContexts\TracingCriteriaContext.cs" />
     <Compile Include="Model\Criteria\Criterion.cs" />
-    <Compile Include="Model\Criteria\SamplingCriteria\DurationCriteria.cs" />
-    <Compile Include="Model\Criteria\SamplingCriteria\TopStackOccurrenceCriteria.cs" />
+    <Compile Include="Model\Criteria\SamplingCriteria\DurationCriterion.cs" />
+    <Compile Include="Model\Criteria\SamplingCriteria\TopStackOccurrenceCriterion.cs" />
     <Compile Include="Model\Criteria\TracingCriteria\CallCountCriterion.cs" />
     <Compile Include="Model\Criteria\TracingCriteria\TimeActiveCriterion.cs" />
     <Compile Include="Model\Criteria\TracingCriteria\TimeWallClockCriterion.cs" />
@@ -146,7 +146,7 @@
     <Compile Include="View\SortedMethodView.xaml.cs">
       <DependentUpon>SortedMethodView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="VisualProfilerUIView.xaml.cs">
+    <Compile Include="View\VisualProfilerUIView.xaml.cs">
       <DependentUpon>VisualProfilerUIView.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
@@ -189,9 +189,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="VisualProfilerUIView.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="View\VisualProfilerUIView.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

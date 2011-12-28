@@ -1,8 +1,8 @@
 namespace VisualProfilerUI.Model.Criteria.SamplingCriteria
 {
-    public class DurationCriteria : Criterion
+    public class DurationCriterion : Criterion
     {
-        public DurationCriteria()
+        public DurationCriterion()
             : base("Duration")
         {
         }

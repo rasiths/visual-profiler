@@ -30,10 +30,10 @@ namespace VisualProfilerUI.Model.Methods
 
         public override IValue GetValueFor(Criterion criterion)
         {
-            if (criterion == SamplingCriteriaContext.TopStackOccurrenceCriteria)
+            if (criterion == SamplingCriteriaContext.TopStackOccurrenceCriterion)
                 return _topStackOccurrence;
 
-            if (criterion == SamplingCriteriaContext.DurationCriteria)
+            if (criterion == SamplingCriteriaContext.DurationCriterion)
                 return _duration;
 
             string message = string.Format("Criterion {0} is not supported for a tracing method",

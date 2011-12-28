@@ -30,17 +30,17 @@ namespace VisualProfilerUITests.ModelTests.CriteriaContextsTests
         {
             var availableCriteria = _samplingCriteriaContext.AvailableCriteria.ToArray();
             Assert.AreEqual(2,availableCriteria.Count());
-            Assert.IsTrue(availableCriteria.Contains(new DurationCriteria()));
-            Assert.IsTrue(availableCriteria.Contains(new TopStackOccurrenceCriteria()));
+            Assert.IsTrue(availableCriteria.Contains(new DurationCriterion()));
+            Assert.IsTrue(availableCriteria.Contains(new TopStackOccurrenceCriterion()));
         }
 
         [Test]
         public void GetMaxValuesTest()
         {
-            IValue durationMaxValue = _samplingCriteriaContext.GetMaxValueFor(new DurationCriteria());
+            IValue durationMaxValue = _samplingCriteriaContext.GetMaxValueFor(new DurationCriterion());
             Assert.AreEqual(_maxDuration, durationMaxValue);
 
-            IValue topStackOccurrenceMaxValue = _samplingCriteriaContext.GetMaxValueFor(new TopStackOccurrenceCriteria());
+            IValue topStackOccurrenceMaxValue = _samplingCriteriaContext.GetMaxValueFor(new TopStackOccurrenceCriterion());
             Assert.AreEqual(_maxTopStackOccurrence, topStackOccurrenceMaxValue);
         }
     }

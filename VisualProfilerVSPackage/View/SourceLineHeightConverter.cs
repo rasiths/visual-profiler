@@ -11,7 +11,8 @@ namespace VisualProfilerVSPackage.View
    [ValueConversion(typeof(int), typeof(double))]
     public class SourceLineHeightConverter : IValueConverter
    {
-       public static double LineHeight = 16;    
+       //TODO set to proper a real value 
+       public static double LineHeight =  16;  // experimentaly acquired value on my machine
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             int correctionLineOffset = parameter == null ? 0 : System.Convert.ToInt32(parameter);
