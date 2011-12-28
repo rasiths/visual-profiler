@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -21,29 +22,16 @@ namespace CodeAdornment
         private IWpfTextView _view;
         private IAdornmentLayer _adornmentLayer;
         private string _sourceFilePath;
+        private ContainingUnitView containingUnitView;
 
         public CodeAdornment(IWpfTextView view)
         {
             _view = view;
             _sourceFilePath = GetSourceFilePath();
             _adornmentLayer = view.GetAdornmentLayer("CodeAdornment");
-            _view.ViewportWidthChanged += delegate { Initialize(); };
-            _view.ViewportHeightChanged += delegate { Initialize(); };
-            //  _view.LayoutChanged += delegate { Initialize(); }; 
-        }
 
-        private bool _init = false;
-        private void Initialize()
-        {
-            if (_init) return;
-            _init = true;
-
-            
             _adornmentLayer.RemoveAllAdornments();
-
-            SourceLineHeightConverter.LineHeight = _view.LineHeight -1 ;
-            ContainingUnitView containingUnitView = ContainingUnitView.GetContainingUnitViewByName(_sourceFilePath);
-
+            containingUnitView = ContainingUnitView.GetContainingUnitViewByName(_sourceFilePath);
 
             if (containingUnitView.Parent != null)
             {
@@ -51,8 +39,37 @@ namespace CodeAdornment
                 adornmentLayer.RemoveAdornment(containingUnitView);
             }
 
-
+            //TODO Some how anchor the adornment layer to prevent random moving.
+            Canvas.SetTop(containingUnitView, 0);
             _adornmentLayer.AddAdornment(AdornmentPositioningBehavior.OwnerControlled, null, null, containingUnitView, null);
+
+            // _view.ViewportWidthChanged += delegate { Initialize(); };
+            //_view.ViewportHeightChanged += delegate { Initialize(); };
+            //    _view.LayoutChanged += delegate { Initialize(); };
+            //   _view.ViewportLeftChanged += delegate { Initialize(); }; 
+            //   _view.ZoomLevelChanged += delegate { Initialize(); }; 
+            // _view.VisualElement.SizeChanged +=delegate { Initialize(); }; 
+        }
+
+        private bool _init = false;
+        private void Initialize()
+        {
+           
+            //     SourceLineHeightConverter.LineHeight = _view.LineHeight;
+            //    Debug.WriteLine("Line height = {0}", _view.LineHeight);
+            //if (_init) return;
+            // _init = true;
+            //double top = Canvas.GetTop(containingUnitView);
+            //   Canvas.SetTop(containingUnitView, 0);
+            //var top =_view.ViewportTop;
+
+
+
+            //    Canvas.SetLeft(containingUnitView, 0);
+
+            //      System.Console.Beep();
+            //  System.Windows.MessageBox.Show(_view.ViewportTop.ToString());
+
         }
 
         private string GetSourceFilePath()

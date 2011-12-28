@@ -5,13 +5,12 @@
     <UserControl.Resources>
         <View:SourceLineHeightConverter x:Key="lineHeightConverter" />
     </UserControl.Resources>
-
-        <!--<StackPanel>
-        <Rectangle Width="30" Height="30" Fill="Green" />-->
         <ItemsControl ItemsSource="{Binding Path=MethodViewModels }">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                <Canvas />
+                    <!--Marker of the top of the canvas to follow the random moving-->
+                <!--<Canvas Height="60" Background="Gray" Opacity="0.5" Width="100" />-->
+                <Canvas  />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemContainerStyle>
@@ -30,6 +29,4 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-<!--<Rectangle Width="30" Height="30" Fill="Blue" />
-    </StackPanel>-->
 </UserControl>

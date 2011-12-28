@@ -1,8 +1,8 @@
 namespace VisualProfilerUI.Model.Criteria.SamplingCriteria
 {
-    public class TopStackOccurrenceCriteria : Criterion
+    public class TopStackOccurrenceCriterion : Criterion
     {
-        public TopStackOccurrenceCriteria()
+        public TopStackOccurrenceCriterion()
             : base("Top stack occurrence")
         {
         }

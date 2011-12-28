@@ -25,8 +25,8 @@ namespace VisualProfilerUITests.ModelTests.CriteriaTests
         [Test]
         public void EqualityOfDerivedClassTest()
         {
-            DurationCriteria criterion1 = new DurationCriteria();
-            DurationCriteria criterion2 = new DurationCriteria();
+            DurationCriterion criterion1 = new DurationCriterion();
+            DurationCriterion criterion2 = new DurationCriterion();
             Assert.IsTrue(criterion1 == criterion2);
             Assert.IsTrue(criterion1.Equals((object)criterion2));
             Assert.IsTrue(criterion1.Equals(criterion2));

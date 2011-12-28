@@ -66,10 +66,10 @@ namespace VisualProfilerUI.Model.CallTreeConvertors.Sampling
             foreach (Method method in _methodDictionary.Values)
             {
                 maxTopStackOccurrence =
-                    (UintValue) Max(method.GetValueFor(SamplingCriteriaContext.TopStackOccurrenceCriteria), maxTopStackOccurrence);
+                    (UintValue) Max(method.GetValueFor(SamplingCriteriaContext.TopStackOccurrenceCriterion), maxTopStackOccurrence);
                 maxDuration =
                     (DoubleValue)
-                    Max(method.GetValueFor(SamplingCriteriaContext.DurationCriteria), maxDuration);
+                    Max(method.GetValueFor(SamplingCriteriaContext.DurationCriterion), maxDuration);
             }
 
             CriteriaContext = new SamplingCriteriaContext(

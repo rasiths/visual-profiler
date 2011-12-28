@@ -12,8 +12,8 @@ namespace VisualProfilerUI.Model.CriteriaContexts
         private readonly UintValue _maxTopStackOccurrence;
         private readonly DoubleValue _maxDuration;
         private readonly Criterion[] _availableCriteria;
-        public static readonly TopStackOccurrenceCriteria TopStackOccurrenceCriteria = new TopStackOccurrenceCriteria();
-        public static readonly DurationCriteria DurationCriteria = new DurationCriteria();
+        public static readonly TopStackOccurrenceCriterion TopStackOccurrenceCriterion = new TopStackOccurrenceCriterion();
+        public static readonly DurationCriterion DurationCriterion = new DurationCriterion();
 
         public SamplingCriteriaContext(UintValue maxTopStackOccurrence, DoubleValue maxDuration)
         {
@@ -21,7 +21,7 @@ namespace VisualProfilerUI.Model.CriteriaContexts
             Contract.Requires(maxDuration != null);
             _maxTopStackOccurrence = maxTopStackOccurrence;
             _maxDuration = maxDuration;
-            _availableCriteria = new Criterion[]{TopStackOccurrenceCriteria, DurationCriteria};
+            _availableCriteria = new Criterion[]{TopStackOccurrenceCriterion, DurationCriterion};
         }
 
         public IEnumerable<Criterion> AvailableCriteria
@@ -31,10 +31,10 @@ namespace VisualProfilerUI.Model.CriteriaContexts
 
         public IValue GetMaxValueFor(Criterion criterion)
         {
-            if (criterion == TopStackOccurrenceCriteria)
+            if (criterion == TopStackOccurrenceCriterion)
                 return _maxTopStackOccurrence;
 
-            if (criterion == DurationCriteria)
+            if (criterion == DurationCriterion)
                 return _maxDuration;
 
             var exceptionMessage = string.Format("Criterion of type {0} is not available in {1}", criterion.GetType().Name,

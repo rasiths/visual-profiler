@@ -6,6 +6,7 @@ using System.Windows;
 
 using Microsoft.VisualStudio.Shell;
 using VisualProfilerUI;
+using VisualProfilerUIView = VisualProfilerUI.View.VisualProfilerUIView;
 
 namespace JanVratislav.VisualProfilerVSPackage
 {
@@ -39,7 +40,7 @@ namespace JanVratislav.VisualProfilerVSPackage
             // the strip being 16x16.
             this.BitmapResourceID = 301;
             this.BitmapIndex = 1;
-
+            this.Caption = "Visual Profiler - Not Started";
 
             _visualProfilerUIView = new VisualProfilerUIView();
             base.Content = _visualProfilerUIView;

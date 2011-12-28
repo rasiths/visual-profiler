@@ -1,9 +1,8 @@
-﻿﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using VisualProfilerAccess.ProfilingData;
@@ -14,7 +13,7 @@ using VisualProfilerUI.Model.CallTreeConvertors.Tracing;
 using VisualProfilerUI.Model.CriteriaContexts;
 using VisualProfilerUI.ViewModel;
 
-namespace VisualProfilerUI
+namespace VisualProfilerUI.View
 {
     public partial class VisualProfilerUIView : UserControl
     {
@@ -65,11 +64,11 @@ namespace VisualProfilerUI
                     OnUpdateCallback);
                 profilerAccess.StartProfiler();
 
-                _uiLogic.ActiveCriterion = SamplingCriteriaContext.TopStackOccurrenceCriteria;
+                _uiLogic.ActiveCriterion = SamplingCriteriaContext.TopStackOccurrenceCriterion;
 
                 criterionSwitchVMs = new[] {
-                new CriterionSwitchViewModel(SamplingCriteriaContext.TopStackOccurrenceCriteria){IsActive = true},
-                new CriterionSwitchViewModel(SamplingCriteriaContext.DurationCriteria)};
+                new CriterionSwitchViewModel(SamplingCriteriaContext.TopStackOccurrenceCriterion){IsActive = true},
+                new CriterionSwitchViewModel(SamplingCriteriaContext.DurationCriterion)};
             }
 
             foreach (var switchVM in criterionSwitchVMs)
