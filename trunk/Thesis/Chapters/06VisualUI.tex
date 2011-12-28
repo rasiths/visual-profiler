@@ -100,11 +100,83 @@ For every profiling mode (tracing or sampling) there are various criteria with d
 \end{figure}
 
 \subsection{User interface - view-model}
-The view-model is responsible for the control the UI. It holds references to the model data and exposes them to the view. The view-model handles user input by commands that are bound to the view. It controls the view by changed dependency \footnote{Dependency property - \href{http://msdn.microsoft.com/en-us/library/ms752914.aspx}{http://msdn.microsoft.com/en-us/library/ms752914.aspx}}
+The view-model is responsible for the control of the UI. It holds references to the model data and exposes them to the view. The view-model handles user input by commands that are bound to the view. It controls the view by changes of view-model properties that are databound to dependency properties \footnote{Dependency property - \href{http://msdn.microsoft.com/en-us/library/ms752914.aspx}{http://msdn.microsoft.com/en-us/library/ms752914.aspx}} of the view.
 
+Every view-model inherits from the \textit{ViewModelBase} class, the figure \ref{fig:05ViewModelBase}. This class implements the \textit{INotifyPropertyChanged} interface that allows the WPF databinding to re-databind whenever a view-model property changes. When a view-model property changes, it calls in its setter the \textit{ViewModelBase}'s \textit{OnPropertyChanged()} method and passes its name as a parameter and the \textit{ViewModelBase}'s \textit{OnPropertyChanged()} method in turn invokes the \textit{ViewModelBase}'s \textit{PropertyChanged} event, which notified the registered handlers (presumably some WPF delegates) about the change to the property. This mechanism is an elegant way to achieve loose coupeling between view and view-model.
  
+ \begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 05ViewModelBase.png}
+		\caption{The \textit{ViewModelBase} class implements \textit{INotifyPropertyChanged} interface.}
+	\label{fig:05ViewModelBase}
+\end{figure}
+
+The middle point of the UI logic is the class \textit{UILogic}. This class holds references to all view-models, handles actions from commands and updates the views-models, which consequently update the views.
+
+The other parts of the view-model are:
+
+\begin{itemize}	
+\item  \textit{ContainingUnitViewModel} - represents a source file and holds \textit{MethodViewModel}s, this view-model is shared by three views	
+
+\item \textit{CriterionSwitchViewModel} - provides data and commands for switching profiling criteria
+
+\item \textit{DetailViewModel} - holds data for a method in focus
+
+\item \textit{MethodViewModel} - exposes data and commands for highlighting and changing information in the UI, this view-model is shared by three views	
+\end{itemize}
 
 
+\subsection{User interface - view}
+The view is based on a compostion of user controls. Dynamic display is accomplished by WPF panels. The controls are illustrated on the figure \ref{fig:05UIViewsArrows}.
+
+The main views are:
+
+\begin{itemize}	
+\item  \textit{ContainingUnitView} - contains methods, this view has no visual parts, it provides only layout 
+
+\item \textit{CriteriaSwitchView} - holds the radio buttons for switching the profiling criteria
+
+\item \textit{DetailView} - displays data for a method in focus
+
+\item \textit{MethodView} - represents a method in source file, invokes MouseUp, MouseEnter, MouseLeave events
+
+\item \textit{SortedMethodsView} - is a container for all methods sorted by an actual criterion
+
+\item \textit{SortedMethodView} - same functionality as \textit{MethodView}
+
+\item \textit{VisualProfilerUIView} - the top level container, encompasses all other controls
+
+\item \textit{VSPackage.ContainingUnitView} - identical functionality to \textit{ContainingUnitView}, placed in the source editor 
+
+\item \textit{VSPackage.MethodView} - like \textit{MethodView}, resides in the source editor
+
+\end{itemize}
+
+Every view corresponds to one view-model. However, a view-model might be shared by multiple views. This can save a lot of development effort and coding. The table \ref{tab:05view-view-models} expresses the relation among views and view-models in the UI.
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=0.5]{\imagePath 05UIViewsArrows.png}
+		\caption{The \textit{ViewModelBase} class implements \textit{INotifyPropertyChanged} interface.}
+	\label{fig:05UIViewsArrows}
+\end{figure}
+
+\begin{table}
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Views}                                                               & \textbf{View-models }             \\ \hline
+        ContainingUnitView 													&       				   \\ 
+        SortedMethodsView, 													& ContainingUnitViewModel  \\ 
+        VSPackage.ContainingUnitView 										&   					   \\ \hline
+        CriteriaSwitchView                                                  & CriterionSwitchViewModel \\ \hline
+        DetailView                                                          & DetailViewModel          \\ \hline
+        MethodView										                    &                          \\
+        SortedMethodView								                    & MethodViewModel          \\
+        VSPackage.MethodView                                                &                          \\ \hline
+    \end{tabular}
+    	\label{tab:05view-view-models}
+    	\caption{The relation among views and view-models in the UI.}
+\end{table}
 
 
 
