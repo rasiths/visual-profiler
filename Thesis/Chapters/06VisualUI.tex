@@ -114,7 +114,6 @@ Every view-model inherits from the \textit{ViewModelBase} class, the figure \ref
 The middle point of the UI logic is the class \textit{UILogic}. This class holds references to all view-models, handles actions from commands and updates the views-models, which consequently update the views.
 
 The other parts of the view-model are:
-
 \begin{itemize}	
 \item  \textit{ContainingUnitViewModel} - represents a source file and holds \textit{MethodViewModel}s, this view-model is shared by three views	
 
@@ -127,10 +126,9 @@ The other parts of the view-model are:
 
 
 \subsection{User interface - view}
-The view is based on a compostion of user controls. Dynamic display is accomplished by WPF panels. The controls are illustrated on the figure \ref{fig:05UIViewsArrows}.
+The view is based on a compostion of user controls. Dynamic display is accomplished by WPF panels. The placement of view in the UI isillustrated on the figure \ref{fig:05UIViewsArrows}. 
 
-The main views are:
-
+The views are:
 \begin{itemize}	
 \item  \textit{ContainingUnitView} - contains methods, this view has no visual parts, it provides only layout 
 
@@ -152,21 +150,22 @@ The main views are:
 
 \end{itemize}
 
-Every view corresponds to one view-model. However, a view-model might be shared by multiple views. This can save a lot of development effort and coding. The table \ref{tab:05view-view-models} expresses the relation among views and view-models in the UI.
+Every view corresponds to one view-model. However, a view-model might be shared by multiple views. This can save a lot of development effort and coding. The table \ref{tab:05viewviewmodels} expresses the relation among views and view-models in the UI.
 
 \begin{figure}
 	\centering
 		\includegraphics[scale=0.5]{\imagePath 05UIViewsArrows.png}
-		\caption{The \textit{ViewModelBase} class implements \textit{INotifyPropertyChanged} interface.}
+		\caption{Placement of the views in the final UI look.}
 	\label{fig:05UIViewsArrows}
 \end{figure}
 
 \begin{table}
+\centering
     \begin{tabular}{|l|l|}
         \hline
-        \textbf{Views}                                                               & \textbf{View-models }             \\ \hline
+        \textbf{Views}                                                      & \textbf{View-models }    \\ \hline
         ContainingUnitView 													&       				   \\ 
-        SortedMethodsView, 													& ContainingUnitViewModel  \\ 
+        SortedMethodsView 													& ContainingUnitViewModel  \\ 
         VSPackage.ContainingUnitView 										&   					   \\ \hline
         CriteriaSwitchView                                                  & CriterionSwitchViewModel \\ \hline
         DetailView                                                          & DetailViewModel          \\ \hline
@@ -174,18 +173,100 @@ Every view corresponds to one view-model. However, a view-model might be shared 
         SortedMethodView								                    & MethodViewModel          \\
         VSPackage.MethodView                                                &                          \\ \hline
     \end{tabular}
-    	\label{tab:05view-view-models}
-    	\caption{The relation among views and view-models in the UI.}
+    \caption{The relation among views and view-models in the UI.}
+   	\label{tab:05viewviewmodels}
+    	
 \end{table}
 
 
+\section{Visual Studio 2010 IDE integration}
+The Visual Studio 2010 IDE is a composition of a shell and packages - functional units. The shell provides graphical user interface and services for the packages. The core functionality, project types, testing, compilation services and many more, of the IDE is implemented in the packages. Many third-party extensions of the Visual Studio are also packages.
+
+Visual Studio offers numerous ways to extend it. The philosophy behind the extensibility approaches is fragmented, mainly due to historical design decisions, different technologies used and backwards compatibility. The complexity of it is briefly depicted on the figure \ref{fig:05VSExtensibilityGraph}. Finding the right interface to use is sometimes real challange. There is not services discoverability and everything has to be search in the scattered documentation and samples.
 
 
+ \begin{figure}
+	\centering
+		\includegraphics[scale=0.5,angle=90]{\imagePath 05VSExtensibilityGraph.png}
+		\caption{Main extension points of Visual Studio IDE. }
+	\label{fig:05VSExtensibilityGraph}
+\end{figure}
+
+There are many ways how to add new functionality to the IDE. We will briefly summarise them and then delve into details of the add-ins and MEF components. The following approaches may be freely combined.
+
+\subsection{Macros}
+Macros are ability to add function by composing existing functionaly. The functionality in Visual Studio is exposed by commands and  there is a macro language similar to Visual Basic that allows to executing the commands and register new ones. Macros save repetition - replacing click and dialogs with a single key stroke can save a lot of time.
+
+\subsection{Snippets}
+Snippets do not add new capabilities to Visual Studio, they just save typing and thus error rate. For instance the snippet of a dependency property is invaluable.
+
+\subsection{Templates}
+Templates organize and encompass project definitions. When you bring up a new project dialog in Visual Studion. What it is showing you is all the templates it know about. When you make a choice, the template gets used and all the information like what files to start with, what refences will be needed in your project, setting of builds - all that is in template. Templates are Zip files
+
+\subsection{Editor Extensions - MEF}
+We have to cite the MEF's website because it describes MEF in very elaborate way:
+
+''The Managed Extensibility Framework (MEF) is a composition layer for .NET that improves the flexibility, maintainability and testability of large applications. MEF can be used for third-party plugin extensibility, or it can bring the benefits of a loosely-coupled plugin-like architecture to regular applications.''\cite{MEFpage}
+
+Actually MEF 
+\footnote{Managed Extensibility Framework - \href{http://mef.codeplex.com/}{http://mef.codeplex.com/} } 
+is basicly an enhanced dependency injection system. 
+
+The new Visual Studio editor is written in WPF and chose the MEF as an extensibility platform. MEF is used exclusively for extending only the editor and modeling and diagraming tools (Ultimate edition)!
+
+The editor offer many extension points as e.g. content types (code completion, syntax coloring), classification types and formats (key words, syntax errors, comments and so on), tags, margins and scrollbars, \textbf{adornments} (any visual effects in the editor) - used in the UI to color methods, mouse processors and drop handlers and IntelliSence. The samples provided by Visual Studio SDK are very good starting point for experimenting with the extensibility
+\footnote{Visual Studio Software Development Kit - \href{http://msdn.microsoft.com/en-us/library/bb166441(v=VS.100).aspx}{MSDN website}}.
+
+Editor extension are deployed as Visual Studio packages.
+
+\subsection{Add-In}
+An add-in is a compiled DLL that runs in the Visual Studio and contains a class that implements \textit{IDTExtensibility2} - COM interface. It is registered with Visual Studio by an XML file. At load time the add-in receives the Application object, \textit{DTE2} object, that represents Visual Studio and it can that call method on that object to interact with the IDE. An add-in has very broad scope than e.g. an editor extension. You can interact with almost everything in Visual Studio.
+
+\subsection{Package}
+A package is a compiled DLL (native or managed) and has to implement with the \textit{IVsPackage} interface which provides it access to Visual Studio API. Managed Package Framework simplifies package development by providing standard implementations of functions of the \textit{IVsPackage} interface. It uses attributes to control registration.
+
+The main differences between add-ins and packages are:
+\begin{itemize}	
+\item  add-ins were available in the Visual Studio from the very beginning as an extension mechanism and are built on COM components. Packages should overcome some limitation of add-ins and are a newer technology.
+
+\item packages are completely integrate in the IDE whereas add-ins are external item for the IDE  .
+
+\item packages have lower API access oppose to add-ins.
+
+\item the package development kit supports less languages than the one of add-ins. Add-ins may be developed in any COM enabled environment.
+
+\item VSIX files (zip files) are used to deploy packages. They are self-containing and well integrated with the Visual Studion extension manager. VSIX files are shared on the Visual Studion Gallery web site. \footnote{\href{http://visualstudiogallery.msdn.microsoft.com/}{http://visualstudiogallery.msdn.microsoft.com/}}
+. Add-ins do not have a standatized deployment model and a development team has to take care for installing and registering an add-in.
+\end{itemize}
 
 
+\section{Visual Profiler itegration in Visual Studio}
+The integration of the Visual Profiler in Visual Studio has tree parts, \textit{Tools} menu commands for interacting with the profiler, a tool window for hosting the UI and an editor adornment extension for the code coloring. The parts are packed in a single VSIX package.
+
+\subsection{Commands}
+The Visual Profiler adds three command to the \textit{Tools} menu as shown the figure \ref{fig:05ToolMenu}. The commands are
 
 
+\begin{itemize}
+\item Start Visual Profiler in Tracing Mode - builds the current solution, runs the start-up project with the attached profiler in the tracing mode and opens the tool windows with the profiler UI.
 
+\item Start Visual Profiler in Sampling Mode - does the same as the previous point, only  starts the profiler in the sampling mode.
+
+\item Stop Visual Profiler - closes the profiled process and removes the code coloring.
+\end{itemize}
+
+ \begin{figure}
+	\centering
+		\includegraphics[scale=0.7]{\imagePath 05ToolMenu.png}
+		\caption{Commands in the \textit{Tools} menu in Visual Studio 2010. }
+	\label{fig:05ToolMenu}
+\end{figure}
+
+\subsection{Tool windows}
+The tool window is shown right after the profiler starts. The result are updated already during profiling in a second long intervals. The tool window and its functionality was already described earlier in the chapter and depicted on the figures \ref{fig:05BirdeyeView} and \ref{fig:05UIViewsArrows}.
+
+\subsection{Editor adornment extension}
+The editor extension is using MEF to add a canvas on an editor's adornment layer for every file encountered during the profiling. The rectangles representing methods and their profiling results are drawn on the canvas. The data is live updated in sync with the main UI. The visual elements are shown on the figures \ref{fig:05SourceCodeHighlight} and \ref{fig:05UIViewsArrows}.
 
 
 
