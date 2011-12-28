@@ -1,0 +1,128 @@
+\chapter{User Interface and Visual Studio Integration }
+\label{chap:VPUIandSI}
+
+
+This chapter explains the visual presentation of the profiling results in a source code editor and the integration of the profiler in Visual Studio.
+
+\section{Mapping profiling result to source code}
+The profiling results are usually presented in others profiler in great detail by tables, graphs and tree-structures. The difficulty in reading the data is coping with large volumes of data that they present. We believe developers would benefit from briefer overview mapped to context of the source code.
+
+S. G. Eick and J. L. Steffen presented in \cite{EickSteffen92} a method for visualizing line oriented profile data. It displays files as rectangles and code as colored lines within each rectangle. The line color is determined by the profile counts. They claim that their technique allows programmers to discover usage patterns in the code that would be impossible to find using traditional methods. They implemented their ideas in a software tool Seesoft, on the figure \ref{fig:05SeeSoft}.
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=0.5]{\imagePath 05Seesoft.png}
+		\caption{Seesoft - mapping each line of code into a thin row, colored according to a statistics of interest and showing the context in a preview window.}
+	\label{fig:05SeeSoft}
+\end{figure}
+
+
+We followed and extended their idea and proposed and implemented a method level coloring and results overview based on profiling results from the Visual Profiler. 
+
+\section{Source code coloring and bird-eye view}
+To present the profiling results in the Visual Profiler colored rectangles are laid over methods directly in the source code editor as depicted on an example on the figure \ref{fig:05SourceCodeHighlight}. Such approach provides direct feedback to developers and revels the ''hot-spots'' in direct relation with the code in very clear way.  The color of the overlay represents the significance of the particular methods in the context of the profiling metrics.
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=0.7]{\imagePath 05SourceCodeHighlight.png}
+		\caption{Laying a colored rectangle over the source code. The color hue of the rectangle corresponds to a measured value of the method. }
+	\label{fig:05SourceCodeHighlight}
+\end{figure}
+
+The coloring of the source code provides great local awareness of the profiling result but says nothing about the overall results of a profiling session. 
+
+We addressed this problem by introducing a ''bird-eye'' view of the source code with applied coloring. The bird-eye view consist of columns of rectangles. The columns represent individual source files and the rectangles individual methods. The height of the rectangles corresponds to the amount of the source code lines, their order in the column reflects their position in the source file and their color is set according the profiling results.
+When the mouse cursor hovers over a rectangle the detail information for the corresponding method is displayed. The whole situation is illustrated on the figure \ref{fig:05BirdeyeView}.
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=0.7]{\imagePath 05BirdeyeView.png}
+		\caption{Bird-eye view representation of source files as columns and methods as rectangles with highlighted method and detailed information. }
+	\label{fig:05BirdeyeView}
+\end{figure}
+
+The direct source code overlay was missing a possibility to get more exact information about the profiling result and the rectangles from the bird-eye view were lacking a linkage to source code. So we connected them. When the mouse hovers over a source code overlay, a corresponding rectangle is highlighted and details displayed in the bird-eye and when a rectangle in bird-eye view is clicked, a corresponding source file is opened and with the right method highlighted. 
+
+The bird-eye view also joins all methods over their source file and sort them according their measured values and presents them above the source file columns as a row of squares. The color and behaviour of the squares follows the same rules as the color of the rectangles.
+
+Switching between the different profiling modes may be accomplished by the radio buttons in the top right corner of the bird-eye view.
+
+The bird-eye view together with the source code overlays form a very solid and conveying way to display profiling informations. 
+
+We also incorporated a call-graph exploration feature. It allowed to see relation among methods calls. But in the end we took it away, because the UI started to become clogged and it did not bring much value to understanding the profiling results. 
+
+The resulting UI is result of many desing iterations and mock-ups.
+
+\section{Implementation of the user interface}
+The user interface is built on the WPF \footnote{Microsoft Windows Presentation Foundation} framework \cite{WPF4Unleashed} and follows the MVVM \footnote{Model-View-ViewModel} \cite{MVVM2011} UI-design pattern. Let us now briefly introduce WPF adn MVVM.
+
+\subsection{WPF}
+Microsoft Windows Presentation Foundation is the latest framework (as in the end of 2011) for creating user interfaces with rich user experience. It is part of .NET framework and brought a new ideology in composing visual components and thier functionality. Its main features are depicted on the figure \ref{fig:05wpfMainFeatures}.
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=0.7]{\imagePath 05wpfMainFeatures.png}
+		\caption{Overview of the main new features of WPF \cite{WPFpage}}
+	\label{fig:05wpfMainFeatures}
+\end{figure}
+
+WPF is vector base, resolution independent and hardware accelerated. It combines ordinary UI components, 2D graphics, 3D graphics and multimedia. 
+
+Visual part and of UI components is defined in an XML based language called \linebreak XAML \footnote{eXtensible Application Markup Language} and the behaviour is implemented in a managed programming language. The code and XAML use databinding, commands and events to communicate. This architecture results in high separation of appearence and behaviour.
+
+\subsection{Model-View-ViewModel}
+This UI pattern, on the figure \ref{fig:05pattern_mvvm}, was introduced with the advent of WPF and is very often used to build low-coupled applications. It consists of a model that is not aware of the other parts, of a view that manages the user input and sends it by commands to the view-model and of view-model that implement the program logic. The view gets data from the view-model through databinding.
+
+\begin{figure}
+	\centering
+		\includegraphics[scale=0.7]{\imagePath 05pattern_mvvm.png}
+		\caption{Overview of the main new features of WPF \cite{WPFpage}}
+	\label{fig:05pattern_mvvm}
+\end{figure}
+
+\subsection{User interface - model}
+The input data for the model come from the Visual Profiler Access as call trees and method, class, module and assembly metadata. The data are converted to groups representing source files and their methods, which then bear all the profiling data. This process is depicted on the figure \ref{fig:05TransformationOfTrees}. This is a non-trivial task because the profiling data is spread across multiple call trees and their elements. The various data analysis have to be performed, for instance data aggregation over call tree elements belonging to the same method, maximum values of different metrics, redistribution of values and so on.
+
+ \begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 05TransformationOfTrees.png}
+		\caption{Call trees and metadata are merged to form source file groups with aggregated methods.}
+	\label{fig:05TransformationOfTrees}
+\end{figure}
+
+For every profiling mode (tracing or sampling) there are various criteria with diferent units to measure, which adds to the complexity (e.g. call count [hits], duration [s]...). In order to make the implementation as reusable as possible (mainly because of UI reusability and independence) we introduced abstractions of values, criteria and criteria contexts, as show on the figure \ref{fig:05UImodel}. The abstract value is capable of converting itself to a string and to a value on the scale from 0 to 1 provided the maximum value. The criteria know their names and units. The criteria context tracks all available criteria and their maximum values. 
+
+ \begin{figure}
+	\centering
+		\includegraphics[scale=1]{\imagePath 05UImodel.png}
+		\caption{The class hierarchy of the model part.}
+	\label{fig:05UImodel}
+\end{figure}
+
+\subsection{User interface - view-model}
+The view-model is responsible for the control the UI. It holds references to the model data and exposes them to the view. The view-model handles user input by commands that are bound to the view. It controls the view by changed dependency \footnote{Dependency property - \href{http://msdn.microsoft.com/en-us/library/ms752914.aspx}{http://msdn.microsoft.com/en-us/library/ms752914.aspx}}
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
