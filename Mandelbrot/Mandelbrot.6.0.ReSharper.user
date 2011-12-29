@@ -1,0 +1,116 @@
+<Configuration>
+  <RecentFiles>
+    <RecentFiles>
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/d:Properties/f:Resources.resx" caret="5961" fromTop="28" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/d:Properties/f:app.manifest" caret="1476" fromTop="24" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:app.config" caret="0" fromTop="0" />
+      <File id="7B84E1A3-B87E-4366-983A-002AEF223102/d:Properties/f:AssemblyInfo.cs" caret="1118" fromTop="26" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Barvy.cs" caret="95" fromTop="5" />
+      <File id="7B84E1A3-B87E-4366-983A-002AEF223102/f:MandelBrotPoint.cs" caret="0" fromTop="0" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/d:Properties/f:Resources.Designer.cs" caret="0" fromTop="0" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.Designer.cs" caret="651" fromTop="18" />
+      <File id="7B84E1A3-B87E-4366-983A-002AEF223102/f:IMandelBrotCompatible.cs" caret="0" fromTop="0" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Program.cs" caret="0" fromTop="0" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/d:Properties/f:AssemblyInfo.cs" caret="1318" fromTop="21" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.cs" caret="0" fromTop="0" />
+      <File id="7B84E1A3-B87E-4366-983A-002AEF223102/f:MandelBrotSet.cs" caret="5633" fromTop="16" />
+    </RecentFiles>
+    <RecentEdits>
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.cs" caret="6595" fromTop="39" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.Designer.cs" caret="7371" fromTop="56" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.Designer.cs" caret="7371" fromTop="9" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.Designer.cs" caret="7371" fromTop="0" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.Designer.cs" caret="8039" fromTop="48" />
+      <File id="7B84E1A3-B87E-4366-983A-002AEF223102/f:IMandelBrotCompatible.cs" caret="112" fromTop="6" />
+      <File id="7B84E1A3-B87E-4366-983A-002AEF223102/f:MandelBrotPoint.cs" caret="162" fromTop="9" />
+      <File id="7B84E1A3-B87E-4366-983A-002AEF223102/f:MandelBrotSet.cs" caret="5575" fromTop="29" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/d:Properties/f:AssemblyInfo.cs" caret="1718" fromTop="53" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/d:Properties/f:AssemblyInfo.cs" caret="875" fromTop="19" />
+      <File id="7B84E1A3-B87E-4366-983A-002AEF223102/d:Properties/f:AssemblyInfo.cs" caret="1702" fromTop="54" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/d:Properties/f:AssemblyInfo.cs" caret="39" fromTop="1" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.cs" caret="3471" fromTop="52" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Program.cs" caret="814" fromTop="25" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/d:Properties/f:AssemblyInfo.cs" caret="1720" fromTop="27" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/d:Properties/f:AssemblyInfo.cs" caret="1518" fromTop="21" />
+      <File id="7B84E1A3-B87E-4366-983A-002AEF223102/d:Properties/f:AssemblyInfo.cs" caret="1440" fromTop="14" />
+      <File id="7B84E1A3-B87E-4366-983A-002AEF223102/d:Properties/f:AssemblyInfo.cs" caret="1696" fromTop="18" />
+      <File id="7B84E1A3-B87E-4366-983A-002AEF223102/f:MandelBrotSet.cs" caret="459" fromTop="3" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Program.cs" caret="118" fromTop="8" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Program.cs" caret="138" fromTop="9" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Program.cs" caret="71" fromTop="3" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.cs" caret="320" fromTop="14" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Program.cs" caret="434" fromTop="15" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.cs" caret="3363" fromTop="19" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.cs" caret="2847" fromTop="12" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.cs" caret="1903" fromTop="16" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.cs" caret="999" fromTop="11" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Form1.Designer.cs" caret="204" fromTop="7" />
+      <File id="03613B26-7815-4696-B333-DE84EBB35D4F/f:Program.cs" caret="631" fromTop="19" />
+    </RecentEdits>
+  </RecentFiles>
+  <NAntValidationSettings>
+    <NAntPath value="" />
+  </NAntValidationSettings>
+  <UnitTestRunner>
+    <Providers />
+  </UnitTestRunner>
+  <UnitTestRunnerNUnit>
+    <NUnitInstallDir IsNull="False">
+    </NUnitInstallDir>
+    <UseAddins>Never</UseAddins>
+  </UnitTestRunnerNUnit>
+  <SettingsComponent>
+    <string />
+    <integer />
+    <boolean>
+      <setting name="livetemplates.csharp.usevar">True</setting>
+      <setting name="SolutionAnalysisEnabled">False</setting>
+    </boolean>
+  </SettingsComponent>
+  <CompletionStatisticsManager>
+    <ItemStatistics item="CSharpCodeCompletionContext">
+      <Item value="System" priority="31" />
+      <Item value="SwitchAttribute" priority="16" />
+      <Item value="Stopwatch" priority="121" />
+      <Item value="stopwatch" priority="224" />
+      <Item value="new" priority="95" />
+      <Item value="Console`0" priority="58" />
+      <Item value="cw" priority="31" />
+      <Item value="MessageBox`0" priority="63" />
+      <Item value="string" priority="31" />
+      <Item value="format" priority="31" />
+      <Item value="partial" priority="125" />
+      <Item value="public" priority="30" />
+      <Item value="class" priority="61" />
+      <Item value="Diagnostics" priority="53" />
+      <Item value="foreach" priority="31" />
+      <Item value="workerThreads" priority="31" />
+      <Item value="stopwatch1" priority="95" />
+      <Item value="Thread`0" priority="31" />
+      <Item value="ThreadPool" priority="16" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Diagnostics.Stopwatch">
+      <Item value="Reset`0" priority="26" />
+      <Item value="Start`0" priority="80" />
+      <Item value="ElapsedMilliseconds" priority="107" />
+      <Item value="Stop`0" priority="80" />
+      <Item value="ElapsedTicks" priority="27" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Console">
+      <Item value="Beep`0" priority="26" />
+      <Item value="Read`0" priority="26" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Windows.Forms.MessageBox">
+      <Item value="Show`0" priority="53" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.String">
+      <Item value="Format`0" priority="26" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Threading.Thread">
+      <Item value="Join`0" priority="26" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Threading.ThreadPool">
+      <Item value="QueueUserWorkItem`0" priority="26" />
+    </ItemStatistics>
+  </CompletionStatisticsManager>
+</Configuration>
