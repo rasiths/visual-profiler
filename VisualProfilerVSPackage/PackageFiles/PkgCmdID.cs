@@ -7,6 +7,7 @@ namespace VisualProfilerVSPackage.PackageFiles
     {
         public const uint cmdidStartVisualProfilerTracingMode =        0x100;
         public const uint cmdidStartVisualProfilerSamplingMode =        0x101;
+        public const uint cmdidStopVisualProfiler =        0x102;
 
 
     };

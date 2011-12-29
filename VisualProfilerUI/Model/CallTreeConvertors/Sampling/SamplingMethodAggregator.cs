@@ -7,18 +7,42 @@ using VisualProfilerAccess.ProfilingData.CallTreeElems;
 
 namespace VisualProfilerUI.Model.CallTreeConvertors.Sampling
 {
-    public class SamplingMethodAggregator : MethodAggregator<SamplingCallTreeElem>
+     class SamplingMethodAggregator 
     {
        public uint StackTopOccurrenceCount { get; set; }
-       public uint LastProfiledFrameInStackCount { get; set; }
+       public double TimeWallClock { get; set; }
 
-        public SamplingMethodAggregator(MethodMetadata methodMd) : base(methodMd)
-        {}
+        public SamplingMethodAggregator(MethodMetadata methodMd)  {
+         
+            FunctionId = methodMd.Id;
+            MethodMd = methodMd;
+        }
 
-        protected override void AggregateElemSpecificFields(SamplingCallTreeElem callTreeElem)
+        protected void AggregateElemSpecificFields(SamplingTreeElem callTreeElem)
         {
-            StackTopOccurrenceCount = callTreeElem.LastProfiledFrameInStackCount;
-            LastProfiledFrameInStackCount = callTreeElem.StackTopOccurrenceCount;
+            StackTopOccurrenceCount = callTreeElem.TopStackSnapshotOccurrence;
+            TimeWallClock = callTreeElem.WallClockTime;
+        }
+
+    
+
+        public uint FunctionId { get; set; }
+        public MethodMetadata MethodMd { get; set; }
+
+
+        public void Aggregate(SamplingTreeElem callTreeElem)
+        {
+            Contract.Requires(FunctionId == callTreeElem.CallTreeElem.FunctionId);
+            AggregateElemSpecificFields(callTreeElem);
+          
+        }
+
+        public void AggregateRange(IEnumerable<SamplingTreeElem> callTreeElems)
+        {
+            foreach (var callTreeElem in callTreeElems)
+            {
+                Aggregate(callTreeElem);
+            }
         }
     }
 }

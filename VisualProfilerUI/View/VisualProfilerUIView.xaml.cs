@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using VisualProfilerAccess.ProfilingData;
@@ -17,7 +20,7 @@ namespace VisualProfilerUI.View
 {
     public partial class VisualProfilerUIView : UserControl
     {
-        private int _enter = 0;
+     
         private readonly UILogic _uiLogic;
         readonly object _lockObject = new object();
 
@@ -27,13 +30,38 @@ namespace VisualProfilerUI.View
             {
                 Application.ResourceAssembly = typeof (MainWindow).Assembly;
             }
+            EnsureWPFToolKitDllLoads();
             InitializeComponent();
             _uiLogic = new UILogic();
+        }
+
+        /// <summary>
+        /// This control uses a wpf dictionary ../Theme/ExpressionLight.xaml that needs the WPFToolkit dll to work.
+        /// The WPFToolkit dll is loaded when baml (compiled xaml) is loaded. The problem is that its path is resolved based on
+        /// the running application, which is in case of a VS extension the devenv.exe (Visual Studio) process. The default resolution 
+        /// then fails, because the dll is hidden in an extension folder structire. We can either add the WPFToolkit to GAC or 
+        /// load it explicitly before it is being referenced as we do here.
+        /// </summary>
+        private static void EnsureWPFToolKitDllLoads()
+        {
+            var assemblyDirectory = Path.GetDirectoryName(typeof (VisualProfilerUIView).Assembly.Location);
+            string wpfToolKitAssemblyPath = Path.Combine(assemblyDirectory, "WPFToolkit.dll");
+            Assembly.LoadFile(wpfToolKitAssemblyPath);
         }
 
         public UILogic UILogic
         {
             get { return _uiLogic; }
+        }
+
+        private Action _closeProfileeProcessAction;
+
+        public void CloseProfileeProcess()
+        {
+            if(_closeProfileeProcessAction != null)
+            {
+                _closeProfileeProcessAction();
+            }
         }
 
         public void Profile(ProfilerTypes profiler, string processPath)
@@ -47,8 +75,8 @@ namespace VisualProfilerUI.View
                     processStartInfo,
                     TimeSpan.FromMilliseconds(1000),
                     OnUpdateCallback);
+                _closeProfileeProcessAction = profilerAccess.CloseProfileeProcess;
                 profilerAccess.StartProfiler();
-
                 _uiLogic.ActiveCriterion = TracingCriteriaContext.CallCountCriterion;
 
                 criterionSwitchVMs = new[] {
@@ -62,8 +90,8 @@ namespace VisualProfilerUI.View
                     processStartInfo,
                     TimeSpan.FromMilliseconds(1000),
                     OnUpdateCallback);
+                _closeProfileeProcessAction = profilerAccess.CloseProfileeProcess;
                 profilerAccess.StartProfiler();
-
                 _uiLogic.ActiveCriterion = SamplingCriteriaContext.TopStackOccurrenceCriterion;
 
                 criterionSwitchVMs = new[] {
@@ -78,6 +106,7 @@ namespace VisualProfilerUI.View
 
             criteriaSwitch.DataContext = criterionSwitchVMs;
             _uiLogic.CriterionSwitchVMs = criterionSwitchVMs;
+           
         }
 
         private void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
@@ -94,7 +123,7 @@ namespace VisualProfilerUI.View
 
         private void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<SamplingCallTree> eventArgs)
         {
-            //if (Interlocked.CompareExchange(ref _enter, 0, 1) == 1)
+           // if (Interlocked.CompareExchange(ref _enter, 0, 1) == 1)
             {
                 lock (_lockObject)
                 {
@@ -153,6 +182,9 @@ namespace VisualProfilerUI.View
             if (handler != null) handler(data);
         }
 
+        private int _enter = 0;
+
+        //[Conditional("DEBUG")]
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
             _enter = 1;

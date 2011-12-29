@@ -3,13 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:v="clr-namespace:VisualProfilerUI.View"
              TextOptions.TextFormattingMode="Display">
     <UserControl.Background>
-        <ImageBrush ImageSource="Images/main_background.png" TileMode="Tile"  ViewportUnits="Absolute" Viewport="0,0,8,8"  ></ImageBrush>
+        <ImageBrush ImageSource="../Images/main_background.png" TileMode="Tile"  ViewportUnits="Absolute" Viewport="0,0,8,8"  ></ImageBrush>
     </UserControl.Background>
 
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Theme/ExpressionLight.xaml"/>
+                <ResourceDictionary Source="../Theme/ExpressionLight.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <Style TargetType="{x:Type TextBlock}">
                 <Setter Property="Control.Foreground" Value="WhiteSmoke"/>

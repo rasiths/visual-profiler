@@ -43,8 +43,12 @@ namespace JanVratislav.VisualProfilerVSPackage
             this.Caption = "Visual Profiler - Not Started";
 
             _visualProfilerUIView = new VisualProfilerUIView();
-            base.Content = _visualProfilerUIView;
+            base.Content = _visualProfilerUIView;           
+        }
 
+        protected override void OnClose()
+        {
+            _visualProfilerUIView.CloseProfileeProcess();
         }
 
         public VisualProfilerUIView VisualProfilerUIView

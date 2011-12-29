@@ -41,6 +41,14 @@ namespace VisualProfilerVSPackage.View
                 containingUnitView.DataContext = cuvModel;
             }
         }
+
+        public static void RemoveAllContainingUnits()
+        {
+            foreach (var containingUnit in ContainingUnitsDict.Values)
+            {
+                containingUnit.DataContext = null;
+            }
+        }
     }
 
     

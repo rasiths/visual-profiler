@@ -10,13 +10,10 @@
              BorderBrush="{Binding Path=BorderBrush}" 
              BorderThickness="{Binding Path=BorderThinkness}"
              Opacity="{Binding Path=Opacity}"
-                     Width="25" 
-                     Height="25" 
-                     >
+             Width="25" 
+             Height="25">
     <View:MethodViewBase.Resources>
         <ImageBrush x:Key="background" ImageSource="/Images/method_background.png" TileMode="Tile"  ViewportUnits="Absolute" Viewport="0,0,4,4"  ></ImageBrush>
     </View:MethodViewBase.Resources>
-    <Rectangle 
-               
-               Fill="{StaticResource ResourceKey=background}" />
+    <Rectangle Fill="{StaticResource ResourceKey=background}" />
 </View:MethodViewBase>

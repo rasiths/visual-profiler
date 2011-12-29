@@ -52,14 +52,6 @@ namespace VisualProfilerUITests.ModelTests.ValuesTests
             Assert.AreEqual(0.0, convertToZeroOneScale);
         }
 
-        [Test]
-        [ExpectedException]
-        public void ConvertToZeroOneScaleOutOfScaleTest()
-        {
-            DoubleValue value1 = new DoubleValue(50);
-            DoubleValue value2 = new DoubleValue(2);
-            var convertToZeroOneScale = value1.ConvertToZeroOneScale(value2);
-            
-        }
+     
     }
 }

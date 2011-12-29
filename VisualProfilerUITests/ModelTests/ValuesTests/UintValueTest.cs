@@ -51,15 +51,5 @@ namespace VisualProfilerUITests.ModelTests.ValuesTests
             var convertToZeroOneScale = uintValue1.ConvertToZeroOneScale(uintValue2);
             Assert.AreEqual(0.0, convertToZeroOneScale);
         }
-
-        [Test]
-        [ExpectedException]
-        public void ConvertToZeroOneScaleOutOfScaleTest()
-        {
-            UintValue uintValue1 = new UintValue(50);
-            UintValue uintValue2 = new UintValue(2);
-            var convertToZeroOneScale = uintValue1.ConvertToZeroOneScale(uintValue2);
-            
-        }
     }
 }

@@ -103,11 +103,16 @@ namespace VisualProfilerAccess.ProfilingData
                 _profilerCommunicator.ReceiveActionFromProfilee(_pipeServer, out finishLoop);
                 if (finishLoop)
                 {
-                    _cancellationTokenSource.Cancel();
-                    _pipeServer.Dispose();
-                    _stopProfilingEvent.Set();
+                    FinishProfiling();
                 }
             }
+        }
+
+        private void FinishProfiling()
+        {
+            _cancellationTokenSource.Cancel();
+            _pipeServer.Dispose();
+            _stopProfilingEvent.Set();
         }
 
         private void OutboundMessageLoop(object state)
@@ -130,6 +135,16 @@ namespace VisualProfilerAccess.ProfilingData
                 }
                 Thread.Sleep(ProfilerDataUpdatePeriod);
                 _stopProfilingEvent.WaitOne();
+            }
+        }
+
+        public void CloseProfileeProcess()
+        {
+            if (!ProfileeProcess.HasExited)
+            {
+                ProfileeProcess.CloseMainWindow();
+                ProfileeProcess.Close();
+                FinishProfiling();
             }
         }
 
