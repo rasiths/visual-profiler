@@ -13,8 +13,7 @@ namespace VisualProfilerAccess
         private static void Main(string[] args)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
-            var processStartInfo = new ProcessStartInfo
-                                       {FileName = @"D:\Honzik\Desktop\Mandelbrot\Mandelbrot\bin\Debug\Mandelbrot.exe"};
+            var processStartInfo = new ProcessStartInfo{ FileName = @"..\..\..\Mandelbrot\Bin\Mandelbrot.exe" };
 
             if (false)
             {
@@ -44,7 +43,7 @@ namespace VisualProfilerAccess
 
         private static void OnUpdateCallback(object sender, ProfilingDataUpdateEventArgs<TracingCallTree> eventArgs)
         {
-            Console.Clear();
+         //   Console.Clear();
             foreach (TracingCallTree callTree in
                 eventArgs.CallTrees)
             {
@@ -68,7 +67,7 @@ namespace VisualProfilerAccess
 
         private static void OnUpdateCallback2(object sender, ProfilingDataUpdateEventArgs<SamplingCallTree> eventArgs)
         {
-            Console.Clear();
+        //    Console.Clear();
             foreach (SamplingCallTree callTree in
                 eventArgs.CallTrees)
             {

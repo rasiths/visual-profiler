@@ -51,8 +51,8 @@ namespace VisualProfilerUI.ViewModel
             Detail.MethodName = method.Name;
             IValue value = method.GetValueFor(ActiveCriterion);
             Detail.Metrics = value.GetAsString(ActiveCriterion.Divider) + " " + ActiveCriterion.Unit;
-            Detail.Class = method.ClassFullName; 
-                Detail.Source=Path.GetFileName(method.SourceFile);
+            Detail.Class = method.ClassFullName;
+            Detail.Source = Path.GetFileName(method.SourceFile) + ", line " + method.FirstLineNumber; ;
         }
 
         private void ClearDetail()
@@ -141,6 +141,13 @@ namespace VisualProfilerUI.ViewModel
             Method method = MethodModelByIdDict[methodViewModel.Id];
             string sourceFile = method.SourceFile;
             return sourceFile;
+        }
+
+        public int GetFirstLineOfMethod(MethodViewModel methodViewModel)
+        {
+            Method method = MethodModelByIdDict[methodViewModel.Id];
+            var firstLineNumber = method.FirstLineNumber;
+            return firstLineNumber;
         }
     }
 }

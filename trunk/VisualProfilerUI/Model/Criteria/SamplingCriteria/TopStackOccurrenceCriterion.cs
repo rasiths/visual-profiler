@@ -14,7 +14,7 @@ namespace VisualProfilerUI.Model.Criteria.SamplingCriteria
 
         public override string Unit
         {
-            get { return "call"; }
+            get { return "occurrences"; }
         }
     }
 }

@@ -29,10 +29,12 @@ namespace JanVratislav.VisualProfilerVSPackage
     public sealed class VisualProfilerVSPackagePackage : Package
     {
         private DTE2 _dte;
+        private VisualProfilerToolWindow _window;
 
         public VisualProfilerVSPackagePackage()
         {
             Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
+            
         }
 
         protected override void Initialize()
@@ -51,6 +53,9 @@ namespace JanVratislav.VisualProfilerVSPackage
                 MenuCommand menuItemSampling = new MenuCommand(SamplingCallback, menuCommandIDSampling);
                 mcs.AddCommand(menuItemSampling);
 
+                CommandID menuCommandIDStop = new CommandID(GuidList.guidVisualProfilerVSPackageCmdSet, (int)PkgCmdIDList.cmdidStopVisualProfiler);
+                MenuCommand menuItemStop = new MenuCommand(StopProfilerCallback, menuCommandIDStop);
+                mcs.AddCommand(menuItemStop);
             }
 
             _dte = GetService(typeof(SDTE)) as DTE2;
@@ -64,6 +69,19 @@ namespace JanVratislav.VisualProfilerVSPackage
         private void SamplingCallback(object sender, EventArgs e)
         {
            StartProfiler(ProfilerTypes.SamplingProfiler);
+        }
+
+        private void StopProfilerCallback(object sender, EventArgs e)
+        {
+            var messageBoxResult = MessageBox.Show("Are you sure that you want to stop the profiling session?", "Visual Profiler", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+            if(messageBoxResult ==MessageBoxResult.Yes)
+            {
+                ContainingUnitView.RemoveAllContainingUnits();
+                if (_window != null && _window.VisualProfilerUIView != null)
+                {
+                    _window.VisualProfilerUIView.CloseProfileeProcess();
+                }
+            }
         }
 
         private void StartProfiler(ProfilerTypes profilerType)
@@ -81,20 +99,15 @@ namespace JanVratislav.VisualProfilerVSPackage
                 if (Path.GetExtension(assemblyPath) != ".exe") throw new Exception("The output of the startUp project is not an executable.");
                 if (!File.Exists(assemblyPath)) throw new Exception("The output executable file could not be found.");
 
-                VisualProfilerToolWindow window = this.FindToolWindow(typeof(VisualProfilerToolWindow), 0, true) as VisualProfilerToolWindow;
-                if ((null == window) || (null == window.Frame)) throw new NotSupportedException("Cannot create a window.");
+                _window = this.FindToolWindow(typeof(VisualProfilerToolWindow), 0, true) as VisualProfilerToolWindow;
+                if ((null == _window) || (null == _window.Frame)) throw new NotSupportedException("Cannot create a window.");
 
-                UILogic uiLogic = window.VisualProfilerUIView.UILogic;
-                window.VisualProfilerUIView.UILogic.MethodClick +=
-                    mvm =>
-                        {
-                            string sourcePath = uiLogic.GetSourceFilePathForMethod(mvm);
-                            _dte.ItemOperations.OpenFile(sourcePath);
-                        };
-                window.VisualProfilerUIView.Profile(profilerType, assemblyPath);
-                window.VisualProfilerUIView.DataUpdate += ContainingUnitView.UpdateDataOfContainingUnits;
-                window.Caption = string.Format("Visual Profiler - {0} Mode", GetModeString(profilerType));
-                IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
+                UILogic uiLogic = _window.VisualProfilerUIView.UILogic;
+                _window.VisualProfilerUIView.UILogic.MethodClick += mvm => OnMethodClick(uiLogic, mvm);
+                _window.VisualProfilerUIView.Profile(profilerType, assemblyPath);
+                _window.VisualProfilerUIView.DataUpdate += ContainingUnitView.UpdateDataOfContainingUnits;
+                _window.Caption = string.Format("Visual Profiler - {0} Mode", GetModeString(profilerType));
+                IVsWindowFrame windowFrame = (IVsWindowFrame)_window.Frame;
                 ErrorHandler.ThrowOnFailure(windowFrame.Show());
 
             }
@@ -102,6 +115,18 @@ namespace JanVratislav.VisualProfilerVSPackage
             {
                 MessageBox.Show(e.Message, "Profiler initialization failed.", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void OnMethodClick(UILogic uiLogic, MethodViewModel mvm)
+        {
+            string sourcePath = uiLogic.GetSourceFilePathForMethod(mvm);
+            _dte.ItemOperations.OpenFile(sourcePath);
+            
+
+            //TODO when the adornment layer is stable, enable this line moving.
+            //var firstLineOfMethod = uiLogic.GetFirstLineOfMethod(mvm);
+            //var commandName = "Edit.GoTo " + firstLineOfMethod;
+            //_dte.ExecuteCommand(commandName);
         }
 
 
