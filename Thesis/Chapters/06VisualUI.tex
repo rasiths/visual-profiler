@@ -266,7 +266,10 @@ The Visual Profiler adds three command to the \textit{Tools} menu as shown the f
 The tool window is shown right after the profiler starts. The result are updated already during profiling in a second long intervals. The tool window and its functionality was already described earlier in the chapter and depicted on the figures \ref{fig:05BirdeyeView} and \ref{fig:05UIViewsArrows}.
 
 \subsection{Editor adornment extension}
+\label{sec:06EditorAdorExt}
 The editor extension is using MEF to add a canvas on an editor's adornment layer for every file encountered during the profiling. The rectangles representing methods and their profiling results are drawn on the canvas. The data is live updated in sync with the main UI. The visual elements are shown on the figures \ref{fig:05SourceCodeHighlight} and \ref{fig:05UIViewsArrows}.
+
+Unfortunately, we encountered a problem or maybe a bug in the editor and the adornment layers. The adornment layers are sometimes seemingly randomly moving during scrolling or navigating in the editor. We initially suspected a wrong usage of the API during adding a canvas to the layer of the problem and tried to resolve it, without success. Then we discovered by means of .NET reflection that the adornment layer is actually itself a canvas that we managed to color. The colored canvas moved as well together with our canvas. So we assumed that problem was somewhere else and start googling and stackoverflow-ing, which did not help to find the right answer. There was only one post with very similar problem - no answer either. We are leaving this issue to the future work.
 
 \section{Summary}
 This chapter introduced visual principles used during the mapping of the profiling results to source code. The technique the Visual Profiler uses is based on the proposal of S. G. Eick and J. L. Steffen and their SeeSoft software. We follow their idea, but simplified it and placed it to the real context.
