@@ -20,10 +20,10 @@ The data structure in the Visual Profiler Access is similar to the data structur
 
 The metadata derived classes use caches for every implementation of the base \textit{MetadataBase} class. The caches are instances of the \textit{System.Collections.Generic.Dictionary\textless uint, TMetadata \textgreater} class. The key to the dictionary is the metadata id. The metadata is added the cache as they come from the backend.
 
-The call trees and their call tree elements are not cached, however, they are matched with they corresponding cached metadata during the deserialization.
+The call trees and their call tree elements are not cached, however, they are matched with their corresponding cached metadata during the deserialization.
 
 \section{Deserialization}
-The profiling data comes from the named pipe in form of a byte stream. We added a handful of extension methods to the stream, the \textit{System.IO.Stream} class, to deserialize the basic types, as depicted on the figure \ref{fig:05DeserializeActions}. The the base classes of the call tree and the call tree elements classes define an abstract method for deserialization. This method had to be overridden in inherited classes to specify the deserialization logic that corresponds to the logic of the serialization in the backend.
+The profiling data comes from the named pipe in form of a byte stream. We added a handful of extension methods to the stream, the \textit{System.IO.Stream} class, to deserialize the basic types, as depicted on the figure \ref{fig:05DeserializeActions}. The base classes of the call tree and the call tree elements classes define an abstract method for deserialization. This method had to be overridden in inherited classes to specify the deserialization logic that corresponds to the logic of the serialization in the backend.
 
 \begin{figure}
 	\centering
@@ -36,15 +36,15 @@ The profiling data comes from the named pipe in form of a byte stream. We added 
 The entry point to the profiler is the \textit{ProfilerAccess\textless TCallTree \textgreater} class, the figure \ref{fig:05ProfilerAccess}. To create an instance of this class you have to:
 \begin{enumerate}
 
-\item specify the TCallTree generic parameter, the type of a call tree that will be used to store profiling data,
+\item specify the \textit{TCallTree} generic parameter, the type of a call tree that will be used to store profiling data,
 
-\item provide an instance of the System.Diagnostics.ProcessStartInfo class that specify the executable of the profiled application,
+\item provide an instance of the \textit{System.Diagnostics.ProcessStartInfo} class that specify the executable of the profiled application,
 
-\item pass one value of the \textit{ProfilerTypes} enum that represents what profiler to use in the backend,
+\item pass one value of the \textit{ProfilerTypes} enum that represents which profiler type to use in the backend,
 
-\item supply the the update period for the result fetching and
+\item supply the update period for the result fetching and
 
-\item pass a reference to the \textit{EventHandler\textless ProfilingDataUpdateEventArgs\textless TCallTree\textgreater\textgreater} delegate, that is called back when a profiling metadata update is successfully carried out.
+\item pass a reference to the \textit{EventHandler\textless ProfilingDataUpdateEventArgs\textless TCallTree\textgreater\textgreater} delegate, that is called back when a profiling data update is successfully carried out.
  
 \end{enumerate}
 \begin{figure}
@@ -72,7 +72,7 @@ When the \textit{StartProfiler} method is called a bidirectional named pipe with
 
 Both the action and the command are only counterpart to the actions and commands in the backend.
 
-The command thread sends with in the constructor specified period the \textit{SendProfilingData} command to the backend. The action thread listens for the actions. When the \textit{SendingProfilingData} action is received, the action thread deserializes the containing profiling data and passes them as the event argument to the specified callback delegate and executes it on a separate thread pool thread. This process is repeated until the profiling application exits.
+The command thread sends within the constructor specified period the \textit{SendProfilingData} command to the backend. The action thread listens for the actions. When the \textit{SendingProfilingData} action is received, the action thread deserializes the containing profiling data and passes them as the event argument to the specified callback delegate and executes it on a separate threadpool thread. This process is repeated until the profiling application exits.
 
 The \textit{ProfilerAccess} class offers the \textit{Wait} method that blocks a calling thread until the profiling is completed. This can be used to prevent a main application thread to exit prematurely.
 
@@ -81,12 +81,12 @@ The \textit{ProfilerAccess} class is responsible for management of the communica
 \section{Source code locations}
 Finding an exact position of profiled methods in source code is required for the projection of the profiling result to the Visual Studio code editor. 
 
-The data regarding source code, symbols, such as names of local variables and line numbers, is not stored in the compiled modules, because it would take too much space. During compilation a PBD \footnote{Program database, extension \textit{.pdb}} file is generated. Its format is proprietary and its mainly used for debugging purposes. The PDB files also stores exact line numbers for methods.
+The data regarding source code, symbols, such as names of local variables and line numbers, is not stored in the compiled modules, because it would take too much space. During compilation a PBD\footnote{Program database, extension \textit{.pdb}} file is generated. Its format is proprietary and it is mainly used for debugging purposes. The PDB files also stores exact line numbers for methods.
 
-There is an unmanaged API from Microsoft called Debug Interface Access for reading the PDB file. This API is somewhat verbose and it seemed according the samples not easy to use. Luckily, Microsoft also runs an open source project called Common Compiler Infrastructure (CCI). The project is set of libraries and APIs that allow to analyse or modify .NET assemblies, modules and debugging PDB files. The CCI is actually a set of more projects, each targeting different areas. One of these projects is the CCI Metadata. It provides an API, among others, for reading and writing the PDB files. The API needs for its correct functionality a valid pdb file for a managed assembly.
+There is an unmanaged API from Microsoft called Debug Interface Access for reading PDB files. This API is somewhat verbose and it seemed according the samples not easy to use. Luckily, Microsoft also runs an open source project called Common Compiler Infrastructure (CCI). The project is set of libraries and APIs that allow to analyse or modify .NET assemblies, modules and debugging PDB files. The CCI is actually a set of more projects, each targeting different areas. One of these projects is the CCI Metadata. It provides an API, among others, for reading and writing PDB files. The API needs for its correct functionality a valid PDB file for a managed assembly.
 
 We wrapped this API into two functions that accept metadata tokens of a method and return a path to a source code file and positions in it. The metadate from the profiler backend can easily be traced in the source code. 
 
 
 \section{Summary}
-In this chapter, we have looked at the the \textit{ProfilerAccess\textless TCallTree \textgreater} class and highlighted the most important parts of it. The class is more or less a wrapper for the unmanaged functionality of the Visual profiler backend. The source code to methods mapping was introduced together with the notion of the PBD files
+In this chapter, we have looked at the \textit{ProfilerAccess\textless TCallTree \textgreater} class and highlighted the most important parts of it. The class is more or less a wrapper for the unmanaged functionality of the Visual profiler backend. The source code to methods mapping was introduced together with the notion of the PBD files
