@@ -1,0 +1,68 @@
+\chapter{Testing and Evaluations}
+Testing is a crutial part of every software project. In this chapter, we will look at tests used during development of Visual Profiler. Next, we will evaluate performance overhead and corectness of the profiler.
+
+\section{Testing}
+During the development we employed various testing strategies base on nature of a particular projects. 
+
+To test the profiler on a more realistic application we used an multithreaded application rendering mandelbrot set (a fractal). It was developed as a class project in 2008. The application and its source code is available without any major changes on the attached DVD. 
+
+\section{Tesing of Visual Profiler Backend}
+The backend part is written in C++. Unfortunatelly, our skills and experience in the C++ platform did not allow us to write unit tests. Therefore the testing of functionaly was accomplieshed manually. 
+
+A set of .NET simple testing applications were created to monitor  the profiler's behaviour . The backend always tranformed output call trees into a textual representation that allowed us to verify the expected values, such as call orders, methods hit counts, metadata collections and so on. We also focused on stability of the profiler in cases of exceptions.
+
+Invaluable help was possibility to debug the profiler backend. Thanks to it we could analize many problematic areas in the Profiling API.
+
+\section{Testing of Visual Profiler Access and UI}
+Over seventy unit tests verify functionaly and correctness of the Access and the UI. We chose the NUnit \footnote{\href{http://www.nunit.org/}{http://www.nunit.org/}} as a test framework and used it together with the Resharper test runner \footnote{\href{http://www.jetbrains.com/resharper/features/unit_testing.html}{http://www.jetbrains.com/resharper/features/unit\_testing.html}}. It was a great choice since it was a very productive environment. Reshaper allows to even debug the unit tests.
+
+The sofware architecture of the Access and the UI had to be adjusted to allow testing. We did not develop according test driven development paradigm, but we developed ``with tests in the min''. The decoupling of classes and introduction of interfaces helped us to ease the testing. To mock dependencies we used a mocking library Moq \href{{http://code.google.com/p/moq/}{http://code.google.com/p/moq/}}. Moq is developed to support newest features in .NET and takes full advantage of feauters like expression trees to easily and type-safely mock behaviour. 
+
+The UI was covered by unit test only partially, mainly the model part. The biggest reason for that was lack of time in the end of the project. Nevertheless, the Model-View-ViewModel pattern emploeyed in the UI can make testing of the UI logic almost a trivial task. 
+
+The Visual Studio Package project template for creating extesibility offers in the initial wizard an option of creating an integration test. Since our extension is a small, proof of concept like project, we did use it. 
+
+The final user interface was test by hand. We focused on layout issues, correct functionality and clear logics of the UI.
+
+The installation of the Visual Studio SDK adds an experimental instance of Visual Studio. What this means is that during an extension development, there is no need to risk corruption of the develoment envirnoment by testing the developed extension in the very same development environment. You can just test it in an independent instance of Visual Studio - experimental instance. The experimental instance has its own registry and data storage isolated from the main instance. This can even be set back to what it was after the Visual Studio installation and thus roll back all changes made to the experimental instance. Extensions deployed to the experimental instance can be debugged from the main instance just by hitting F5 - what a great way to develop. 
+
+
+
+\section{Evaluation of overhead}
+The overhead imposed on a profiled applicaton is one of the main characteristics of profilers. The overhead greatly depends on the profiling mode and granuality as discussed in the chapter \ref{01ProfModes}.
+
+We conducted measurements of both, the tracing and the sampling, mode profilers on the mandelbrot fractal rendering application and on a fibonacci sequence application, created only for purpose of the measurement. We chose the fibonacci sequence because of its high recursion, which can very well demonstrate the difference between the overhead of both profiling modes. The program runs 100 iteration of fibonacci of 30. The mandelbrot application represents in this case a ``normally'' behaving application with loops and function calls. The result are presented in the table \ref{07tbl:compareResults}. 
+
+\begin{table}
+\centering
+    \begin{tabular}{|l|r|r|r|}
+        \hline
+        ~                  & without profiling & tracing mode & sampling mode \\ \hline
+        Fibonacci sequence & 1                 & 110,11       & 1,13          \\ 
+        Mandelbrot fractal & 1                 & 1,77         & 1,09          \\
+        \hline
+    \end{tabular}
+    \caption{The multiples of application duration for the tracing and sampling modes. }
+    \label{07tbl:compareResults}
+\end{table}
+ 
+As expected, the tracing mode copes poorly with extensive method calls, whereas it makes the application run about 80 \% slower in the normal-scenario. On the other hand the sampling mode imposes constant overhead around 10 \% regadless of method call intesinty.
+
+\section{Evaluation of exactness}
+The exactness of profiling results is dependent as well on the profiling mode and granuality as discussed in the chapter \ref{01ProfModes}. The tracing mode results are very accurate and fully match runtime behaviour of application. Compared to that, the sampling mode results only show trends in the applications. Some method invocation are not even detected. To prove that we ran the Mandelbrot fractal application for both modes and counted the number of methods in the results. The table \ref{07tbl:compareResultsExactness} revels that the sampling mode lags behind the tracing mode wiht only around 70 \% of detected methods.
+
+\begin{table}[H]
+\centering
+    \begin{tabular}{|l|r|}
+        \hline
+        Tracing mode  & 32 methods \\ \hline
+        Sampling mode & 23 methods \\
+        \hline
+    \end{tabular}
+     \caption{The number of detected methods in a profiling session. }
+    \label{07tbl:compareResultsExactness}
+\end{table}
+
+\section{Impact of method filtering on results}
+
+
