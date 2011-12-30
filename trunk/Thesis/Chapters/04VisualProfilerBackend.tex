@@ -187,6 +187,8 @@ The \textit{MethodMetadata} class has a member that points to the \textit{ClassM
 \label{subsubsec:04ProfEnabAssem}
 Even a very small .NET console application loads hundreds of methods. If the profiler profiled every method of .NET assemblies and the profiled application it would impose huge overhead on the entire application without any direct benefits. The profiling of the .NET functions would not provide much useful information about the hot spot, the place where to start tuning up the profiled application. 
 
+Just to provide an example of the immense effect of the filtering. When we profiled our Mandelbrot test application, see chapter \ref{chap:07TestingEval}, with the disabled filtering we recorded over 6000 method invocation. A log file, where the profiler was dumping text representation of trees, had 17,5 MB. With the enabled filtering the log had only 13 KB with 32 methods invoked. The main contributors to those 6000 methods were the method from the \textit{mscorlib} and \textit{System.Windows.Forms} assemblies and many of the 6000 methods were called only once.
+
 This is why the filtering on the assembly level was introduced. An assembly is profiling enabled if it has the \textit{[assembly: VisualProfiler.ProfilingEnabled]} attribute applied. If a function id, actually its respective method, does not belong to a profiling enabled assembly then the profiler does not bother with tracking its performance data.
 
 \section{Measuring profiling data}
