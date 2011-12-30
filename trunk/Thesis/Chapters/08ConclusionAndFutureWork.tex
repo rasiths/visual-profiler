@@ -1,6 +1,6 @@
 \chapter{Conclusion and Future Work}
 
-After the thorough initial analysis of profiling modes, granularity and the currently available profilers for .net platform, we chose to implement a tracing, method-level and a sampling, method-level profiler. The nature of the tracing and sampling profiles is very different. The tracing profiler provides exact information about runtime conditions but slow downs profiled applications, whereas the sampling profiler shows only statistical representation of the runtime conditions but with very low overhead.
+After the thorough initial analysis of profiling modes, granularity and the currently available profilers for .NET platform, we chose to implement a tracing, method-level and a sampling, method-level profiler. The nature of the tracing and sampling profiles is very different. The tracing profiler provides exact information about runtime conditions but slows down profiled applications, whereas the sampling profiler shows only statistical representation of the runtime conditions but with very low overhead.
 
 We used the Profiling API as a starting point to implement both profilers. The Profiling API exposes a rich set of interfaces to interact with the CLR\footnote{Common Language Runtime - .NET runtime environment} and to monitor its activity allowing to observe method calls, perform snapshots of thread call stack and query runtime metadata.
 
@@ -15,16 +15,16 @@ The visual presentation of results takes place in the Visual Profiler UI. The UI
 The code was tested for correctness by a set of unit tests and manual testing. A performance evaluation showed results of a comparison of the profiling
 modes. The sampling mode is clearly faster and its overhead is stable regardless of call tree structure of a profiled application whereas the tracing profiler provides more precise data with volatile overhead in terms of the call tree structure of the profiler application.
 
-The final implementation of the Visual Profiler does not beat the currently available profilers. The provided set of features is limited and serves more as a proof of the concept. The performance and accuracy may be well comparable, though. Its main contribution is its integrations into Visual Studio 2010 IDE and the innovative way of displaying profiling results for development-time profiling.
+The final implementation of the Visual Profiler does not beat the currently available profilers. The provided set of features is limited and serves more as a proof of the concept. The performance and accuracy may be well comparable, though. Its main contribution is its integrations into Visual Studio 2010 IDE and the innovative way of displaying profiling results during development-time profiling.
 
-To become a fully-fledged profiler the Visual Profiler has to add few features and overcome a some limitations such as 
+To become a fully-fledged profiler the Visual Profiler has to add few features and overcome some limitations such as 
 enable 64-bit application profiling,
-target more application forms  (web-apps, windows services, phones, silverlight-apps...),
+target more application platforms (web-apps, windows services, phones, silverlight-apps...),
 add remote profiling,
-improve UX\footnote{User eXperience} by ability of saving and comparing results of profiling sessions and by improving navigation in results,
+improve UX\footnote{User eXperience} by implementing saving and comparing results of different profiling sessions, focus on navigation in results,
 enhance accuracy and speed of profiling and others.
 
-There are still some unresolved issues in the final version of the profiler regarding partial UI instability of the code coloring and the impact of the assembly filtering on results. We are aware of this issue. However, we did not have sufficient capacity to resolve them and thus we delegate them to the future work.
+There are still some unresolved issues in the final version of the profiler regarding partial UI instability of the code coloring and the impact of the assembly filtering on results. We are aware of this issues. However, we did not have sufficient capacity to resolve them and thus we delegate them to the future work.
 
 
 
