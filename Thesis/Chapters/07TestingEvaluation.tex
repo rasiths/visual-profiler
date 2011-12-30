@@ -10,29 +10,29 @@ To test the profiler on a more realistic application we used an multithreaded ap
 \section{Testing of Visual Profiler Backend}
 The backend part is written in C++. Unfortunately, our skills and experience in the C++ platform did not allow us to write unit tests. Therefore the testing of functionality was accomplished manually. 
 
-A set of .NET simple testing applications were created to monitor  the profiler's behaviour . The backend always transformed output call trees into a textual representation that allowed us to verify the expected values, such as call orders, methods hit counts, metadata collections and so on. We also focused on stability of the profiler in cases of exceptions.
+A set of .NET simple testing applications were created to monitor  the profiler's behaviour. The backend always transformed output call trees into a textual representation that allowed us to verify the expected values, such as call orders, methods hit counts, metadata collections and so on. We also focused on stability of the profiler in cases of exceptions.
 
 Invaluable help was the possibility to debug the profiler backend. Thanks to it we could analyse many problematic areas in the Profiling API.
 
 \section{Testing of Visual Profiler Access and UI}
-Over seventy unit tests verify functionality and correctness of the Access and the UI. We chose the NUnit \footnote{\href{http://www.nunit.org/}{http://www.nunit.org/}} as a test framework and used it together with the Resharper test runner \footnote{\href{http://www.jetbrains.com/resharper/features/unit_testing.html}{http://www.jetbrains.com/resharper/features/unit\_testing.html}}. It was a great choice since it was a very productive environment. Resharper allows to even debug the unit tests.
+Over seventy unit tests verify functionality and correctness of the Access and the UI. We chose the NUnit\footnote{\href{http://www.nunit.org/}{http://www.nunit.org/}} as a test framework and used it together with the Resharper test runner\footnote{\href{http://www.jetbrains.com/resharper/features/unit_testing.html}{http://www.jetbrains.com/resharper/features/unit\_testing.html}}. It was a great choice since it was a very productive environment. Resharper even allows to debug the unit tests.
 
-The software architecture of the Access and the UI had to be adjusted to allow testing. We did not develop according test driven development paradigm, but we developed ``with tests in the min''. The decoupling of classes and introduction of interfaces helped us to ease the testing. To mock dependencies we used a mocking library Moq \href{{http://code.google.com/p/moq/}{http://code.google.com/p/moq/}}. Moq is developed to support newest features in .NET and takes full advantage of features like expression trees to easily and type-safely mock behaviour. 
+The software architecture of the Access and the UI had to be adjusted to allow testing. We did not develop according test driven development paradigm, but we developed ``with tests in the mind''. The decoupling of classes and introduction of interfaces helped us to ease the testing. To mock dependencies we used a mocking library Moq\footnote{ \href{http://code.google.com/p/moq/}{http://code.google.com/p/moq/}}. Moq is developed to support newest features in .NET and takes full advantage of features like expression trees to easily and type-safely mock behaviour. 
 
 The UI was covered by unit test only partially, mainly the model part. The biggest reason for that was lack of time in the end of the project. Nevertheless, the Model-View-ViewModel pattern employed in the UI can make testing of the UI logic almost a trivial task. 
 
 The Visual Studio Package project template for creating extensibility offers in the initial wizard an option of creating an integration test. Since our extension is a small, proof of concept like project, we did use it. 
 
-The final user interface was test by hand. We focused on layout issues, correct functionality and clear logics of the UI.
+The final user interface was tested by hand. We focused on layout issues, correct functionality and clear logics of the UI.
 
-The installation of the Visual Studio SDK adds an experimental instance of Visual Studio. What this means is that during an extension development, there is no need to risk corruption of the development environment by testing the developed extension in the very same development environment. You can just test it in an independent instance of Visual Studio - experimental instance. The experimental instance has its own registry and data storage isolated from the main instance. This can even be set back to what it was after the Visual Studio installation and thus roll back all changes made to the experimental instance. Extensions deployed to the experimental instance can be debugged from the main instance just by hitting F5 - what a great way to develop. 
+The installation of the Visual Studio SDK adds an experimental instance of Visual Studio. What this means is that during an extension development, there is no need to risk corruption of the development environment by testing the developed extension in the very same development environment. You can just test it in an independent instance of Visual Studio - experimental instance. The experimental instance has its own registry and data storage isolated from the main instance. This can even be reset back to what it was after the Visual Studio installation and thus roll back all changes made to the experimental instance. Extensions deployed to the experimental instance can be debugged from the main instance just by hitting F5 - what a great way to develop. 
 
 
 
 \section{Evaluation of overhead}
 The overhead imposed on a profiled application is one of the main characteristics of profilers. The overhead greatly depends on the profiling mode and granularity as discussed in the chapter \ref{01ProfModes}.
 
-We conducted measurements of both, the tracing and the sampling, mode profilers on the Mandelbrot fractal rendering application and on a Fibonacci sequence application, created only for purpose of the measurement. We chose the Fibonacci sequence because of its high recursion, which can very well demonstrate the difference between the overhead of both profiling modes. The program runs 100 iteration of Fibonacci of 30. The Mandelbrot application represents in this case a ``normally'' behaving application with loops and function calls. The result are presented in the table \ref{07tbl:compareResults}. 
+We conducted measurements of both, the tracing and the sampling mode, profilers on the Mandelbrot fractal rendering application and on a Fibonacci sequence application, created only for purpose of the measurement. We chose the Fibonacci sequence because of its high recursion, which can very well demonstrate the difference between the overhead of both profiling modes. The program runs 100 iteration of Fibonacci of 30. The Mandelbrot application represents in this case a ``normally'' behaving application with loops and function calls. The result are presented in the table \ref{07tbl:compareResults}. 
 
 \begin{table}
 \centering
@@ -50,7 +50,7 @@ We conducted measurements of both, the tracing and the sampling, mode profilers 
 As expected, the tracing mode copes poorly with extensive method calls, whereas it makes the application run about 80 \% slower in the normal-scenario. On the other hand the sampling mode imposes constant overhead around 10 \% regardless of method call intensity.
 
 \section{Evaluation of exactness}
-The exactness of profiling results is dependent as well on the profiling mode and granularity as discussed in the chapter \ref{01ProfModes}. The tracing mode results are very accurate and fully match runtime behaviour of application. Compared to that, the sampling mode results only show trends in the applications. Some method invocation are not even detected. To prove that we ran the Mandelbrot fractal application for both modes and counted the number of methods in the results. The table \ref{07tbl:compareResultsExactness} revels that the sampling mode lags behind the tracing mode with only around 70 \% of detected methods.
+The exactness of profiling results depends on the profiling mode and granularity as discussed in the chapter \ref{01ProfModes}. The tracing mode results are very accurate and fully match runtime behaviour of application. Compared to that, the sampling mode results only show trends in the applications. Some method invocation are not even detected. To prove that we ran the Mandelbrot fractal application for both modes and counted the number of methods in the results. The table \ref{07tbl:compareResultsExactness} revels that the sampling mode lags behind the tracing mode with only around 70 \% of detected methods.
 
 \begin{table}[h!]
 \centering
@@ -67,14 +67,14 @@ The exactness of profiling results is dependent as well on the profiling mode an
 \section{Impact of assembly filtering on results}
 The section \ref{subsubsec:04ProfEnabAssem} about profiling enabled assemblies discusses reasons for profiling only some assemblies. Leaving out some assemblies from profiling may, nonetheless, hide some important details about method calls and affect the profiling result. 
 
-A problem may occur if and a method \textit{A} from a profiled assembly (profiled method) calls a method \textit{B} from non-profiled assembly (non-profiled method) and the non-profiled method \textit{B} then calls a profiled method \textit{C}. The real call tree is A-B-C but the profiler records A-C, because the non-profiled method did not cause a transition in a call tree structure of the profiler. 
+A problem may occur if a method \textit{A} from a profiled assembly (profiled method) calls a method \textit{B} from non-profiled assembly (non-profiled method) and the non-profiled method \textit{B} then calls a profiled method \textit{C}. The real call tree is A-B-C but the profiler records A-C, because the non-profiled method did not cause a transition in a call tree structure of the profiler. 
 
 An interesting effect of this event can be observed in the Mandelbrot test application by measuring the active time (user plus kernel CPU time). The \textit{ApplicationMessageLoop} method is called once and starts only a form (window). It has two lines of code. Interestingly, it ranks as the 3rd most active method. A full, non-filtered profiler run proved our hypothesis about the application message loop acting as the non-profiled method B from previous paragraph. The application actually handles mouse-move events to display coordinates. The profiled \textit{ApplicationMessageLoop} method starts the non-profiled message loop and the non-profiled message loop invokes the profiled mouse-move handler each time the mouse moves. When the handler returns it updates time counter of the \textit{ApplicationMessageLoop} method instead of the message loop since the profiler does not have a clue about the message loop methods.
 
 \section{Summary}
-The different approached to testing and ensuring the application correctness, that we used, such as unit testing and pure hand testing, were introduced in this chapter. We also pointed our testing imperfections and blamed the lack of time for them.
+The different approached to testing and ensuring the application correctness, that we used, such as unit testing and pure hand testing, were introduced in this chapter. We also pointed out our testing imperfections and blamed the lack of time for them.
 
-After that, we in revealed the non surprising result of the comparison of the profiling modes. The sampling mode is clearly faster and not influenced by structure of an application, whereas the tracing profiler provides more precise out data.
+After that, we revealed the non-surprising result of the comparison of the profiling modes. The sampling mode is clearly faster and not influenced by structure of an application, whereas the tracing profiler provides more precise data.
 
 Lastly, we looked at an interesting variation of results caused by the assembly filtering.
 
