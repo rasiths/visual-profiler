@@ -1,6 +1,6 @@
 \chapter{Visual Profiler Backend}
 \label{chap04:chapter}
-The backend is the part of the profiler responsible for collecting the data from the profiled application and for sending them to the analytic part of the Visual Profiler frontend. There are many requirements for a profiling backend to fulfil, such as speed, multi-threading, correctness, low memory consumption and others. In this chapter, we will introduce the profiling modes we chose to implement and review the inner implementation of the backend and design decision we had to make.
+The backend is the part of the profiler responsible for collecting the data from a profiled application and for sending them to the analytic part of the Visual Profiler frontend. There are many requirements for a profiling backend to fulfil, such as speed, multi-threading, correctness, low memory consumption and others. In this chapter, we will introduce the profiling modes we chose to implement and review the inner implementation of the backend and design decision we had to make.
 
 \section{Choice of the implementation strategy and the profiling modes}
 Based on the analysis of the profiling modes on the .NET platform in the chapter \ref{chapPerProfOnDotNet}, we made a decision to use the profiling API as the base for our own profiler instead of implementing everything from scratch. The profiling API offers a 	 matured API with intrinsic support of all .NET features. This helps to avoid many unnecessary implementation problems that could be encountered during an implementation of a .NET profiler entirely from beginning.
@@ -12,11 +12,9 @@ The choice of the sampling profiling mode was straightforward because of its sto
 On the other hand, the difference between the tracing and the instrumentation profiling is not that vast. They both measure exact results and put similar overhead on the profiling. However, the selected method granularity makes them both even more comparable from user's point of view. They both have their implementation pitfall and neither of them would be easier to program that the other. In the end, we opted for the tracing profiling mode since it does not require any changes to target assemblies.
 
 \section{Software architecture of the backend }
-The backend runs in two processes. The first process, written in C++ and called the Visual Profiler Backend, is the actual profiled application with the hosted profiler DLL that is loaded by the CLR and accessed by the COM interface, as described in the chapter \ref{chapPerProfOnDotNet}. The sampling and tracing profilers are implemented as distinct COM CoClasses and only one of them can run at a time. The CoClasses share the common code base for the profiled data collection and the interprocess communication with the managed code.
+The backend runs in two processes. The first process is the actual profiled application with the hosted profiler DLL, written in C++ and called the Visual Profiler Backend, that is loaded by the CLR and accessed by the COM interface, as described in the chapter \ref{chapPerProfOnDotNet}. The sampling and tracing profilers are implemented as distinct COM CoClasses and only one of them can run at a time. The CoClasses share the common code base for the profiling data collection and the interprocess communication with the managed code.
 
-The second process is programmed in C\# and is called the Visual Profiler Access. It starts the profiled application, written in C++, with the desired profiling mode in a separate process, initialize the interprocess communication for transferring the profiling data and is responsible for their processing so they can be later used by an analytic and UI frontend.
-
-The whole relation is shown on the figure \ref{fig:04softwareArchitecture}.
+The second process is programmed in C\# and is called the Visual Profiler Access. It starts the profiled application, written in C++, with the desired profiling mode in a separate process, initialize the interprocess communication for transferring the profiling data and it is responsible for the data processing so the data can be later used by an analytic and UI frontend. The whole relation is shown on the figure  \ref{fig:04softwareArchitecture}.
 
 \begin{figure}
 	\centering
@@ -25,10 +23,10 @@ The whole relation is shown on the figure \ref{fig:04softwareArchitecture}.
 	\label{fig:04softwareArchitecture}
 \end{figure}
 
-The both profiling mode are implemented in the visual profiler backend part. It also contains bunch of supporting classes for handling metadata information for methods, classes, modules and assemblies, for caching the profiling intermediate results and for serializing the results and transmitting them over IPC (interprocess communication) to the Visual Profiler Access part. The Active Template Library (ATL) framework from Microsoft is used to simplify programming of the Component Object Model (COM) in C++
+The both profiling mode are implemented in the Visual Profiler Backend part. It also contains bunch of supporting classes for handling metadata information for methods, classes, modules and assemblies, for caching the profiling intermediate results and for serializing the results and transmitting them over IPC\footnote{inter-process communication} to the Visual Profiler Access part. The Active Template Library (ATL) framework from Microsoft is used to simplify programming of the Component Object Model (COM) in C++
 
 \section{Implementations of the \textit{ICorProfilerCallback3 } interface}
-The \textit{ICorProfilerCallback3} interface is the center point of the profiling API. With its 80 methods it is a little bit impractical to implement it, mainly because only a handful of the method is usually made use of. For that reason we created a default class \textit{CorProfilerCallbackBase} as depicted on the figure \ref{fig:04ProfilerCallbacks}. This provides empty implementation of every methods of the interface and derived classes can only override methods we need. This idea makes it easier to have clearly arranged classes and meet the clean code rules.
+The \textit{ICorProfilerCallback3} interface is the center point of the profiling API. With its 80 methods it is a little bit impractical to implement it, mainly because only a handful of the method is usually made use of. For that reason we created a default class \textit{CorProfilerCallbackBase} as depicted on the figure \ref{fig:04ProfilerCallbacks}. This provides empty implementation of every method of the interface and derived classes can only override methods we need. This idea makes it easier to have clearly arranged classes and meet the clean code rules.
 
 \begin{figure}
 	\centering
@@ -38,7 +36,7 @@ The \textit{ICorProfilerCallback3} interface is the center point of the profilin
 \end{figure}
 
 \subsection{\textit{TracingProfiler} class}
-This class is home for the tracing profiler mode implementation, the figure \ref{fig:04ProfilerCallbacks}. It starts its lifetime by running the IPC with the Visual Profiler Access on a separate thread in the \textit{Constructor()} method. After that, the \textit{Initialize()} method is invoked by the CLR and passed a pointer to the \textit{ICallProfilerInfo3} interface. Here registers the profiler the function ID mapper (more detail later in this subsection), the function enter/leave, the thread created/destroyed and the exception events notifications. At this point is everything set up and the profiled application starts running.
+This class is home for the tracing profiler mode implementation, the figure \ref{fig:04ProfilerCallbacks}. It starts its lifetime by running the IPC with the Visual Profiler Access on a separate thread in the \textit{Constructor()} method. After that, the \textit{Initialize()} method is invoked by the CLR and passed a pointer to the \textit{ICorProfilerInfo3} interface. Here registers the profiler the function ID mapper (more detail later in this subsection), the function enter/leave, the thread created/destroyed and the exception events notifications. At this point everything is set up and the profiled application starts running.
 
 \begin{center}
 \rule{300pt}{1.5pt}
@@ -46,11 +44,11 @@ This class is home for the tracing profiler mode implementation, the figure \ref
 %-------------------------------------------------------------------------------------------
 During the profiling session there is a need to trace the method enter and leave notifications for every managed thread simultaneously. This is a demanding task. If you realize that every single call to and return from a managed method is augmented by overhead of this notification. 
 
-Our first approach to storing the collected profiling information was to push the ids of managed functions, into an enter-stack and a leave-stack. Every managed thread has its own private enter and leave stacks. All stacks were saved by the corresponding thread ids in a common hash table. During the processing of a function enter or leave notification the hash table had to be searched. This created a potential race condition (inserting a new thread to hash table and reading from it at the same time). The access to the hash table requires synchronization.
+Our first approach to storing the collected profiling information was to push the ids of managed functions, into an enter-stack and a leave-stack. Every managed thread had its own private enter and leave stacks. All stacks were saved by the corresponding thread ids in a common hash table. During the processing of a function enter or leave notification the hash table had to be searched. This created a potential race condition (inserting a new thread to hash table and reading from it at the same time). The access to the hash table required synchronization.
 
 That was fairly easy to implement and did indeed work correctly. However, it did not perform very well. Firstly, it used so much memory that after tens of seconds the application memory working set reached hundreds of mega bytes. Secondly, the synchronized hash table lookups slowed down the application. The profiled application was running approximately 50 times slower! (according to the rough duration measurements in the profiled application). It was clearly unacceptable. A better solution had to be found. 
 
-Subsequently, we realized that an union of snapshots of thread's call stacks forms a call tree as depicted on the figure \ref{fig:04PrimitiveCallTree}.
+Subsequently, we realized that an union of snapshots of thread call stacks forms a call tree as depicted on the figure \ref{fig:04PrimitiveCallTree}.
 
 
 \begin{figure}
@@ -60,14 +58,14 @@ Subsequently, we realized that an union of snapshots of thread's call stacks for
 	\label{fig:04PrimitiveCallTree}
 \end{figure}
 
-The \textit{TracingCallTree} class was created based on the idea.
+The \textit{TracingCallTree} class was created based on this idea.
 A simplified representation of the \textit{TracingCallTree} class is depicted on the figure \ref{fig:04TracingCallTreeActiveElem}. Every tree element (class \textit{TracingCallTreeElem}) contains cumulative profiling results such as the number of the enter and leave, time related data and some other auxiliary data. The object of the \textit{TracingCallTree} class contains an active element pointer and a root pointer. The active element pointer points to an element representing a currently executing function and the root element pointer represents the top most method, e.g. the Main method. 
 
 
 \begin{figure}
 	\centering
 		\includegraphics[scale=1.3]{\imagePath 04TracingCallTreeActiveElem.png}
-		\caption{A simplified representation of the TracingCallTree class. The active element pointer points to the currently executing function element with the call tree hierarchy. }
+		\caption{A simplified representation of the \textit{TracingCallTree} class. The active element pointer points to the currently executing function element with the call tree hierarchy. }
 	\label{fig:04TracingCallTreeActiveElem}
 \end{figure}
 
@@ -84,34 +82,34 @@ The change from a stack to a call tree and usage of the thread local storage bro
 %-------------------------------------------------------------------------------------------
 Let us move to the activity of the profiler. The profiler receives a notification from the CLR whenever a new managed thread is created - via the method \textit{ThreadCreated}. The notification executes within the context of the newly created thread. The tracing profiler registers the thread id and associates with it an instance of the \textit{TracingCallTree} class. Such an association is saved into a hash table, represented by C++ \textit{std::map}, under the thread id key. The reference to the \textit{TracingCallTree} object is stored into the thread local storage in order to avoid repetitive search in the hash table by every single enter/leave notification.
 
-After that a managed method in the profiling application is about to be entered. But before it is actually entered the CLR gives a chance to the tracing profiler to express its interest in this particular methods. The CLR invokes the FunctionIdMapper method and passes it a function id (type FunctionID) of the method. The profiler caches the method's metadata (the name, the declaring...) obtained via the function id and if the method is from an assembly with enabled profiling, as mentioned in the section \ref{subsubsec:04ProfEnabAssem}, the profiler expresses its interest in receiving the enter/leave notifications for the method,  or hooks to it, by setting an output parameter of the FunctionIdMapper to \textit{true} value. The function id mapping occurs only once for every managed method.
+After that a managed method in the profiled application is about to be entered. But before it is actually entered the CLR gives a chance to the tracing profiler to express its interest in this particular methods. The CLR invokes the FunctionIdMapper method and passes it a function id (type \textit{FunctionID}) of the method. The profiler caches the method's metadata (the name, the declaring...) obtained via the function id and if the method is from an assembly with enabled profiling, as mentioned in the section \ref{subsubsec:04ProfEnabAssem}, the profiler expresses its interest in receiving the enter/leave notifications for the method,  or hooks to it, by setting an output parameter of the \textit{FunctionIdMapper} to \textit{true} value. The function id mapping occurs only once for every managed method.
 
 If a hooked managed method is being entered, the CLR call the profiler's function-enter handler and passes to it the same function id as to the FunctionIdMapper method. This notification is very performance sensitive (very repetitive) and therefore the function-enter handler is declared with the naked attribute (\textit{\_declspec(naked)}), the compiler generates code without prolog and epilog code. We had to write own prolog/epilog code sequences using inline assembler code to call yet another function that makes a downward transition on the thread's tracing call tree.
 
 When a function is being left, the profiler's function-leave handler is called and again receives as an input parameter the function id. The function-leave handler has to be declared with the naked attribute as well. It just calls another function to make a upward transition on the thread's tracing call tree.
 
-If a thread of the profiled application ends its execution without any exception, the CLR call the ThreadDestroyed method and lets the tracing profiler to do some book-keeping and close the corresponding tracing call tree.
+If a thread of the profiled application ends its execution without any exception, the CLR calls the ThreadDestroyed method and lets the tracing profiler to do some book-keeping and close the corresponding tracing call tree.
 
-If an exception occurs on a thread then a search for a \textit{catch} clause begins by walking up a thread's call stack. The CLR the \textit{ExceptionSearchFunctionEnter} invokes for every searched function on the thread's call stack till it find the matching \textit{catch} clause and calls the \textit{ExceptionSearchCatcherFound} function. The tracing profiler uses this exception handling mechanism to transition upwards the corresponding tracing call tree together with the thread's call stack. If the \textit{catch} clause were not found the profiled application would crash due to an unhandled exception.
+If an exception occurs on a thread then a search for a \textit{catch} clause begins by walking up a thread's call stack. The CLR invokes the \textit{ExceptionSearchFunctionEnter} for every searched function on the thread call stack until it finds the matching \textit{catch} clause and calls the \textit{ExceptionSearchCatcherFound} function. The tracing profiler uses this exception handling mechanism to transition upwards the corresponding tracing call tree together with the thread's call stack. If the \textit{catch} clause were not found the profiled application would crash due to an unhandled exception.
  
-After the profiling application exited, the IPC send out, in the \textit{Destructor} function, the profiling data and is ended and the profiling session is considered to be over.
+After the profiling application exited, the IPC sends out, in the \textit{Destructor} function, the final profiling data and is ended and the profiling session is considered to be over.
 
 
 \subsection{\textit{SamplingProfiler} class}
-In this class resides the profiler implementing the sampling profiler mode, shown on the figure \ref{fig:04ProfilerCallbacks}. The sampling profiler starts by connection the IPC communication from its \textit{Constructor} method on a separate thread. The CLR calls after that the \textit{Initialize} method and passed to it a pointer to the \textit{ICallProfilerInfo3} interface. The sampling profiling set the mask to value \textit{COR\_PRF\_MONITOR\_THREADS} a \textit{COR\_PRF\_ENABLE\_STACK\_SNAPSHOT} in order to receive threads related notifications and to enable managed call stack's snapshots. An instance of the \textit{StackWalker} class is also created to carry out the exploration of the managed threads' stacks. The sampling is being started.
+In this class resides the profiler implementing the sampling profiler mode, shown on the figure \ref{fig:04ProfilerCallbacks}. The sampling profiler starts by connection the IPC communication from its \textit{Constructor} method on a separate thread. The CLR calls after that the \textit{Initialize} method and passed to it a pointer to the \textit{ICorProfilerInfo3} interface. The sampling profiling set the mask to value \textit{COR\_PRF\_MONITOR\_THREADS} a \textit{COR\_PRF\_ENABLE\_STACK\_SNAPSHOT} in order to receive threads related notifications and to enable managed call stack's snapshots. An instance of the \textit{StackWalker} class is also created to carry out the exploration of the managed thread stacks. The sampling is being started.
 
-In this moment it is the right time to start the profiled application. When a managed thread is created, it is registered with the stack walker, in \textit{ThreadCreated} notification handler fired by the CLR.
+In this moment it is the right time to start the profiled application. When a managed thread is created, it is registered with the stack walker, in the \textit{ThreadCreated} notification handler fired by the CLR.
 
 To collect the profiling information the sampling profiler uses an object of the SamplingCallTree class, an alternative of the \textit{TracingCallTree}, for every managed thread. Every time a stack snapshot is created it is added to the sampling call tree of the corresponding thread, as indicated on the figure \ref{fig:04PrimitiveSamplingCallTree}. 
 
 \begin{figure}
 	\centering
 		\includegraphics[scale=1]{\imagePath 04PrimitiveSamplingCallTree.png}
-		\caption{ Merge of a stack snapshot wiht a thread's sampling call tree. }
+		\caption{ Merge of a stack snapshot wit a thread's sampling call tree. }
 	\label{fig:04PrimitiveSamplingCallTree}
 \end{figure}
 
-The constructor of the \textit{StackWalker} class, as shown on fig. \ref{fig:04StackWalker}, accepts the sampling period in milliseconds as its parameter. When the method \textit{StartSampling} is called the stack walker create a new thread and periodically gets the stack snapshots for every managed thread.
+The constructor of the \textit{StackWalker} class, as shown on the figure \ref{fig:04StackWalker}, accepts the sampling period in milliseconds as its parameter. When the method \textit{StartSampling} is called the stack walker create a new thread and periodically gets the stack snapshots for every managed thread.
 
 \begin{figure}
 	\centering
@@ -125,7 +123,7 @@ To get the stack snapshot, the stack walker calls the \textit{ICorProfilingInfo3
 
 The CLR suspends the inspected thread during a call to \textit{DoStackSnapshot} function. Therefore the \textit{MakeFrameWalk} function has to be fast to minimize the performance overhead on the profiled application.
 
-When a managed thread is about to end, it execution the CLR calls \textit{ThreadDestroyed} notification handler and the thread's id is unregistered from the stack walker.
+When a managed thread is about to end its execution the CLR calls the \textit{ThreadDestroyed} notification handler and the thread's id is unregistered from the stack walker.
 
 The stack walker is not allowed to perform its stack walks after the profiling session is over. Otherwise, an error during reading the metadata occurs. In order to avoid this the sampling profiler overrides the \textit{Shutdown} method of the \textit{ICorProfilerCallback} interface. This method is called by the CLR right before the end of the profiling session and the sampling profiler blocks the CLR's thread until the last stack walk is completed. After that the application terminates, the collected data is send out and the IPC finishes together with the profiler.
 
@@ -161,18 +159,18 @@ class SamplingCallTreeElem : public CallTreeElemBase<SamplingCallTreeElem>
 
 The \textit{CallTreeBase} class defines a static hash table for storing the call trees by their ids, it provides a handful of static synchronized methods to add, get and serialize the content of the static hash table. In addition, it defines instance methods and fields for distinct purposes such as thread time related measurement, the root call tree element pointer, the abstract serialization method and other auxiliary members.
 
-The \textit{CallTreeElemBase} class is plain data class and holds the function id, a pointer to the parent element and a hash table, C++ \textit{std::map}, to hold pointers to children elements.
+The \textit{CallTreeElemBase} class is a plain data class and holds a function id, a pointer to the parent element and a hash table, C++ \textit{std::map}, to hold pointers to children elements.
 
 The derived classes \textit{TracingCallTree, SamplingCallTree, TracingCallTreeElem, SamplingCallTreeElem} then only define their special behaviour and data. 
 
 \section{Metadata}
 We have referred to the term metadata in the preceding chapter without specifying it. The metadata is information stored in .NET assemblies describing their data types, identity, relations with other assemblies, security permissions, attributes and other additional information.
 
-The \textit{ICorProfilingInfo3} and \textit{ICorProfilingCallback3} interfaces provide mostly only opaque identifiers for the methods, classes, module, assemblies, parameters and attributes. The way to get the corresponding metadata is to convert the identifiers to a metadata token to corresponding metadata. The ICorProfilingInfo provides few method to achieve such conversion. Once the metadata token is available the \textit{IMetaDataImport} comes in handy \cite{ProfMSDNMetaData} to acquire whatever information about the metadata, pretty much everything what is available in the .NET \textit{System.Type} namespace. The \textit{ICorProfilingCallback3::GetTokenAndMetadataFromFunction} and other functions return a reference to the \textit{IMetaDataImport} object through the output parameter. 
+The \textit{ICorProfilingInfo3} and \textit{ICorProfilingCallback3} interfaces provide mostly only opaque identifiers for the methods, classes, module, assemblies, parameters and attributes. The way to get the corresponding metadata is to convert the identifiers to a metadata token to corresponding metadata. The \textit{ICorProfilingInfo} provides a few methods to achieve such conversion. Once the metadata token is available the \textit{IMetaDataImport} comes in handy \cite{ProfMSDNMetaData} to acquire whatever information about the metadata, pretty much everything what is available in the .NET \textit{System.Type} namespace. The \textit{ICorProfilingCallback3::GetTokenAndMetadataFromFunction} and other functions return a reference to the \textit{IMetaDataImport} object through the output parameter. 
 
 Our strategy is to cache metadata, classes, modules and assemblies of method by ids. The profiler in its both mutation always infers the metadata from a function id identifier. The tracing profiler does that in the \textit{FunctionIdMapper} function and the sampling profiler right after the \textit{DoStackSnapshot} function returns.
 
-A similar inheritance hierarchy as by the \textit{CallTreeBase} class and its derived classes is employed by the metadata. There is a templated \textit{MetadataBase} class. It takes two template arguments TId and TMetadata. The TId is the opaque identifier used in the \textit{ICorProfilerCallback3} interface, e.g. FunctionID or AssemblyID. The TMetadata is the deriving type. The \textit{MetadataBase} class defines a static cache, C++ \textit{std::map}, for each templated class and static methods to manipulate the cache. The \textit{MetadataBase} class inherits from the \textit{MetadataSerializer} class adding the serialization capabilities. The entire hierarchy is shown on the figure \ref{fig:04metadataStructure}.
+A similar inheritance hierarchy as by the \textit{CallTreeBase} class and its derived classes is employed by the metadata. There is a templated \textit{MetadataBase} class. It takes two template arguments \textit{TId} and \textit{TMetadata}. The \textit{TId} is the opaque identifier used in the \textit{ICorProfilerCallback3} interface, e.g. the \textit{FunctionID} or the \textit{AssemblyID}. The \textit{TMetadata} is the deriving type. The \textit{MetadataBase} class defines a static cache, C++ \textit{std::map}, for each templated class and static methods to manipulate the cache. The \textit{MetadataBase} class inherits from the \textit{MetadataSerializer} class adding the serialization capabilities. The entire hierarchy is shown on the figure \ref{fig:04metadataStructure}.
 
 \begin{figure}
 	\centering
@@ -185,35 +183,35 @@ The \textit{MethodMetadata} class has a member that points to the \textit{ClassM
 
 \section{Profiling enabled assembly}
 \label{subsubsec:04ProfEnabAssem}
-Even a very small .NET console application loads hundreds of methods. If the profiler profiled every method of .NET assemblies and the profiled application it would impose huge overhead on the entire application without any direct benefits. The profiling of the .NET functions would not provide much useful information about the hot spot, the place where to start tuning up the profiled application. 
+Even a very small .NET console application loads hundreds of methods. If the profiler profiled every method of .NET assemblies in the profiled application it would impose huge overhead on the entire application without any direct benefits. The profiling of the .NET functions would not provide much useful information about the hot spots, the places where to start tuning up the profiled application. 
 
-Just to provide an example of the immense effect of the filtering. When we profiled our Mandelbrot test application, see chapter \ref{chap:07TestingEval}, with the disabled filtering we recorded over 6000 method invocation. A log file, where the profiler was dumping text representation of trees, had 17,5 MB. With the enabled filtering the log had only 13 KB with 32 methods invoked. The main contributors to those 6000 methods were the method from the \textit{mscorlib} and \textit{System.Windows.Forms} assemblies and many of the 6000 methods were called only once.
+Just to provide an example of the immense effect of the filtering. When we profiled our Mandelbrot test application, see the chapter \ref{chap:07TestingEval}, with the disabled filtering we recorded over 6000 unique method invocation. A log file, where the profiler was dumping text representation of trees, had 17,5 MB. With the enabled filtering the log had only 13 KB with 32 methods invoked. The main contributors to those 6000 methods were the method from the \textit{mscorlib} and the \textit{System.Windows.Forms} assemblies and many of the 6000 methods were called only once.
 
 This is why the filtering on the assembly level was introduced. An assembly is profiling enabled if it has the \textit{[assembly: VisualProfiler.ProfilingEnabled]} attribute applied. If a function id, actually its respective method, does not belong to a profiling enabled assembly then the profiler does not bother with tracking its performance data.
 
 \section{Measuring profiling data}
 \subsection{Tracing profiler}
-The tracing profiling is very accurate. It collects the method's enter/leave count, the wall-clock time and the user and kernel mode time. For this reason, it use system functions to measure the wall-clock time, the user time and the kernel time. Namely the \textit{GetThreadTimes}, the \textit{QueryThreadCycleTime} and the \textit{GetSystemTimeAsFileTime} system functions.
+The tracing profiling is very accurate. It collects the method's enter/leave count, the wall-clock time and the user and kernel mode time. For this reason, it uses system functions to measure the wall-clock time, the user time and the kernel time. Namely the \textit{GetThreadTimes}, the \textit{QueryThreadCycleTime} and the \textit{GetSystemTimeAsFileTime} system functions.
 
 The \textit{GetThreadTimes} function returns the amount of time that the thread has executed in user and kernel modes via its output parameter. However, the results are within 15 ms tolerance which is too much for measuring the duration of individual functions. Therefore, in order to minimize the error of the measurement the user and kernel modes time is always measured cumulatively for a thread tracing call tree as the whole and then divided among its tracing call tree element. 
 
-The tracing call tree element uses the \textit{QueryThreadCycleTime} function, which is very precise in comparison with the The \textit{GetThreadTimes} function, to determine the number of CPU clock cycles used by its corresponding function. This value includes cycles spent in both user mode and kernel mode. The number of cycles is later used to distribute the cumulative user and kernel mode times in the tracing call tree measured by the GetThreadTimes function and so it the measurement error hindered.
+The tracing call tree element uses the \textit{QueryThreadCycleTime} function, which is very precise in comparison with the the \textit{GetThreadTimes} function, to determine the number of CPU clock cycles used by its corresponding function. This value includes cycles spent in both user mode and kernel mode. The number of cycles is later used to distribute the cumulative user and kernel mode times in the tracing call tree measured by the \textit{GetThreadTimes} function and so the measurement error is hindered in this way.
 
 Every tracing call tree element is self responsible for the wall-clock time measurement and uses the \textit{GetSystemTimeAsFileTime} function for that.
 
 The method's enter/leave count is measured by incrementing counters by every function enter/leave callback.
 
 \subsection{Sampling profiler}
-The sampling profiler is purely stochastic. During a stack walk, it collects how many times a method occurred on top of the thread's call stack and how many times it was the last top most profiled enabled method, that means the method called other non-profiled methods.
+The sampling profiler is purely stochastic. During a stack walk, it collects how many times a method occurred on top of the thread call stack and how many times it was the last top most profiled enabled method, that means the method called other non-profiled methods.
 
 The sampling call tree keeps track of the wall-clock time and the user and kernel mode time for its corresponding managed thread using the \textit{GetThreadTimes} and the \textit{GetSystemTimeAsFileTime} system functions.
 
 The measured values are later distributed to determine the duration of the profiled methods.
 
 \section{Sending the profiling results}
-The Visual profiler backend runs in a different process that the analytic frontend with an user interface. Therefore the profiling data is transmitted to the frontend's process using the inter-process communication (IPC), the named pipes. 
+The Visual profiler backend runs in a different process than the analytic frontend with an user interface. Therefore the profiling data is transmitted to the frontend process using the inter-process communication (IPC), the named pipes. 
 
-A named pipe is created by the visual profiler access before the start of a profiling session, the figure \ref{fig:04softwareArchitecture}. The name of the named pipe is handed over in the process' ''VisualProfiler.PipeName'' environmental variable. The communication logic is enclosed in the \textit{VisualProfilerAccess} class, the figure \ref{fig:04VisualProfilerAccessInBackend}. Both the tracing and the sampling profiler start in their constructors to listen to the named pipe on a separate thread and end the communication in their destructors.
+A named pipe is created by the visual profiler access before the start of a profiling session, the figure \ref{fig:04softwareArchitecture}. The name of the named pipe is handed over in the process ``VisualProfiler.PipeName'' environmental variable. The communication logic is enclosed in the \textit{VisualProfilerAccess} class, the figure \ref{fig:04VisualProfilerAccessInBackend}. Both the tracing and the sampling profiler starts in their constructors to listen to the named pipe on a separate thread and end the communication in their destructors.
 
 \begin{figure}
 	\centering
@@ -237,7 +235,7 @@ The instance of the \textit{VisualProfilerAccess} class then waits for a command
 \end{itemize}
 
 \subsection{Serializing the profiling data}
-As presented earlier in this chapter, every call tree and call tree element have is capable of serializing its states. We created the \textit{SerializationBuffer} class to aid the this task. This class manages a byte array and provides methods for copying of numerous types into the byte array, the figure \ref{fig:04SerializationBuffer}.
+As presented earlier in this chapter, every call tree and call tree element have is capable of serializing its states. We created the \textit{SerializationBuffer} class to aid this task. This class manages a byte array and provides methods for copying of numerous types into the byte array, the figure \ref{fig:04SerializationBuffer}.
 
 \begin{figure}
 	\centering
@@ -248,7 +246,7 @@ As presented earlier in this chapter, every call tree and call tree element have
 
 The actual serialization occurs when the \textbf{SendProfilingData} command is received or when the profiled application ends. 
 
-Firstly, the metadata is serialized incrementally - only the metadata that has not yet been send in any previous requests are serialized. This decreases the number of the resulting bytes. On the other hand, the serialized call trees and call tree elements are always fully serialized and sent as they are, the figure \ref{fig:04bufferSctruct}.
+Firstly, the metadata is serialized incrementally - only the metadata that has not yet been sent in any previous requests are serialized. This decreases the number of the resulting bytes. On the other hand, the serialized call trees and call tree elements are always fully serialized and sent as they are, the figure \ref{fig:04bufferSctruct}.
 
 \begin{figure}
 	\centering
@@ -260,13 +258,13 @@ Firstly, the metadata is serialized incrementally - only the metadata that has n
 \subsection{Live updates}
 The visual profiler supports the live updates feature. It allows to view the intermediate profiling results while the profiling is running. 
 
-Due to the multi-threaded nature of the profiler and possible race conditions, it is not possible in the course of the profiling session just to access an arbitrary call tree and its call tree elements and perform the serialization. Therefore a on-demand snapshot mechanism was adopted. It works as follows and shown on the figure \ref{fig:04refreshStatechart}. 
+Due to the multi-threaded nature of the profiler and possible race conditions, it is not possible in the course of the profiling session just to access an arbitrary call tree and its call tree elements and perform the serialization. Therefore an on-demand snapshot mechanism was adopted. It works as follows and shown on the figure \ref{fig:04refreshStatechart}. 
 
 Every call tree has it own buffer, instance of the \textit{SerializationBuffer}. After the profiling data have been updated (after the enter/leave notification or the stack walk) the call tree's \textit{RefreshCallTreeBuffer} bool flag is checked and if the flag is \underline{set} the call tree's metadata is serialized to the call tree's buffer and the flag is \underline{reset}. 
 
-When the frontend sends the \textbf{SendProfilingData} command the buffers of all call trees are collected and sent out to the frontend and the \textit{RefreshCallTreeBuffer} flag is \underline{set} again. And the whole process repeats. However, the buffers were refreshed for the last time when the before last \textbf{SendProfilingData} command was received and they are not really update. But this is acceptable since the data is only a preview of the profiling result, not the real results.
+When the frontend sends the \textbf{SendProfilingData} command, the buffers of all call trees are collected and sent out to the frontend and the \textit{RefreshCallTreeBuffer} flag is \underline{set} again. And the whole process repeats. However, the buffers were refreshed for the last time before the last \textbf{SendProfilingData} command was received and the buffers are therefore not the most recent representation of runtime conditions. This is acceptable since the data is only a preview of the profiling result, not the real results.
 
-Thus, we can provide a lightweight and non-intrusive update mechanism with very low overhead. 
+Thanks to this we can provide a lightweight and non-intrusive update mechanism with very low overhead. 
 
 \begin{figure}
 	\centering
@@ -277,7 +275,7 @@ Thus, we can provide a lightweight and non-intrusive update mechanism with very 
 
  
 \section{Summary}
-In this chapter, we have presented several reasons for the choice to implement the tracing and sampling profilers and the software architecture of the visual profiler backend was outlined. Afterwards, we explored how both profilers were implemented, how the metadata is acquired and stored, what and how is measured and, finally, how the profiling data is send to the frontend through a named pipe.
+In this chapter, we have presented several reasons for the choice to implement the tracing and sampling profilers and the software architecture of the Visual Profiler Backend was outlined. Afterwards, we explored how both profilers were implemented, how the metadata is acquired and stored, what and how is measured and, finally, how the profiling data is sent to the frontend through a named pipe.
 
 
 
