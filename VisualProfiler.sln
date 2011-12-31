@@ -4,14 +4,23 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VisualProfilerBackend", "VisualProfilerBackend\VisualProfilerBackend.vcxproj", "{1A1FEA91-EA79-4CEF-B61A-E9DFEDA237E2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualProfilerAccess", "VisualProfilerAccess\VisualProfilerAccess.csproj", "{EF9CE7CB-9985-4C4B-ADBC-9D7DAAA43D56}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1A1FEA91-EA79-4CEF-B61A-E9DFEDA237E2} = {1A1FEA91-EA79-4CEF-B61A-E9DFEDA237E2}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualProfilerAccessTests", "VisualProfilerAccessTests\VisualProfilerAccessTests.csproj", "{73EF1A83-ECD0-4DB7-AFFF-37592DDFA566}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualProfilerUI", "VisualProfilerUI\VisualProfilerUI.csproj", "{1D0CD374-1D0D-42F7-89F9-6548A35D3129}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1A1FEA91-EA79-4CEF-B61A-E9DFEDA237E2} = {1A1FEA91-EA79-4CEF-B61A-E9DFEDA237E2}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualProfilerUITests", "VisualProfilerUITests\VisualProfilerUITests.csproj", "{6BBB568A-FA4F-4051-BE09-967770A67F46}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualProfilerVSPackage", "VisualProfilerVSPackage\VisualProfilerVSPackage.csproj", "{45676B80-BACC-42EC-B85A-86CA5CAE89BE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1A1FEA91-EA79-4CEF-B61A-E9DFEDA237E2} = {1A1FEA91-EA79-4CEF-B61A-E9DFEDA237E2}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution

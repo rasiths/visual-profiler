@@ -198,6 +198,10 @@
       <Link>VisualProfilerBackendDll\VisualProfilerBackend.dll</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Content Include="License.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>

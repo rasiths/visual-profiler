@@ -8,8 +8,8 @@ namespace VisualProfilerUI
         public MainWindow()
         {
             InitializeComponent();
-            
-               visualProfilerUI.Profile(ProfilerTypes.TracingProfiler, @"..\..\..\Mandelbrot\Bin\Mandelbrot.exe");
+
+            visualProfilerUI.Profile(ProfilerTypes.TracingProfiler, @"..\..\..\Mandelbrot\Bin\Mandelbrot.exe");
             //visualProfilerUI.Profile(ProfilerTypes.SamplingProfiler, @"..\..\..\Mandelbrot\Bin\Mandelbrot.exe");
         }
     }
