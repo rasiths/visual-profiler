@@ -14,13 +14,12 @@
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <TargetZone>LocalIntranet</TargetZone>
     <GenerateManifests>true</GenerateManifests>
-    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
     <ManifestCertificateThumbprint>92E3F478F001D5B5A144A5A1B3F564FC8481B732</ManifestCertificateThumbprint>
     <ManifestKeyFile>Mandelbrot_TemporaryKey.pfx</ManifestKeyFile>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -146,7 +145,6 @@
     <None Include="Resources\zoom_out.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Properties\app.manifest" />
     <None Include="Resources\TIJ4MP_C.ico" />
   </ItemGroup>
   <ItemGroup>
