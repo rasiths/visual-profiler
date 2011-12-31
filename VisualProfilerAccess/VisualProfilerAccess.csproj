@@ -124,7 +124,6 @@
     <Compile Include="SourceLocation\SourceLocatorFactory.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
     <None Include="VisualProfilerKey.snk" />
   </ItemGroup>
