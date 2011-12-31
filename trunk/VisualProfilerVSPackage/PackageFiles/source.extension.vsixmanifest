@@ -4,8 +4,9 @@
     <Name>Visual Profiler</Name>
     <Author>JanVratislav</Author>
     <Version>1.0</Version>
-    <Description xml:space="preserve">A profiler for Visual Studio - alfa version</Description>
+    <Description xml:space="preserve">A profiler for Visual Studio 2010 - alfa version</Description>
     <Locale>1033</Locale>
+    <License>License.txt</License>
     <Icon>logo.png</Icon>
     <PreviewImage>previewImage.png</PreviewImage>
     <InstalledByMsi>false</InstalledByMsi>
