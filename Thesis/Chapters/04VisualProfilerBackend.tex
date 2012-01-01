@@ -14,7 +14,7 @@ On the other hand, the difference between the tracing and the instrumentation pr
 \section{Software architecture of backend }
 The backend runs in two processes. The first process is the actual profiled application with the hosted profiler DLL, written in C++ and named the Visual Profiler Backend, that is loaded by the CLR and accessed by the COM interface, as described in the chapter \ref{chapPerProfOnDotNet}. The sampling and tracing profilers are implemented as distinct COM CoClasses and only one of them can run at a time. The CoClasses share the common code base for the profiling data collection and the interprocess communication with the managed code.
 
-The second process is programmed in C\# and is called the Visual Profiler Access. It starts the profiled application, written in C++, with the desired profiling mode in a separate process, initialize the interprocess communication for transferring the profiling data and it is responsible for the data processing so the data can be later used by an analytic and UI frontend. The whole relation is shown on the figure  \ref{fig:04softwareArchitecture}.
+The second process is programmed in C\# and is called the Visual Profiler Access. It starts the profiled application, written in C++, with the desired profiling mode in a separate process, initialize the interprocess communication for transferring the profiling data and it is responsible for the data processing so the data can be later used by an analytic and UI frontend. The whole relation is shown in the figure  \ref{fig:04softwareArchitecture}.
 
 \begin{figure}
 	\centering
@@ -26,7 +26,7 @@ The second process is programmed in C\# and is called the Visual Profiler Access
 Both profiling modes are implemented in the Visual Profiler Backend part. It also contains bunch of supporting classes for handling metadata information for methods, classes, modules and assemblies, for caching the profiling intermediate results and for serializing the results and transmitting them over IPC\footnote{inter-process communication} to the Visual Profiler Access part. The Active Template Library (ATL) framework from Microsoft is used to simplify programming of the Component Object Model (COM) in C++
 
 \section{Implementations of \texttt{ICorProfilerCallback3 } interface}
-The \texttt{ICorProfilerCallback3} interface is the center point of the Profiling API. With its 80 methods it is a little bit impractical to implement, mainly because only a handful of the methods is usually made use of. For that reason we created a default class \texttt{CorProfilerCallbackBase} as depicted on the figure \ref{fig:04ProfilerCallbacks}. This provides empty implementation of every method of the interface and derived classes can only override methods we need. This idea makes it easier to have clearly arranged classes and meet the clean code rules.
+The \texttt{ICorProfilerCallback3} interface is the center point of the Profiling API. With its 80 methods it is a little bit impractical to implement, mainly because only a handful of the methods is usually made use of. For that reason we created a default class \texttt{CorProfilerCallbackBase} as depicted in the figure \ref{fig:04ProfilerCallbacks}. This provides empty implementation of every method of the interface and derived classes can only override methods we need. This idea makes it easier to have clearly arranged classes and meet the clean code rules.
 
 \begin{figure}
 	\centering
@@ -48,7 +48,7 @@ Our first approach to storing the collected profiling information was to push th
 
 That was fairly easy to implement and did indeed work correctly. However, it did not perform very well. Firstly, it used so much memory that after tens of seconds the application memory working set reached hundreds of mega bytes. Secondly, the synchronized hash table lookups slowed down the application. The profiled application was running approximately 50 times slower! (according to the rough duration measurements in the profiled application). It was clearly unacceptable. A better solution had to be found. 
 
-Subsequently, we realized that an union of snapshots of thread call stacks forms a call tree as depicted on the figure \ref{fig:04PrimitiveCallTree}.
+Subsequently, we realized that an union of snapshots of thread call stacks forms a call tree as depicted in the figure \ref{fig:04PrimitiveCallTree}.
 
 
 \begin{figure}
@@ -59,7 +59,7 @@ Subsequently, we realized that an union of snapshots of thread call stacks forms
 \end{figure}
 
 The \texttt{TracingCallTree} class was created based on this idea.
-A simplified representation of the \texttt{TracingCallTree} class is depicted on the figure \ref{fig:04TracingCallTreeActiveElem}. Every tree element (class \texttt{TracingCallTreeElem}) contains cumulative profiling results such as the number of entering, leaving and timing related data and some other auxiliary data. The object of the \texttt{TracingCallTree} class contains an active element pointer and a root pointer. The active element pointer points to an element representing a currently executing function and the root element pointer represents the top most method, e.g. the Main method. 
+A simplified representation of the \texttt{TracingCallTree} class is depicted in the figure \ref{fig:04TracingCallTreeActiveElem}. Every tree element (class \texttt{TracingCallTreeElem}) contains cumulative profiling results such as the number of entering, leaving and timing related data and some other auxiliary data. The object of the \texttt{TracingCallTree} class contains an active element pointer and a root pointer. The active element pointer points to an element representing a currently executing function and the root element pointer represents the top most method, e.g. the Main method. 
 
 
 \begin{figure}
@@ -95,7 +95,7 @@ If an exception occurs on a thread then a search for a \texttt{catch} clause beg
 After the profiling application's exit, the IPC sends out the final profiling data (this happens in the \texttt{Destructor} function) and it is ended. At this moment the profiling session is considered to be over.
 
 \subsection{\texttt{SamplingProfiler} class}
-In this class resides the profiler implementing the sampling profiler mode, shown on the figure \ref{fig:04ProfilerCallbacks}. The sampling profiler starts by connection the IPC communication from its \texttt{Constructor} method on a separate thread. The CLR calls after that the \texttt{Initialize} method and passed a pointer to the \texttt{ICorProfilerInfo3} interface to it. The sampling profiling sets the mask to \texttt{COR\_PRF\_MONITOR\_THREADS} and \texttt{COR\_PRF\_ENABLE\_STACK\_SNAPSHOT} values in order to receive threads related notifications and to enable managed call stack's snapshots. An instance of the \texttt{StackWalker} class is also created to carry out the exploration of the managed thread stacks. The sampling is being started.
+In this class resides the profiler implementing the sampling profiler mode, shown in the figure \ref{fig:04ProfilerCallbacks}. The sampling profiler starts by connection the IPC communication from its \texttt{Constructor} method on a separate thread. The CLR calls after that the \texttt{Initialize} method and passed a pointer to the \texttt{ICorProfilerInfo3} interface to it. The sampling profiling sets the mask to \texttt{COR\_PRF\_MONITOR\_THREADS} and \texttt{COR\_PRF\_ENABLE\_STACK\_SNAPSHOT} values in order to receive threads related notifications and to enable managed call stack's snapshots. An instance of the \texttt{StackWalker} class is also created to carry out the exploration of the managed thread stacks. The sampling is being started.
 
 In this moment it is the right time to start the profiled application. When a managed thread is created, it is registered with the stack walker, in the \texttt{ThreadCreated} notification handler fired by the CLR.
 
