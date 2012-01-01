@@ -2,7 +2,7 @@
 \label{chap04:chapter}
 The backend is a part of the profiler responsible for collecting data from a profiled application and for sending them to the analytic part of the Visual Profiler frontend. There are many requirements for a profiling backend to fulfill, such as speed, multi-threading, correctness, low memory consumption and others. In this chapter, we introduce the profiling modes we chose to implement and review the inner implementation of the backend and design decision we had to make.
 
-\section{Choice of the implementation strategy and the profiling modes}
+\section{Choice of the implementation strategy and profiling modes}
 Based on the analysis of the profiling modes on the .NET platform in the chapter \ref{chapPerProfOnDotNet}, we made a decision to use the Profiling API as the base for our own profiler instead of implementing everything from scratch. The Profiling API offers a 	 matured API with intrinsic support of all .NET features. This helps to avoid many unnecessary implementation problems that could be encountered during an implementation of a .NET profiler entirely from the beginning.
 
 One of the primary goals of this work was to create a method granularity profiler supporting two distinct profiling modes for the .NET.
