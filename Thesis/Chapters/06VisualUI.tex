@@ -19,7 +19,7 @@ S. G. Eick and J. L. Steffen presented in \cite{EickSteffen92} a method for visu
 
 We followed and extended their idea and proposed and implemented a method level coloring and an overview of results based on profiling results from the Visual Profiler. 
 
-\section{Source code coloring and bird-eye view}
+\section{Source code coloring and bird's-eye view}
 To present the profiling results in Visual Profiler, colored rectangles are laid over methods directly in the source code editor as depicted on an example in the figure \ref{fig:05SourceCodeHighlight}. Such approach provides direct feedback to developers and reveals the ``hot-spots'' in direct relation with the code in very clear way.  The color of the overlay represents significance of methods in context of profiling metrics.
 
 \begin{figure}
@@ -31,23 +31,23 @@ To present the profiling results in Visual Profiler, colored rectangles are laid
 
 The coloring of the source code provides great local awareness of the profiling result but says nothing about the overall results of a profiling session. 
 
-We addressed this problem by introducing a ''bird-eye'' view of source code with applied coloring. The bird-eye view consists of columns of rectangles. The columns represent individual source files and the rectangles individual methods. The height of the rectangles corresponds to amount of source code lines, their order in the column reflects their position in the source file and their color is set according to profiling results.
+We addressed this problem by introducing a ''bird's-eye'' view of source code with applied coloring. The bird's-eye view consists of columns of rectangles. The columns represent individual source files and the rectangles individual methods. The height of the rectangles corresponds to amount of source code lines, their order in the column reflects their position in the source file and their color is set according to profiling results.
 When the mouse cursor hovers over a rectangle the detail information for the corresponding method is displayed. The whole situation is illustrated in the figure \ref{fig:05BirdeyeView}.
 
 \begin{figure}
 	\centering
 		\includegraphics[scale=0.9]{\imagePath 05BirdeyeView.png}
-		\caption{Bird-eye view representation of source files represented as columns and methods represented as rectangles with a highlighted method and detailed information. }
+		\caption{bird's-eye view representation of source files represented as columns and methods represented as rectangles with a highlighted method and detailed information. }
 	\label{fig:05BirdeyeView}
 \end{figure}
 
-The direct source code overlay was missing a possibility to get more exact information about the profiling result and the rectangles from the bird-eye view were lacking a linkage to source code. So we connected them. When the mouse hovers over a source code overlay, a corresponding rectangle is highlighted and details are displayed in the bird-eye and when a rectangle in bird-eye view is clicked, a corresponding source file is opened  with the right method highlighted. 
+The direct source code overlay was missing a possibility to get more exact information about the profiling result and the rectangles from the bird's-eye view were lacking a linkage to source code. So we connected them. When the mouse hovers over a source code overlay, a corresponding rectangle is highlighted and details are displayed in the bird's-eye and when a rectangle in bird's-eye view is clicked, a corresponding source file is opened  with the right method highlighted. 
 
-The bird-eye view, in addition, joins all methods over all source file and sorts them according to their measured values and presents them above the source file columns as a row of squares. Color and behavior of the squares follows the same rules as by the rectangles.
+The bird's-eye view, in addition, joins all methods over all source file and sorts them according to their measured values and presents them above the source file columns as a row of squares. Color and behavior of the squares follows the same rules as by the rectangles.
 
-Switching between different profiling modes may be accomplished by radio buttons in the top right corner of the bird-eye view.
+Switching between different profiling modes may be accomplished by radio buttons in the top right corner of the bird's-eye view.
 
-The bird-eye view with source code overlays form together a very solid and conveying way to display profiling information. 
+The bird's-eye view with source code overlays form together a very solid and conveying way to display profiling information. 
 
 We also incorporated a call-graph exploration feature. It allowed seeing relations among methods calls. But in the end we took it away, because the UI started to become clogged and it did not bring much value to understanding the profiling results. 
 
@@ -272,7 +272,7 @@ Unfortunately, we encountered a problem or maybe a bug in the editor and the ado
 \section{Summary}
 This chapter introduced visual principles used during the mapping of the profiling results to the source code. The technique Visual Profiler uses is based on the proposal of S. G. Eick and J. L. Steffen and their SeeSoft software. We follow their ideas, simplified them and placed them to the real context.
 
-After that, the final UI implementation of the bird-eye view and the code coloring were presented together with the basic principles of WPF and the Model-View-ViewModel pattern. The usage of these principles was highlighted in the context of the final UI implementation of the Visual Profiler.
+After that, the final UI implementation of the bird's-eye view and the code coloring were presented together with the basic principles of WPF and the Model-View-ViewModel pattern. The usage of these principles was highlighted in the context of the final UI implementation of the Visual Profiler.
 
 Then we moved to the basic concepts of the Visual Studio extensibility, which is a very broad and complex topic.
 
