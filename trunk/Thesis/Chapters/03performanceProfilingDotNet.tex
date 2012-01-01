@@ -49,7 +49,7 @@ Profiling a .NET application is not as straightforward as profiling a convention
 
 The purpose of the Profiling API is not to be only a profiling tool, as its name suggests, but to be a versatile diagnostic tool for the .NET platform that can be used in many program analysis scenarios, for instance a code coverage utility for unit testing.
 
-To make use of the Profiling API, as depicted on the figure \ref{fig:03profilerAppSchema}, a profiler's native code DLL containing profiling custom logic is loaded to the profiled application's process. The profiler DLL implements the \texttt{ICorProfilerCallback} interface and creates an in-process COM server . The CLR calls methods in that interface to notify profiler of one out of many runtime events of the profiled process. The profiler can query the state of the profiled application and of the events by calling back into CLR using methods of \texttt{ICorProfilerInfo} interface.
+To make use of the Profiling API, as depicted in the figure \ref{fig:03profilerAppSchema}, a profiler's native code DLL containing profiling custom logic is loaded to the profiled application's process. The profiler DLL implements the \texttt{ICorProfilerCallback} interface and creates an in-process COM server . The CLR calls methods in that interface to notify profiler of one out of many runtime events of the profiled process. The profiler can query the state of the profiled application and of the events by calling back into CLR using methods of \texttt{ICorProfilerInfo} interface.
 
 \begin{figure}
 	\centering

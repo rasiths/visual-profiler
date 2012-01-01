@@ -18,7 +18,7 @@ The data structure in the Visual Profiler Access is similar to the data structur
 	\label{fig:05accessStructure}
 \end{figure}
 
-The metadata derived classes use caches for every implementation of the base \texttt{MetadataBase} class. The caches are instances of the \texttt{System.Collections.Generic.Dictionary\textless uint, TMetadata \textgreater} class. The key to the dictionary is the metadata id. The metadata are added the cache as they come from the backend.
+The metadata derived classes use caches for every implementation of the base \texttt{MetadataBase} class. The caches are instances of the \texttt{System.Collections.Generic.Dictionary\textless uint, TMetadata\textgreater} class. The key to the dictionary is the metadata id. The metadata are added the cache as they come from the backend.
 
 The call trees and their call tree elements are not cached, however, they are matched with their corresponding cached metadata during the deserialization.
 
@@ -33,7 +33,7 @@ The profiling data comes from the named pipe in form of a byte stream. We added 
 \end{figure}
 
 \section{Visual profiler access API}
-The entry point to the profiler is the \texttt{ProfilerAccess\textless TCallTree \textgreater} class, see figure \ref{fig:05ProfilerAccess}. To create an instance of this class you have to:
+The entry point to the profiler is the \texttt{ProfilerAccess\textless TCallTree\textgreater} class, see figure \ref{fig:05ProfilerAccess}. To create an instance of this class you have to:
 \begin{enumerate}
 
 \item specify the \texttt{TCallTree} generic parameter, the type of a call tree that will be used to store profiling data,
