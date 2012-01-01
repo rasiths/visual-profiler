@@ -5,7 +5,7 @@
 This chapter explains visual presentation of profiling results in the source code editor and integration of the profiler into Visual Studio.
 
 \section{Visually mapping profiling results to source code}
-The profiling results are usually presented in other profilers in great detail by tables, graphs and tree-structures. The difficulty in reading the data is coping with large volumes of data that they present. We believe developers would benefit from briefer overview mapped to context of source code.
+The profiling results are usually presented in other profilers in great detail by tables, graphs and tree-structures. The difficulty in reading the data is coping large volumes of data that they present. We believe, developers would benefit from briefer overview mapped to context of source code.
 
 S. G. Eick and J. L. Steffen presented in \cite{EickSteffen92} a method for visualizing line oriented profile data. It displays files as rectangles and code as colored lines within each rectangle. Color of lines is determined base on profiling metrics. They claim that their technique allows programmers to discover usage patterns in the code that would be impossible to find using traditional methods. They implemented their ideas in a software tool Seesoft, see figure \ref{fig:05SeeSoft}.
 
@@ -20,7 +20,7 @@ S. G. Eick and J. L. Steffen presented in \cite{EickSteffen92} a method for visu
 We followed and extended their idea and proposed and implemented a method level coloring and an overview of results based on profiling results from the Visual Profiler. 
 
 \section{Source code coloring and bird-eye view}
-To present the profiling results in Visual Profiler, colored rectangles are laid over methods directly in the source code editor as depicted on an example in the figure \ref{fig:05SourceCodeHighlight}. Such approach provides direct feedback to developers and revels the ``hot-spots'' in direct relation with the code in very clear way.  The color of the overlay represents significance of methods in context of profiling metrics.
+To present the profiling results in Visual Profiler, colored rectangles are laid over methods directly in the source code editor as depicted on an example in the figure \ref{fig:05SourceCodeHighlight}. Such approach provides direct feedback to developers and reveals the ``hot-spots'' in direct relation with the code in very clear way.  The color of the overlay represents significance of methods in context of profiling metrics.
 
 \begin{figure}
 	\centering
@@ -31,23 +31,23 @@ To present the profiling results in Visual Profiler, colored rectangles are laid
 
 The coloring of the source code provides great local awareness of the profiling result but says nothing about the overall results of a profiling session. 
 
-We addressed this problem by introducing a ''bird-eye'' view of source code with applied coloring. The bird-eye view consists of columns of rectangles. The columns represent individual source files and the rectangles individual methods. The height of the rectangles corresponds to amount of source code lines, their order in the column reflects their position in the source file and their color is set according profiling results.
+We addressed this problem by introducing a ''bird-eye'' view of source code with applied coloring. The bird-eye view consists of columns of rectangles. The columns represent individual source files and the rectangles individual methods. The height of the rectangles corresponds to amount of source code lines, their order in the column reflects their position in the source file and their color is set according to profiling results.
 When the mouse cursor hovers over a rectangle the detail information for the corresponding method is displayed. The whole situation is illustrated in the figure \ref{fig:05BirdeyeView}.
 
 \begin{figure}
 	\centering
 		\includegraphics[scale=0.9]{\imagePath 05BirdeyeView.png}
-		\caption{Bird-eye view representation of source files as columns and methods as rectangles with highlighted method and detailed information. }
+		\caption{Bird-eye view representation of source files represented as columns and methods represented as rectangles with a highlighted method and detailed information. }
 	\label{fig:05BirdeyeView}
 \end{figure}
 
-The direct source code overlay was missing a possibility to get more exact information about the profiling result and the rectangles from the bird-eye view were lacking a linkage to source code. So we connected them. When the mouse hovers over a source code overlay, a corresponding rectangle is highlighted and details displayed in the bird-eye and when a rectangle in bird-eye view is clicked, a corresponding source file is opened  with the right method highlighted. 
+The direct source code overlay was missing a possibility to get more exact information about the profiling result and the rectangles from the bird-eye view were lacking a linkage to source code. So we connected them. When the mouse hovers over a source code overlay, a corresponding rectangle is highlighted and details are displayed in the bird-eye and when a rectangle in bird-eye view is clicked, a corresponding source file is opened  with the right method highlighted. 
 
-The bird-eye view, in addition, joins all methods over all source file and sort them according to their measured values and presents them above the source file columns as a row of squares. Color and behavior of the squares follows the same rules as by the rectangles.
+The bird-eye view, in addition, joins all methods over all source file and sorts them according to their measured values and presents them above the source file columns as a row of squares. Color and behavior of the squares follows the same rules as by the rectangles.
 
 Switching between different profiling modes may be accomplished by radio buttons in the top right corner of the bird-eye view.
 
-The bird-eye view together with source code overlays form a very solid and conveying way to display profiling information. 
+The bird-eye view with source code overlays form together a very solid and conveying way to display profiling information. 
 
 We also incorporated a call-graph exploration feature. It allowed seeing relations among methods calls. But in the end we took it away, because the UI started to become clogged and it did not bring much value to understanding the profiling results. 
 
@@ -68,10 +68,10 @@ The Microsoft Windows Presentation Foundation is the latest framework (as in the
 
 WPF is vector based, resolution independent and hardware accelerated. It combines ordinary UI components, 2D graphics, 3D graphics and multimedia. 
 
-Visual parts and of UI components is defined in an XML based language called \linebreak XAML\footnote{eXtensible Application Markup Language} and the behavior is implemented in a managed programming language. The code and XAML use databinding, commands and events to communicate. This architecture results in high separation of appearance and behavior.
+Visual parts of UI components are defined in an XML based language called \linebreak XAML\footnote{eXtensible Application Markup Language} and the behavior is implemented in a managed programming language. The code and XAML use databinding, commands and events to communicate. This architecture results in a high separation of appearance and behavior.
 
 \subsection{Model-View-ViewModel}
-This UI pattern, see figure \ref{fig:05pattern_mvvm}, was introduced with the advent of WPF and is very often used to build low-coupled applications. It consists of a model that is not aware of the other parts, of a view that manages user input and sends it by commands to a view-model and of the view-model that implement program logic. The view gets data from the view-model through databinding.
+This UI pattern, see figure \ref{fig:05pattern_mvvm}, was introduced with the advent of WPF and is very often used to build low-coupled applications. It consists of a model that is not aware of the other parts, of a view that manages user input and sends it by commands to a view-model and of the view-model that implements program logic. The view gets data from the view-model through databinding.
 
 \begin{figure}
 	\centering
@@ -81,7 +81,7 @@ This UI pattern, see figure \ref{fig:05pattern_mvvm}, was introduced with the ad
 \end{figure}
 
 \subsection{User interface - model}
-The input data for the model come from the Visual Profiler Access as call trees and method, class, module and assembly metadata. The data are converted to groups representing source files and their methods, which then bear all profiling data. This process is depicted in the figure \ref{fig:05TransformationOfTrees}. This is a non-trivial task because the profiling data is spread across multiple call trees and their elements. The various data analysis have to be performed, for instance data aggregation over call tree elements belonging to the same method, maximum values of different metrics, redistribution of values and so on.
+The input data for the model come from the Visual Profiler Access as call trees and method, class, module and assembly metadata. The data are converted to groups representing source files and their methods, which then bear all profiling data. This process is depicted in the figure \ref{fig:05TransformationOfTrees}. This is a non-trivial task because the profiling data are spread across multiple call trees and their elements. Various data analysis have to be performed, for instance data aggregation over call tree elements belonging to the same method, maximum values of different metrics, redistribution of values and so on.
 
  \begin{figure}
 	\centering
@@ -102,7 +102,7 @@ For every profiling mode (tracing or sampling) there are various criteria with d
 \subsection{User interface - view-model}
 The view-model is responsible for the control of the UI. It holds references to model data and exposes them to the view. The view-model handles user input by commands that are bound to the view. It controls the view by changes of view-model properties, which are databound to dependency properties\footnote{Dependency property - \href{http://msdn.microsoft.com/en-us/library/ms752914.aspx}{http://msdn.microsoft.com/en-us/library/ms752914.aspx}} of the view.
 
-Every view-model inherits from the \texttt{ViewModelBase} class, see figure \ref{fig:05ViewModelBase}. This class implements the \texttt{INotifyPropertyChanged} interface that allows the WPF databinding to re-databind whenever a view-model property changes. When a view-model property changes, it calls in its setter the \texttt{ViewModelBase}'s \texttt{OnPropertyChanged()} method and passes the property name as an input parameter and the \texttt{ViewModelBase}'s \texttt{OnPropertyChanged()} method in turn invokes the \texttt{ViewModelBase}'s \texttt{PropertyChanged} event, which notified the registered handlers (presumably some WPF delegates) about the change to the property. This mechanism is an elegant way to achieve loose coupling between the view and the view-model.
+Every view-model inherits from the \texttt{ViewModelBase} class, see figure \ref{fig:05ViewModelBase}. This class implements the \texttt{INotifyPropertyChanged} interface that allows the WPF databinding to re-databind whenever a view-model property changes. When a view-model property changes, it calls in its setter, the \texttt{ViewModelBase}'s \texttt{OnPropertyChanged()} method, and passes the property name as an input parameter. The \texttt{ViewModelBase}'s \texttt{OnPropertyChanged()} method in turn invokes the \texttt{ViewModelBase}'s \texttt{PropertyChanged} event, which notified the registered handlers (presumably some WPF delegates) about the change to the property. This mechanism is an elegant way to achieve loose coupling between the view and the view-model.
  
  \begin{figure}
 	\centering
@@ -111,7 +111,7 @@ Every view-model inherits from the \texttt{ViewModelBase} class, see figure \ref
 	\label{fig:05ViewModelBase}
 \end{figure}
 
-The middle point of the UI logic is the class \texttt{UILogic}. This class holds references to all view-models, handles actions from commands and updates views-models, which consequently update views.
+The middle point of the UI logic is the class \texttt{UILogic}. This class holds references to all view-models, handles actions from commands and updates views-models that consequently update views.
 
 The other parts of the view-model are:
 \begin{itemize}	
@@ -126,7 +126,7 @@ The other parts of the view-model are:
 
 
 \subsection{User interface - view}
-The UI is based on a composition of user controls. Dynamic display is accomplished by WPF panels. The placement of the views in the UI illustrated is illustrated in the figure \ref{fig:05UIViewsArrows}. 
+The UI is based on a composition of user controls. Dynamic display is accomplished by WPF panels. The placement of the views in the UI is illustrated in the figure \ref{fig:05UIViewsArrows}. 
 
 The views are:
 \begin{itemize}	
@@ -180,9 +180,9 @@ Every view corresponds to one view-model. However, a view-model might be shared 
 
 
 \section{Visual Studio 2010 IDE integration}
-The Visual Studio 2010 IDE is a composition of a shell and packages - functional units. The shell provides graphical user interface and services for the packages. The core functionality, project types, testing, compilation services and many more, of the IDE is implemented in the packages. Many third-party extensions of Visual Studio are also packages.
+The Visual Studio 2010 IDE is a composition of a shell and packages - functional units. The shell provides graphical user interface and services for the packages. The core functionality, project types, testing, compilation services and many more, of the IDE are implemented in the packages. Many third-party extensions of Visual Studio are also packages.
 
-Visual Studio offers numerous ways to extend it. The philosophy behind extensibility approaches is fragmented, mainly due to historical design decisions, different technologies used and backwards compatibility. Complexity of it is briefly depicted in the figure \ref{fig:05VSExtensibilityGraph}. Finding the right interface to use is sometimes real challenge. There is no services discoverability and everything has to be searched in the scattered documentation and samples.
+Visual Studio offers numerous ways how to extend it. The philosophy behind extensibility approaches is fragmented, mainly due to historical design decisions, different technologies used and backwards compatibility. Complexity of it is briefly depicted in the figure \ref{fig:05VSExtensibilityGraph}. Finding the right interface to use is sometimes real challenge. There is no services discoverability and everything has to be searched for in the scattered documentation and samples.
 
 
  \begin{figure}
@@ -201,7 +201,7 @@ Macros present ability to add new functionality by composing existing functional
 Snippets do not add new capabilities to Visual Studio, they just save typing and thus error rate. For instance, the snippet for a dependency property is invaluable.
 
 \subsection{Templates}
-Templates organize and encompass project definitions. When you bring up a new project dialog in Visual Studio, what it is showing you is all templates it knows about. When you make a choice of a project, a template gets used and all the information like what files to start with, what references will be needed in your project, setting of builds - all that is in template. Templates are ZIP files
+Templates organize and encompass project definitions. When you bring up a new project dialog in Visual Studio, what it is showing you is all templates it knows about. When you make a choice of a project, a template gets used and all the information like what files to start with, what references will be needed in your project, setting of builds is in template. Templates are ZIP files.
 
 \subsection{Editor Extensions - MEF}
 Here we have to cite the MEF's website because it describes MEF in very elaborate way:
@@ -211,27 +211,27 @@ Here we have to cite the MEF's website because it describes MEF in very elaborat
 Actually MEF\footnote{Managed Extensibility Framework - \href{http://mef.codeplex.com/}{http://mef.codeplex.com/} } 
 is basically an enhanced dependency injection system. 
 
-The new Visual Studio editor is written in WPF and chose MEF as an extensibility platform. MEF is used exclusively for extending the editor and the modeling and diagramming tools (Ultimate edition).
+The new Visual Studio editor is written in WPF and chooses MEF as an extensibility platform. MEF is used exclusively for extending the editor and the modeling and diagramming tools (Ultimate edition).
 
-The editor offer many extension points as e.g. content types (code completion, syntax coloring), classification types and formats (key words, syntax errors, comments and so on), tags, margins and scrollbars, \textbf{adornments} (any visual effects in the editor) - used in the UI to color methods - mouse processors and drop handlers and IntelliSence. The samples provided by Visual Studio SDK are very good starting point for experimenting with the extensibility\footnote{Visual Studio Software Development Kit - \href{http://msdn.microsoft.com/en-us/library/bb166441(v=VS.100).aspx}{MSDN website}}.
+The editor offer many extension points like content types (code completion, syntax coloring), classification types and formats (key words, syntax errors, comments and so on), tags, margins and scrollbars, \textbf{adornments} (any visual effects in the editor) - used in the UI to color methods - mouse processors and drop handlers and IntelliSence. The samples provided by Visual Studio SDK are very good starting point for experimenting with the extensibility\footnote{Visual Studio Software Development Kit - \href{http://msdn.microsoft.com/en-us/library/bb166441(v=VS.100).aspx}{MSDN website}}.
 
 Editor extensions are deployed as Visual Studio packages.
 
 \subsection{Add-In}
-An add-in is a compiled DLL that runs in Visual Studio and contains a class that implements \texttt{IDTExtensibility2} - a COM interface. It is registered with Visual Studio by an XML file. The add-in receives the Application object  at load time, the \texttt{DTE2} object, which represents Visual Studio, and it can then call methods on that object to interact with the IDE. An add-in has very broad scope in comparison with for instance an editor extension. You can interact with almost everything in Visual Studio.
+An add-in is a compiled DLL that runs in Visual Studio and contains a class that implements \texttt{IDTExtensibility2} - a COM interface. It is registered with Visual Studio by an XML file. The add-in receives the Application object  at load time, the \texttt{DTE2} object, which represents Visual Studio, and it can then call methods on that object to interact with the IDE. An add-in has a very broad scope in comparison with for instance an editor extension. You can interact with almost everything in Visual Studio.
 
 \subsection{Package}
-A package is a compiled DLL (native or managed) and has to implement the \texttt{IVsPackage} interface which provides it access to Visual Studio API. Managed Package Framework simplifies package development by providing standard implementations of functions of the \texttt{IVsPackage} interface. It uses attributes to control registration.
+A package is a compiled DLL (native or managed) and has to implement the \texttt{IVsPackage} interface which provides access to Visual Studio API. Managed Package Framework simplifies package development by providing standard implementations of functions of the \texttt{IVsPackage} interface. It uses attributes to control registration.
 
 The main differences between add-ins and packages are:
 \begin{itemize}	
-\item  add-ins were available in the Visual Studio from the very beginning as an extension mechanism and are built on COM components. Packages should overcome some limitation of add-ins and are a newer technology.
+\item  add-ins were available in the Visual Studio from the very beginning as an extension mechanism and are built on COM components. Packages should overcome some limitations of add-ins and are a newer technology.
 
 \item packages are completely integrated in the IDE whereas add-ins are external items for the IDE  .
 
-\item packages have lower level API access oppose to add-ins.
+\item packages have lower level API access opposed to add-ins.
 
-\item the package development kit supports fewer languages than the one of add-ins. Add-ins may be developed in any COM enabled environment.
+\item the package development kit supports fewer languages than the add-ins deployment model. Add-ins may be developed in any COM enabled environment.
 
 \item VSIX files (ZIP files) are used to deploy packages. They are self-containing and well integrated with the Visual Studio extension manager. VSIX files may be shared on the Visual Studio Gallery web site\footnote{\href{http://visualstudiogallery.msdn.microsoft.com/}{http://visualstudiogallery.msdn.microsoft.com/}}
 . Add-ins do not have a standardized deployment model and a development team has to take care for installing and registering an add-in.
@@ -239,16 +239,16 @@ The main differences between add-ins and packages are:
 
 
 \section{Visual Profiler integration in Visual Studio}
-Integration of Visual Profiler in Visual Studio has tree parts, \texttt{Tools} menu commands for interacting with the profiler, a tool window for hosting the UI and an editor adornment extension for the code coloring. The parts are packed in a single VSIX package.
+Integration of Visual Profiler in Visual Studio has tree parts, \texttt{Tools} menu commands for interacting with the profiler, a tool window for hosting the UI and an editor adornment extension for the code coloring. These parts are packed in a single VSIX package.
 
 \subsection{Commands}
-The Visual Profiler adds three commands to the \texttt{Tools} menu as shown in the figure \ref{fig:05ToolMenu}. The commands are
+The Visual Profiler adds three commands to the \texttt{Tools} menu as shown in the figure \ref{fig:05ToolMenu}. The commands are:
 
 
 \begin{itemize}
 \item \textbf{Start Visual Profiler in Tracing Mode} - builds the current solution, runs the start-up project with the attached profiler in the tracing mode and opens the tool windows with the profiler UI,
 
-\item \textbf{Start Visual Profiler in Sampling Mode} - does the same as the previous command, only  starts the profiler in the sampling mode,
+\item \textbf{Start Visual Profiler in Sampling Mode} - does the same as the previous command, except that it starts the profiler in the sampling mode,
 
 \item \textbf{Stop Visual Profiler} - closes the profiled process and removes the code coloring.
 \end{itemize}
@@ -261,18 +261,18 @@ The Visual Profiler adds three commands to the \texttt{Tools} menu as shown in t
 \end{figure}
 
 \subsection{Tool window}
-The tool window is shown right after the profiler starts. The results are updated already during profiling in one second long intervals. The tool window and its functionality was already described earlier in the chapter and depicted in the figures \ref{fig:05BirdeyeView} and \ref{fig:05UIViewsArrows}.
+The tool window is shown right after the profiler starts. The results are updated during profiling in one-second-long intervals. The tool window and its functionality were already described earlier in the chapter and were depicted in the figures \ref{fig:05BirdeyeView} and \ref{fig:05UIViewsArrows}.
 
 \subsection{Editor adornment extension}
 \label{sec:06EditorAdorExt}
-The editor extension uses MEF to add a canvas on an editor's adornment layer for every source file encountered during the profiling. Rectangles representing methods and their profiling results are drawn on the canvas. The data is live updated in sync with the main UI. The visual elements are shown in the figures \ref{fig:05SourceCodeHighlight} and \ref{fig:05UIViewsArrows}.
+The editor extension uses MEF to add a canvas on an editor's adornment layer for every source file encountered during the profiling. Rectangles representing methods and their profiling results are drawn on the canvas. The data are updated live in sync with the main UI. The visual elements are shown in the figures \ref{fig:05SourceCodeHighlight} and \ref{fig:05UIViewsArrows}.
 
-Unfortunately, we encountered a problem or maybe a bug in the editor and the adornment layers. The adornment layers are sometimes seemingly randomly moving during scrolling or navigating in the editor. We initially suspected a wrong usage of the API during adding a canvas to the layer as cause of the problem and tried to resolve it, without success. Then we discovered by means of the .NET reflection that an adornment layer is actually itself a canvas that we managed to color. This colored canvas moved as well together with our canvas. So we assumed that problem was somewhere else and started googling and stackoverflow-ing, which did not help to find a right answer. There was only one post with a very similar problem - no answer either. We leave this issue to the future work.
+Unfortunately, we encountered a problem or maybe a bug in the editor and the adornment layers. The adornment layers are sometimes seemingly randomly moving during scrolling or navigating in the editor. We initially suspected a wrong usage of the API during adding a canvas to the layer as cause of the problem and tried to resolve it, without success. Then we discovered by means of the .NET reflection that an adornment layer is actually itself a canvas that we managed to color. This colored canvas moved as well together with our canvas. So we assumed that the problem was somewhere else and started googling and stackoverflow-ing, that did not help to find a right answer. There was only one post with a very similar problem - no answer either. We leave this issue to the future work.
 
 \section{Summary}
-This chapter introduced visual principles used during the mapping of the profiling results to source code. The technique Visual Profiler uses is based on the proposal of S. G. Eick and J. L. Steffen and their SeeSoft software. We follow their ideas, simplified them and placed them to the real context.
+This chapter introduced visual principles used during the mapping of the profiling results to the source code. The technique Visual Profiler uses is based on the proposal of S. G. Eick and J. L. Steffen and their SeeSoft software. We follow their ideas, simplified them and placed them to the real context.
 
-After that, the final UI implementation of the bird-eye view and the code coloring were presented together with the basic principles of WPF and the Model-View-ViewModel pattern. The usage of these principles was highlight in context of the final UI implementation of the Visual Profiler.
+After that, the final UI implementation of the bird-eye view and the code coloring were presented together with the basic principles of WPF and the Model-View-ViewModel pattern. The usage of these principles was highlighted in the context of the final UI implementation of the Visual Profiler.
 
 Then we moved to the basic concepts of the Visual Studio extensibility, which is a very broad and complex topic.
 
