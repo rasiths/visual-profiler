@@ -38,18 +38,18 @@ The first possibility how to create a .net instrumenting profiler is by an injec
 
 The second possibility is similar to the first and it only goes one level down, to manipulate CIL of already compiled .NET assemblies or modules. This approach targets every .NET program regardless of the programming language. However, certain problems have to be solved, e.g. the target assembly signing.
 
-The third possibility is to use the JIT compilation notifications of the profiling API. The original CIL can be modified before the JIT compilation.
+The third possibility is to use the JIT compilation notifications of the Profiling API. The original CIL can be modified before the JIT compilation.
 
-It is apparent how big role the profiling API plays in the profiling of .NET applications. It is a great starting point for every profiling mode implementation.
+It is apparent how big role the Profiling API plays in the profiling of .NET applications. It is a great starting point for every profiling mode implementation.
 
 \section{Profiling API}
-This section is based on articles, documentation and examples provided on the Microsoft Developer Network (MSDN) \cite{ProfMSDN}. The provided information is valid for the version of the profiling API that comes with the .NET 4.0. 
+This section is based on articles, documentation and examples provided on the Microsoft Developer Network (MSDN) \cite{ProfMSDN}. The provided information is valid for the version of the Profiling API that comes with the .NET 4.0. 
 
-Profiling a .NET application is not as straightforward as profiling a conventional application compiled into machine code. The main reasons are aforementioned CLR features that conventional profiling methods cannot properly identify and that complicate the profiling. The profiling API provides a way how to acquire the profiling data for a managed application with minimum effect on the performance of the CLR and the profiled application. 
+Profiling a .NET application is not as straightforward as profiling a conventional application compiled into machine code. The main reasons are aforementioned CLR features that conventional profiling methods cannot properly identify and that complicate the profiling. The Profiling API provides a way how to acquire the profiling data for a managed application with minimum effect on the performance of the CLR and the profiled application. 
 
-The purpose of the profiling API is not to be only a profiling tool, as its name suggests, but to be a versatile diagnostic tool for the .NET platform that can be used in many program analysis scenarios, for instance a code coverage utility for unit testing.
+The purpose of the Profiling API is not to be only a profiling tool, as its name suggests, but to be a versatile diagnostic tool for the .NET platform that can be used in many program analysis scenarios, for instance a code coverage utility for unit testing.
 
-To make use of the profiling API, as depicted on the figure \ref{fig:03profilerAppSchema}, a profiler's native code DLL containing profiling custom logic is loaded to the profiled application's process. The profiler DLL implements the \texttt{ICorProfilerCallback} interface and creates an in-process COM server . The CLR calls methods in that interface to notify profiler of one out of many runtime events of the profiled process. The profiler can query the state of the profiled application and of the events by calling back into CLR using methods of \texttt{ICorProfilerInfo} interface.
+To make use of the Profiling API, as depicted on the figure \ref{fig:03profilerAppSchema}, a profiler's native code DLL containing profiling custom logic is loaded to the profiled application's process. The profiler DLL implements the \texttt{ICorProfilerCallback} interface and creates an in-process COM server . The CLR calls methods in that interface to notify profiler of one out of many runtime events of the profiled process. The profiler can query the state of the profiled application and of the events by calling back into CLR using methods of \texttt{ICorProfilerInfo} interface.
 
 \begin{figure}
 	\centering
@@ -85,15 +85,15 @@ The CLR notification can be divided into following groups as listed in \cite{Pro
 \item Information about the runtime memory heap and garbage collection activity.
 \end{enumerate}
 
-The implementation of the \texttt{ICorProfilerCallback} interface is mandatory to use the profiling API. The developer of the profiler has to implement all methods of the interface and there are 80 of them. Luckily, for the majority of methods, those out of interest, it is simply enough to return \texttt{S\_OK HRESULT}. The others have to provide code to handle the events and desired logic.
+The implementation of the \texttt{ICorProfilerCallback} interface is mandatory to use the Profiling API. The developer of the profiler has to implement all methods of the interface and there are 80 of them. Luckily, for the majority of methods, those out of interest, it is simply enough to return \texttt{S\_OK HRESULT}. The others have to provide code to handle the events and desired logic.
 
 Most of the methods of the \texttt{ICorProfilerCallback} interface receive additional data in form of input parameters. And some methods come in pairs started-finished \linebreak(\texttt{GarbageCollectionStarted} - \texttt{GarbageCollectionFinished}) or enter-leave \linebreak(\texttt{ExceptionSearchFunctionEnter} -  \texttt{ExceptionSearchFunctionLeave}). 
 
 The parameters are either unsigned int (\texttt{UINT}) ids or pointers to some CLR structures. For instance the \texttt{ThreadCreated} function gets its threadId parameter of type \texttt{ThreadID} (only \texttt{typedef}ed UINT). The Ids are opaque values, but we think they are bare pointers to the memory where the metadata reside since they are always defined as \texttt{UINT\_PTR}.
 
-To get more information, such as function names, defining classes, assemblies, and other metadata, by an id, the profiling API offers the \texttt{ICorProfilerInfo} and the \texttt{IMetadataImport} interfaces and a system of metadata Tokens corresponding to the metadata.
+To get more information, such as function names, defining classes, assemblies, and other metadata, by an id, the Profiling API offers the \texttt{ICorProfilerInfo} and the \texttt{IMetadataImport} interfaces and a system of metadata Tokens corresponding to the metadata.
 
-The profiling API offers a lot and there is a lot more to write about. However, there are also some limitations to it. Among others, there are no profiling for unmanaged code and no remote profiling. 
+The Profiling API offers a lot and there is a lot more to write about. However, there are also some limitations to it. Among others, there are no profiling for unmanaged code and no remote profiling. 
 
 \section{Summary}
-In this chapter, the .NET framework was briefly introduced. We have outlined some .NET profiling strategies for all the profiling modes and introduced the powerful profiling API for profiling managed applications.
+In this chapter, the .NET framework was briefly introduced. We have outlined some .NET profiling strategies for all the profiling modes and introduced the powerful Profiling API for profiling managed applications.
